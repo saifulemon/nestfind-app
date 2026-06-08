@@ -1,0 +1,45 @@
+id: US-08-FAVORITES
+role: renter
+feature: View and manage saved/favorited properties
+page: 08-favorites.html
+goal: |
+  A renter views all their favorited properties in a grid, clicks a property
+  card to navigate to its detail page, and unfavorites a property by clicking
+  the heart icon.
+
+acceptance_criteria:
+  - id: AC-1
+    description: View list of all favorited properties with property cards showing thumbnail, price, address, and specs
+    ui_route: /favorites
+    endpoint: GET /api/favorites
+    expected: "200 OK, grid displays all saved properties, header shows count 'N saved properties'"
+  - id: AC-2
+    description: Click a property card to navigate to the property detail page
+    ui_route: /favorites
+    endpoint: none (client-side navigation)
+    expected: "Navigate to /properties/:id detail page"
+  - id: AC-3
+    description: Click the filled heart icon on a card to remove property from favorites
+    ui_route: /favorites
+    endpoint: DELETE /api/favorites/:propertyId
+    expected: "200 OK, card removed from grid, count decrements"
+
+boundary_cases:
+  - case: "No favorites saved — empty state shown with icon, 'No saved properties' message, and CTA to browse properties"
+  - case: "User un-favorites the last property — grid transitions to empty state"
+
+error_scenarios:
+  - scenario: "Unauthenticated (401) — redirect to login page"
+  - scenario: "Remove favorite fails with 404 (already removed or property deleted) — card still removed from UI gracefully"
+  - scenario: "Network failure loading favorites — error state with retry CTA"
+
+state_transitions:
+  - state: loading
+    expected: "Skeleton card placeholders shown in grid"
+  - state: empty
+    expected: "Empty state with heart icon, 'No saved properties yet', and 'Browse Properties' CTA button"
+  - state: error
+    expected: "Error banner with retry button"
+
+fixture_refs:
+  - users.renter

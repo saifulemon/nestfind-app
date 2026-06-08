@@ -1,0 +1,6 @@
+gate: backend
+executed_at: 2026-05-21T02:47:15Z
+score: 1.00
+passed: 36/36
+checks_hash: d73b7b2f092114fc7b4586540b64f0e200fa8b23dcaa158c7b41ae792709000d
+runner_pid: 27920

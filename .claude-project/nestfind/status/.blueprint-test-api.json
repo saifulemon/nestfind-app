@@ -1,0 +1,52 @@
+{
+  "blueprint": "test-api",
+  "blueprint_source": "test-api-2.yaml",
+  "target_dir": "/Users/saifulpotential/Potential/nestfind-sample",
+  "started_at": "2026-05-21T02:30:48.577Z",
+  "completed_nodes": [
+    {
+      "id": "pre-check",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-21T02:30:49.692Z",
+      "duration_ms": 1113,
+      "output": "error TS5058: The specified path does not exist: 'tsconfig.app.json'.\n"
+    },
+    {
+      "id": "pm2-restart",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-21T02:30:50.122Z",
+      "duration_ms": 429,
+      "output": "pm2 not available or backend/frontend processes not registered — skip restart\n"
+    },
+    {
+      "id": "ensure-servers",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-21T02:30:50.140Z",
+      "duration_ms": 17,
+      "output": "Backend=404 Frontend=404 — servers healthy\n"
+    },
+    {
+      "id": "smoke-test",
+      "type": "agentic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "run-backend-tests",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "evidence-check",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    }
+  ],
+  "current_node": "smoke-test",
+  "status": "running"
+}

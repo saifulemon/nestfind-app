@@ -1,0 +1,64 @@
+{
+  "blueprint": "init",
+  "blueprint_source": "init-2.yaml",
+  "target_dir": "/Users/saifulpotential/Potential/nestfind-sample",
+  "started_at": "2026-05-19T04:57:02.576Z",
+  "completed_nodes": [
+    {
+      "id": "ensure-target-dir",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T04:57:02.583Z",
+      "duration_ms": 6,
+      "output": "TARGET_DIR ready: /Users/saifulpotential/Potential/nestfind-sample\n"
+    },
+    {
+      "id": "bootstrap-claude-submodule",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T04:57:02.656Z",
+      "duration_ms": 73,
+      "output": "git repo already present\n.claude already present — skip submodule add\nstack submodules initialized\n"
+    },
+    {
+      "id": "scaffold-project",
+      "type": "agentic",
+      "status": "SKIPPED",
+      "timestamp": "2026-05-19T04:57:02.659Z",
+      "reason": "condition_false"
+    },
+    {
+      "id": "generate-claude-md",
+      "type": "agentic",
+      "status": "SKIPPED",
+      "timestamp": "2026-05-19T04:57:02.662Z",
+      "reason": "condition_false"
+    },
+    {
+      "id": "scaffold-backend-ts",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T04:57:02.666Z",
+      "duration_ms": 4,
+      "output": "backend/package.json already exists — skip\nbackend/tsconfig.json already exists — skip\nbackend/node_modules present — skip install\n"
+    },
+    {
+      "id": "scaffold-frontend-ts",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T04:57:02.674Z",
+      "duration_ms": 8,
+      "output": "frontend dirs to scaffold: frontend\n\n--- scaffolding frontend ---\nfrontend/package.json already exists — skip\nfrontend/tsconfig.json already exists — skip\nfrontend/node_modules present — skip install\n\nfrontend scaffold complete: frontend\n"
+    },
+    {
+      "id": "evidence-check",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T04:57:02.688Z",
+      "duration_ms": 12,
+      "output": "PASS: scaffold verified (backend + frontends: frontend + .claude + CLAUDE.md)\n"
+    }
+  ],
+  "current_node": null,
+  "status": "completed"
+}

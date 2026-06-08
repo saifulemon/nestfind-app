@@ -1,0 +1,196 @@
+=== NODE: refactor ===
+timestamp: 2026-05-20T04:30:25.131Z
+backend: opencode
+model: (default)
+command: opencode run --format json "<prompt>"
+
+=== PROMPT (6247 chars) ===
+=== CONTEXT FILES ===
+
+--- .claude/nestjs/guides/best-practices.md ---
+# Backend Best Practices
+
+## CRITICAL RULES (MANDATORY)
+
+### Rule 1: Message Punctuation Convention (MANDATORY)
+
+All user-facing messages in the backend MUST follow these punctuation rules:
+
+**Success messages** must be meaningful and end with a period `.`:
+```typescript
+// ✅ CORRECT: Success messages end with "."
+return new SuccessResponseDto(data, 'Project created successfully.');
+return new ResponsePayloadDto({ message: 'Login successful.' });
+```
+
+```typescript
+// ❌ WRONG: Missing period, or too vague
+return new SuccessResponseDto(data, 'Success');
+return new SuccessResponseDto(data, 'Project created successfully');
+```
+
+**Error messages** must be meaningful and end with an exclamation mark `!`:
+```typescript
+// ✅ CORRECT: Error messages end with "!" and are descriptive
+throw new NotFoundException(`Project with ID ${id} not found!`);
+throw new ForbiddenException('You do not have permission to access this resource!');
+throw new UnauthorizedException('The access ID or password you entered is incorrect!');
+```
+
+```typescript
+// ❌ WRONG: Missing "!", or too vague
+throw new NotFoundException('Not found');
+throw new ForbiddenException('Access denied');
+throw new UnauthorizedException('Invalid credentials');
+```
+
+**Avoid vague messages** — be specific about what went wrong or succeeded:
+| ❌ Vague | ✅ Meaningful |
+|----------|--------------|
+| `'Access denied'` | `'You do not have permission to access this resource!'` |
+| `'Invalid token'` | `'The authentication token is invalid or malformed!'` |
+| `'Success'` | `'Project created successfully.'` |
+| `'Not found'` | `'Project with ID ${id} not found!'` |
+
+### Rule 1b: Multi-Language i18n (MANDATORY)
+
+All messages use `nestjs-i18n` for multi-language support. The `I18nHelper.t()` static utility auto-resolves the user's language from `Accept-Language` header or `?lang=` query parameter.
+
+**When adding new messages:**
+1. Add the key to `backend/src/i18n/en/translation.json` (English)
+2. Add the key to `backend/src/i18n/ko/translation.json` (Korean)
+3. Use via `I18nHelper.t('domain.key', { param: value })`
+
+```typescript
+// ✅ CORRECT: Use I18nHelper.t() — auto-resolves language
+throw new NotFoundException(I18nHelper.t('projects.notFound', { id }));
+return new SuccessResponseDto(data, I18nHelper.t('projects.created'));
+```
+
+```typescript
+// ❌ WRONG: Hardcoded strings bypass multi-language support
+throw new NotFoundException(`Project with ID ${id} not found!`);
+return new SuccessResponseDto(data, 'Project created successfully.');
+```
+
+### Rule 2: Check Existing APIs Before Creating New Ones
+
+**Before creating any new API endpoint, you MUST search for existing endpoints.**
+
+```bash
+# Search for existing endpoints
+grep -r "@Get\|@Post\|@Put\|@Patch\|@Delete" backend/src/modules/ --include="*.controller.ts"
+```
+
+| Frontend Need | Check First |
+|---------------|-------------|
+| Get user profile | `GET /users/:id` or `GET /users/me` |
+| Update user | `PATCH /users/:id` |
+| Get list with filters | Existing `GET /` with query params |
+
+**Only create new endpoint when**:
+- Operation is fundamentally different
+- Business logic is completely distinct
+- Access control requirements differ
+
+---
+
+## NestJS Coding Standards
+
+### General Principles
+
+1. **Use TypeScript Strict Mode**: Enable strict type checking
+2. **Follow Single Responsibility Principle**: Each class should have one clear purpose
+3. **Dependency Injection**: Use constructor injection for all dependencies
+4. **Immutability**: Prefer const over let, avoid mutations when possible
+5. **Async/Await**: Always use async/await, never promise chains
+
+### Naming Conventions
+
+- **Files**: kebab-case (e.g., `user.controller.ts`, `auth.service.ts`)
+- **Classes**: PascalCase (e.g., `UserController`, `AuthService`)
+- **Variables/Functions**: camelCase (e.g., `findUser`, `isActive`)
+- **Constants**: UPPER_SNAKE_CASE (e.g., `MAX_RETRIES`, `API_URL`)
+- **Interfaces**: PascalCase with 'I' prefix (e.g., `IJwtPayload`, `IUser`)
+- **DTOs**: PascalCase with suffix (e.g., `CreateUserDto`, `UpdatePostDto`)
+- **Entities**: PascalCase (e.g., `User`, `Post`)
+
+### Controller Best Practices
+
+**MANDATORY: Controllers MUST extend BaseController. Writing a controller without extending BaseController is PROHIBITED.**
+
+```typescript
+// ✅ GOOD: Extends BaseController, uses decorators, no try/catch
+@ApiTags('Users')
+@Controller('users')
+export class UserController extends BaseController<
+    User,
+    CreateUserDto,
+    UpdateUserDto
+> {
+    constructor(private readonly userService: UserService) {
+        super(userService);
+    }
+
+    // Custom endpoint beyond CRUD — override only when needed
+    @Post(':id/reset-password')
+    @Roles('admin')
+    async resetPassword(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Body() dto: ResetPasswordDto,
+    ): Promise<void> {
+        await this.userService.resetPassword(id, dto);
+    }
+}
+
+// ❌ PROHIBITED: No base class — will FAIL backend gate check
+export class UserController {
+    async getUser(req,
+
+
+=== END CONTEXT ===
+
+
+REFACTOR phase. Review backend/src/ for:
+- Code duplication (extract to shared utilities)
+- Missing Swagger decorators (@ApiTags, @ApiOperation, @ApiResponse)
+- Missing class-validator decorators on DTOs
+- Inconsistent naming vs nestjs conventions
+- Proper use of HTTP status codes
+
+Improve clarity without changing behavior. Tests MUST still pass.
+Do NOT modify backend/test/.
+
+REPORT FILE: .claude-project/nestfind/status/BACKEND_REFACTOR_REPORT.md
+Required fields:
+  phase: backend-refactor
+  refactor_status: (complete|skipped)
+  changes_made: <int>
+  files_touched: [list]
+  tests_still_passing: (true|false)
+
+
+
+=== MANDATORY ARTIFACT CONTRACT ===
+You MUST produce a file at this exact path:
+  /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/BACKEND_REFACTOR_REPORT.md
+
+The orchestrator will verify this file exists after your run.
+If the file is missing, your work is REJECTED regardless of what you say.
+
+The file MUST contain content matching this regex:
+  refactor_status:\s*(complete|skipped)
+This pattern is verified by code, not interpretation.
+
+Do not claim the task is complete without writing this file.
+
+=== STDOUT ===
+[stderr] Performing one time database migration, may take a few minutes...
+[stderr] sqlite-migration:done
+Database migration complete.
+[stderr] [cc-analytics] loaded — server=http://211.188.49.111:8080 dir=/Users/saifulpotential/Potential/nestfind-sample
+{"type":"step_start","timestamp":1779251430100,"sessionID":"ses_1bc59cbe4ffeW5ArbDlmYcW61m","part":{"id":"prt_e43a642d200148ZzhosOPDLVg5","messageID":"msg_e43a63721001uoFMNshssZ84o5","sessionID":"ses_1bc59cbe4ffeW5ArbDlmYcW61m","snapshot":"ad933f1caad680aa39a417ae0840a5ce1d5daf23","type":"step-start"}}
+{"type":"tool_use","timestamp":1779251441194,"sessionID":"ses_1bc59cbe4ffeW5ArbDlmYcW61m","part":{"type":"tool","tool":"todowrite","callID":"call_00_FmEKQ8XZnRUCQ2ycSEF13493","state":{"status":"completed","input":{"todos":[{"content":"Explore backend/src/ structure and understand codebase","status":"in_progress","priority":"high"},{"content":"Review for code duplication and extract shared utilities","status":"pending","priority":"high"},{"content":"Add missing Swagger decorators (@ApiTags, @ApiOperation, @ApiResponse)","status":"pending","priority":"high"},{"content":"Add missing class-validator decorators on DTOs","status":"pending","priority":"high"},{"content":"Fix inconsistent naming vs nestjs conventions","status":"pending","priority":"medium"},{"content":"Fix proper use of HTTP status codes","status":"pending","priority":"medium"},{"content":"Run tests to verify no regressions","status":"pending","priority":"high"},{"content":"Generate BACKEND_REFACTOR_REPORT.md","status":"pending","priority":"high"}]},"output":"[\n  {\n    \"content\": \"Explore backend/src/ structure and understand codebase\",\n    \"status\": \"in_progress\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Review for code duplication and extract shared utilities\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Add missing Swagger decorators (@ApiTags, @ApiOperation, @ApiResponse)\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Add missing class-validator decorators on DTOs\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Fix inconsistent naming vs nestjs conventions\",\n    \"status\": \"pending\",\n    \"priority\": \"medium\"\n  },\n  {\n    \"content\": \"Fix proper use of HTTP status codes\",\n    \"status\": \"pending\",\n    \"priority\": \"medium\"\n  },\n  {\n    \"content\": \"Run tests to verify no regressions\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Generate BACKEND_REFACTOR_REPORT.md\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  }\n]","metadata":{"todos":[{"content":"Explore backend/src/ structure and understand codebase","status":"in_progress","priority":"high"},{"content":"Review for code duplication and extract shared utilities","status":"pending","priority":"high"},{"content":"Add missing Swagger decorators (@ApiTags, @ApiOperation, @ApiResponse)","status":"pending","priority":"high"},{"content":"Add missing class-validator decorators on DTOs","status":"pending","priority":"high"},{"content":"Fix inconsistent naming vs nestjs conventions","status":"pending","priority":"medium"},{"content":"Fix proper use of HTTP status codes","status":"pending","priority":"medium"},{"content":"Run tests to verify no regressions","status":"pending","priority":"high"},{"content":"Generate BACKEND_REFACTOR_REPORT.md","status":"pending","priority":"high"}],"truncated":false},"title":"8 todos","time":{"start":1779251440913,"end":1779251441192}},"id":"prt_e43a64e12001rAGELbowqwhU05","sessionID":"ses_1bc59cbe4ffeW5ArbDlmYcW61m","messageID":"msg_e43a63721001uoFMNshssZ84o5"}}
+{"type":"step_finish","timestamp":1779251442416,"sessionID":"ses_1bc59cbe4ffeW5ArbDlmYcW61m","part":{"id":"prt_e43a672ec001vSY8VypG7ed4OW","reason":"tool-calls","snapshot":"373f2bfd59091c93d2d7333a32986f12ba7fd488","messageID":"msg_e43a63721001uoFMNshssZ84o5","sessionID":"ses_1bc59cbe4ffeW5ArbDlmYcW61m","type":"step-finish","tokens":{"total":16264,"input":15980,"output":261,"reasoning":23,"cache":{"write":0,"read":0}},"cost":0.02879352}}
+{"type":"step_start","timestamp":1779251444855,"sessionID":"ses_1bc59cbe4ffeW5ArbDlmYcW61m","part":{"id":"prt_e43a67c75001pkyMP89Tjtk46c","messageID":"msg_e43a67342001O2B9xMFkySE99x","sessionID":"ses_1bc59cbe4ffeW5ArbDlmYcW61m","snapshot":"ec10234072935b81a15313f0bbba5e2e4bc38531","type":"step-start"}}
+{"type":"text","timestamp":1779251463351,"sessionID":"ses_1bc59cbe4ffeW5ArbDlmYcW61m","part":{"id":"prt_e43a6893f00173Qo4v0cnjrv7M","messageID":"msg_e43a67342001O2B9xMFkySE99x","sessionID":"ses_1bc59cbe4ffeW5ArbDlmYcW61m","type":"text","text":"Let me explore the backend structure first.","time":{"start":1779251448127,"end":1779251463349}}}

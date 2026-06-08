@@ -1,0 +1,6 @@
+gate: test-api
+executed_at: 2026-05-21T02:20:50Z
+score: .50
+passed: 2/4
+checks_hash: 31b1fe2e70dac16be8925ad60599d6c93688de14f6f2b3ff22c0bf67267d5962
+runner_pid: 21334

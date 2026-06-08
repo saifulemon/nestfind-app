@@ -1,0 +1,192 @@
+=== NODE: smoke-test ===
+timestamp: 2026-05-21T02:30:50.142Z
+backend: opencode
+model: (default)
+command: opencode run --format json "<prompt>"
+
+=== PROMPT (6392 chars) ===
+=== CONTEXT FILES ===
+
+--- .claude/skills/qa/test-smoke/SKILL.md ---
+---
+name: smoke-test
+description: Visits every route in the app via playwright-cli, checks for runtime errors (console errors, network 4xx/5xx, unhandled rejections, white screens). Captures and counts console errors per route. Produces a health report with console error summary.
+---
+
+# Smoke Test Skill
+
+Fast, shallow health check of every route in the application. Opens each page in a headless browser and verifies it loads without runtime errors. This is the "pulse check" before deep E2E testing.
+
+**Purpose**: Catch the class of bugs where pages build successfully but fail at runtime (e.g., 401 on public endpoints, unhandled promise rejections, white screens from missing imports, infinite console error loops).
+
+---
+
+## Prerequisites
+
+1. `playwright-cli` installed: `npm install -g @playwright/cli@latest`
+2. **Servers running**: Load and execute `.claude/skills/dev/ensure-servers/SKILL.md`
+   - This will read ports from `ecosystem.config.js`, kill stale processes, start fresh via PM2, and health-check
+   - It produces `BACKEND_PORT`, `FRONTEND_PORT`, `BACKEND_URL`, `FRONTEND_URL`
+   - Use these values below — do NOT hardcode `localhost:3000` or `localhost:5173`
+3. **Seed data verified** (for auth/admin routes):
+   - Test user: `testuser@test.com` / `TestPassword123!`
+   - Admin user: `admin@test.com` / `AdminPassword123!`
+   - Verify via: `curl -s -X POST ${BACKEND_URL}/auth/login -H 'Content-Type: application/json' -d '{"email":"testuser@test.com","password":"TestPassword123!"}'`
+   - If login returns 401: mark auth routes as BLOCKED (not FAIL)
+   - Record: `TEST_USER_AVAILABLE=true|false`, `ADMIN_USER_AVAILABLE=true|false`
+
+---
+
+## Route Discovery
+
+### Option A: Route Manifest (preferred)
+
+Read `.claude-project/routes.yaml` for explicit route definitions with categories:
+
+```yaml
+routes:
+  public:
+    - path: /
+      name: Home
+  auth_required:
+    - path: /cart
+      name: Cart
+  admin_required:
+    - path: /admin
+      name: Admin Dashboard
+```
+
+### Option B: Auto-discover from Router
+
+If no routes.yaml exists, read the frontend router config:
+
+```bash
+# Find route config files
+cat frontend/app/routes.ts frontend/app/routes/*.routes.ts 2>/dev/null
+```
+
+Extract all `route('path', 'file.tsx')` entries. Classify based on layout wrappers:
+- Inside `layout('pages/auth/layout.tsx', ...)` = auth (guest-only)
+- Inside `layout('components/layouts/ProtectedLayout.tsx', ...)` = protected
+- `<ProtectedRoute>` = auth_required
+- `<ProtectedRoute requiredRole="admin">` = admin_required
+
+---
+
+## Execution Protocol
+
+### Step 0: Clean Console Logs
+
+Archive previous console log files so each run starts fresh:
+
+```bash
+mkdir -p .claude-project/qa/smoke/console-logs-archive/
+mv .claude-project/.playwright-cli/console-*.log \
+   .claude-project/qa/smoke/console-logs-archive/ 2>/dev/null || true
+```
+
+### Step 1: Classify Routes
+
+Group all routes into three categories:
+- **public**: Visit directly, no auth needed
+- **auth_required**: Login as test user first (skip if `TEST_USER_AVAILABLE=false`)
+- **admin_required**: Login as admin user first (skip if `ADMIN_USER_AVAILABLE=false`)
+
+### Step 2: Test Public Routes
+
+For each public route:
+
+```bash
+# 1. Open session
+SESSION="smoke-public-$(echo $ROUTE | tr '/' '-' | sed 's/^-//')-$(openssl rand -hex 2)"
+PLAYWRIGHT_MCP_VIEWPORT_SIZE=1440x900 playwright-cli -s=$SESSION open "${FRONTEND_URL}${ROUTE}" --persistent
+
+# 2. Wait for page load (snapshot triggers wait)
+playwright-cli -s=$SESSION snapshot
+
+# 3. Wait 3 seconds for async errors to fire (API calls, auth checks)
+sleep 3
+
+# 4. Take second snapshot to capture post-load state
+playwright-cli -s=$SESSION snapshot
+
+# 5. Screenshot for evidence
+playwright-cli -s=$SESSION screenshot
+# Save to: .claude-project/qa/smoke/{route-kebab}.png
+
+# 6. Capture console errors (see Console Error Capture Protocol below)
+
+# 7. Close session
+playwright-cli -s=$SESSION close
+```
+
+**Evaluate each route:**
+
+| Check | How | PASS | FAIL |
+|-------|-----|------|------|
+| Page loads | Snapshot returns content | Elements visible in accessibility tree | Timeout or empty tree |
+| No white screen | Snapshot has > 3 meaningful elements | Content nodes present | Only root div, no children |
+| No error overlay | Check snapshot for error boundary text | No error boundary triggered | React error boundary or "Something went wrong" |
+| Content renders | Snapshot shows expected page elements | Page-specific content visible | Generic fallback or loading stuck |
+| Console errors within budget | Read console log, count errors | Total <= budget for category | Total exceeds budget OR infinite loop |
+| No P0 error patterns | Check console log for crash/loop patterns | No P0 patterns found | ErrorBoundary caught, infinite auth loop |
+
+### Step 3: Test Auth-Required Routes
+
+**Pre-check**: If `TEST_USER_AVAILABLE=false`:
+- Mark ALL auth-required routes as **BLOCKED** (not FAIL)
+- Reason: "No test user in database — run seed script"
+- Skip login attempt entirely (avoids triggering 
+
+
+=== END CONTEXT ===
+
+
+Smoke test every route listed in .claude-project/nestfind/status/routes.yaml via playwright-cli.
+
+FOR EACH ROUTE:
+1. Navigate to the route
+2. Take a snapshot
+3. Check console for TypeError, ReferenceError, uncaught exceptions
+4. Verify root element has visible children (not a blank page)
+5. Check for unexpected network errors (401 on public, 500 anywhere)
+
+This smoke test is BLOCKING — all routes must pass before backend tests run.
+
+REPORT FILE: .claude-project/nestfind/status/SMOKE_TEST_STATUS.md
+Required fields (regex-verifiable):
+  phase: test-api-smoke
+  routes_probed: <int>
+  routes_passed: <int>
+  console_errors: <int>
+  network_errors: <int>
+  crashes: <int>
+  failed_routes: [list]
+
+If any route crashes, mark it in failed_routes. Fix before running backend tests.
+
+
+
+=== MANDATORY ARTIFACT CONTRACT ===
+You MUST produce a file at this exact path:
+  /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/SMOKE_TEST_STATUS.md
+
+The orchestrator will verify this file exists after your run.
+If the file is missing, your work is REJECTED regardless of what you say.
+
+The file MUST contain content matching this regex:
+  routes_probed:\s*[0-9]+
+This pattern is verified by code, not interpretation.
+
+Do not claim the task is complete without writing this file.
+
+=== STDOUT ===
+[stderr] Performing one time database migration, may take a few minutes...
+[stderr] sqlite-migration:done
+Database migration complete.
+[stderr] [cc-analytics] loaded — server=http://211.188.49.111:8080 dir=/Users/saifulpotential/Potential/nestfind-sample
+{"type":"step_start","timestamp":1779330655746,"sessionID":"ses_1b7a0ec19ffegNtXnw5aQEdtJK","part":{"id":"prt_e485f2600001y64aZMmPwmZDfX","messageID":"msg_e485f165d0017CPUfruU9Hg0HO","sessionID":"ses_1b7a0ec19ffegNtXnw5aQEdtJK","snapshot":"ad7555204999aab5ee35f82c4da352f7fc9d1deb","type":"step-start"}}
+{"type":"tool_use","timestamp":1779330663935,"sessionID":"ses_1b7a0ec19ffegNtXnw5aQEdtJK","part":{"type":"tool","tool":"read","callID":"call_00_s3Uo20R810erEEn4B83g6524","state":{"status":"error","input":{"filePath":"/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/routes.yaml"},"error":"File not found: /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/routes.yaml","time":{"start":1779330663929,"end":1779330663934}},"id":"prt_e485f403b001phrxHS685IetZc","sessionID":"ses_1b7a0ec19ffegNtXnw5aQEdtJK","messageID":"msg_e485f165d0017CPUfruU9Hg0HO"}}
+{"type":"tool_use","timestamp":1779330665215,"sessionID":"ses_1b7a0ec19ffegNtXnw5aQEdtJK","part":{"type":"tool","tool":"skill","callID":"call_01_SgoOBZZhIsIcUg9AUuhm4425","state":{"status":"completed","input":{"name":"smoke-test"},"output":"<skill_content name=\"smoke-test\">\n# Skill: smoke-test\n\n# Smoke Test Skill\n\nFast, shallow health check of every route in the application. Opens each page in a headless browser and verifies it loads without runtime errors. This is the \"pulse check\" before deep E2E testing.\n\n**Purpose**: Catch the class of bugs where pages build successfully but fail at runtime (e.g., 401 on public endpoints, unhandled promise rejections, white screens from missing imports, infinite console error loops).\n\n---\n\n## Prerequisites\n\n1. `playwright-cli` installed: `npm install -g @playwright/cli@latest`\n2. **Servers running**: Load and execute `.claude/skills/dev/ensure-servers/SKILL.md`\n   - This will read ports from `ecosystem.config.js`, kill stale processes, start fresh via PM2, and health-check\n   - It produces `BACKEND_PORT`, `FRONTEND_PORT`, `BACKEND_URL`, `FRONTEND_URL`\n   - Use these values below — do NOT hardcode `localhost:3000` or `localhost:5173`\n3. **Seed data verified** (for auth/admin routes):\n   - Test user: `testuser@test.com` / `TestPassword123!`\n   - Admin user: `admin@test.com` / `AdminPassword123!`\n   - Verify via: `curl -s -X POST ${BACKEND_URL}/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"testuser@test.com\",\"password\":\"TestPassword123!\"}'`\n   - If login returns 401: mark auth routes as BLOCKED (not FAIL)\n   - Record: `TEST_USER_AVAILABLE=true|false`, `ADMIN_USER_AVAILABLE=true|false`\n\n---\n\n## Route Discovery\n\n### Option A: Route Manifest (preferred)\n\nRead `.claude-project/routes.yaml` for explicit route definitions with categories:\n\n```yaml\nroutes:\n  public:\n    - path: /\n      name: Home\n  auth_required:\n    - path: /cart\n      name: Cart\n  admin_required:\n    - path: /admin\n      name: Admin Dashboard\n```\n\n### Option B: Auto-discover from Router\n\nIf no routes.yaml exists, read the frontend router config:\n\n```bash\n# Find route config files\ncat frontend/app/routes.ts frontend/app/routes/*.routes.ts 2>/dev/null\n```\n\nExtract all `route('path', 'file.tsx')` entries. Classify based on layout wrappers:\n- Inside `layout('pages/auth/layout.tsx', ...)` = auth (guest-only)\n- Inside `layout('components/layouts/ProtectedLayout.tsx', ...)` = protected\n- `<ProtectedRoute>` = auth_required\n- `<ProtectedRoute requiredRole=\"admin\">` = admin_required\n\n---\n\n## Execution Protocol\n\n### Step 0: Clean Console Logs\n\nArchive previous console log files so each run starts fresh:\n\n```bash\nmkdir -p .claude-project/qa/smoke/console-logs-archive/\nmv .claude-project/.playwright-cli/console-*.log \\\n   .claude-project/qa/smoke/console-logs-archive/ 2>/dev/null || true\n```\n\n### Step 1: Classify Routes\n\nGroup all routes into three categories:\n- **public**: Visit directly, no auth needed\n- **auth_required**: Login as test user first (skip if `TEST_USER_AVAILABLE=false`)\n- **admin_required**: Login as admin user first (skip if `ADMIN_USER_AVAILABLE=false`)\n\n### Step 2: Test Public Routes\n\nFor each public route:\n\n```bash\n# 1. Open session\nSESSION=\"smoke-public-$(echo $ROUTE | tr '/' '-' | sed 's/^-//')-$(openssl rand -hex 2)\"\nPLAYWRIGHT_MCP_VIEWPORT_SIZE=1440x900 playwright-cli -s=$SESSION open \"${FRONTEND_URL}${ROUTE}\" --persistent\n\n# 2. Wait for page load (snapshot triggers wait)\nplaywright-cli -s=$SESSION snapshot\n\n# 3. Wait 3 seconds for async errors to fire (API calls, auth checks)\nsleep 3\n\n# 4. Take second snapshot to capture post-load state\nplaywright-cli -s=$SESSION snapshot\n\n# 5. Screenshot for evidence\nplaywright-cli -s=$SESSION screenshot\n# Save to: .claude-project/qa/smoke/{route-kebab}.png\n\n# 6. Capture console errors (see Console Error Capture Protocol below)\n\n# 7. Close session\nplaywright-cli -s=$SESSION close\n```\n\n**Evaluate each route:**\n\n| Check | How | PASS | FAIL |\n|-------|-----|------|------|\n| Page loads | Snapshot returns content | Elements visible in accessibility tree | Timeout or empty tree |\n| No white screen | Snapshot has > 3 meaningful elements | Content nodes present | Only root div, no children |\n| No error overlay | Check snapshot for error boundary text | No error boundary triggered | React error boundary or \"Something went wrong\" |\n| Content renders | Snapshot shows expected page elements | Page-specific content visible | Generic fallback or loading stuck |\n| Console errors within budget | Read console log, count errors | Total <= budget for category | Total exceeds budget OR infinite loop |\n| No P0 error patterns | Check console log for crash/loop patterns | No P0 patterns found | ErrorBoundary caught, infinite auth loop |\n\n### Step 3: Test Auth-Required Routes\n\n**Pre-check**: If `TEST_USER_AVAILABLE=false`:\n- Mark ALL auth-required routes as **BLOCKED** (not FAIL)\n- Reason: \"No test user in database — run seed script\"\n- Skip login attempt entirely (avoids triggering auth refresh loop)\n- In the report, show as:\n  ```\n  | /cart | Cart | BLOCKED | 0 | No test user in DB | - |\n  ```\n- BLOCKED routes do NOT count against pass rate\n- Report: \"Pass Rate: 10/12 (83%) + 6 BLOCKED\"\n\nIf `TEST_USER_AVAILABLE=true`:\n1. Open a session and navigate to `/login`\n2. Login via UI:\n   ```bash\n   playwright-cli -s=$SESSION snapshot\n   # Find email field ref, password field ref, submit button ref\n   playwright-cli -s=$SESSION fill {email_ref} \"testuser@test.com\"\n   playwright-cli -s=$SESSION fill {password_ref} \"TestPassword123!\"\n   playwright-cli -s=$SESSION click {submit_ref}\n   playwright-cli -s=$SESSION waitfortext \"...\"  # Wait for redirect\n   ```\n3. Navigate to each auth-required route and run the same checks as public routes\n4. Capture console errors for each route\n5. Close session after all auth routes are tested\n\n### Step 4: Test Admin-Required Routes\n\n**Pre-check**: If `ADMIN_USER_AVAILABLE=false`:\n- Mark ALL admin-required routes as **BLOCKED** (not FAIL)\n- Same handling as auth-required BLOCKED routes\n\nIf `ADMIN_USER_AVAILABLE=true`:\n- Same as Step 3 but login with admin credentials:\n  - Email: `admin@test.com`\n  - Password: `AdminPassword123!`\n\n### Step 5: Network Error Detection\n\nFor each route, after loading, check for network errors by examining the page state:\n- Look for error toast notifications or error messages in the snapshot\n- Check if the page shows an error boundary (\"Something went wrong\")\n- Look for \"401\", \"403\", \"404\", \"500\" text in error messages\n- If the page shows login redirect when it shouldn't (public route), that's a FAIL\n\n---\n\n## Console Error Capture Protocol\n\nThe `playwright-cli` automatically captures browser console errors to log files when\n`.playwright/cli.config.json` has `\"console\": {\"level\": \"error\"}`.\n\n**Log location**: `.claude-project/.playwright-cli/console-{timestamp}.log`\n\n**Log format**:\n```\n[{ms}ms] [ERROR] {message} @ {source_url}:{line}\n```\n\n### Per-Route Console Error Check\n\nAfter visiting each route and waiting 3 seconds:\n\n```bash\n# 1. Find the most recent console log file (corresponds to current session)\nCONSOLE_LOG=$(ls -t .claude-project/.playwright-cli/console-*.log 2>/dev/null | head -1)\n\n# 2. If log exists, count errors\nif [ -f \"$CONSOLE_LOG\" ]; then\n  # Total error lines\n  TOTAL_ERRORS=$(grep -c '\\[ERROR\\]' \"$CONSOLE_LOG\" 2>/dev/null || echo \"0\")\n\n  # Unique error messages (deduplicated)\n  UNIQUE_ERRORS=$(grep '\\[ERROR\\]' \"$CONSOLE_LOG\" 2>/dev/null | \\\n    sed 's/^\\[.*ms\\] //' | sort -u | wc -l | tr -d ' ')\n\n  # Check for auth refresh loop pattern\n  AUTH_LOOP=$(grep -c 'auth/refresh\\|/users/me.*401\\|auth/logout.*401' \"$CONSOLE_LOG\" 2>/dev/null || echo \"0\")\n\n  # Detect infinite loop: > 100 total errors from a single page\n  if [ \"$TOTAL_ERRORS\" -gt 100 ]; then\n    INFINITE_LOOP=\"YES\"\n  else\n    INFINITE_LOOP=\"NO\"\n  fi\n\n  # Extract top error message\n  TOP_ERROR=$(grep '\\[ERROR\\]' \"$CONSOLE_LOG\" 2>/dev/null | \\\n    sed 's/^\\[.*ms\\] //' | sort | uniq -c | sort -rn | head -1 | sed 's/^ *[0-9]* //')\nfi\n```\n\n### Error Classification\n\n| Error Pattern | Category | Severity |\n|---------------|----------|----------|\n| `TypeError: X.map is not a function` | Envelope mismatch | P0 (page crash) |\n| `ErrorBoundary caught:` | Component crash | P0 |\n| Auth refresh loop (> 100 occurrences of 401) | Infinite loop | P0 |\n| `Failed to load resource: 401` on public endpoint | Missing @Public() | P1 |\n| `Failed to load resource: 404` | Missing API route | P1 |\n| `Failed to load resource: 500` | Server error | P1 |\n| `Uncaught TypeError` / `ReferenceError` | Code bug | P1 |\n| React hydration warnings | Framework noise | Ignore |\n| `[WARNING]` level messages | Not errors | Ignore |\n| `chrome-extension://` errors | Browser extension | Ignore |\n\n### Console Error Budget\n\n| Route Category | Max Unique Errors | Max Total Errors |\n|----------------|-------------------|------------------|\n| Public | 0 | 0 |\n| Auth (logged in) | 3 | 10 |\n| Auth (not logged in) | 0 | 0 |\n| Admin (logged in) | 3 | 10 |\n\nA route FAILS the console error check if:\n- Total errors exceed the budget for its category, OR\n- An infinite loop is detected (total > 100), OR\n- Any P0-classified error pattern is found\n\n### Console Log File Management\n\nConsole log files accumulate across runs. The cleanup at Step 0 archives old logs.\n\n**Per-session log isolation**: Each `playwright-cli` session generates its own console log.\nTo associate logs with routes:\n1. Before opening a new session, note the current timestamp\n2. After the session completes, find the console log with the nearest matching timestamp\n3. Quick check: if log file size > 1MB, likely contains an infinite loop\n\n---\n\n## Report Format\n\n```markdown\n# Smoke Test Report\n\n**Date**: {YYYY-MM-DD HH:MM}\n**Routes Tested**: {N}/{total}\n**Passed**: {pass}\n**Failed**: {fail}\n**Blocked**: {blocked} (no seed data)\n**Pass Rate**: {pass}/{tested} ({percentage}%) + {blocked} BLOCKED\n**Total Console Errors**: {sum across all routes}\n**Infinite Loops Detected**: {count}\n\n---\n\n## Console Error Summary\n\n| Route | Category | Total Errors | Unique Errors | Infinite Loop | Top Error |\n|-------|----------|-------------|---------------|---------------|-----------|\n| / | public | 0 | 0 | NO | - |\n| /products | public | 12 | 3 | NO | TypeError: products.map... |\n| /login | public | 0 | 0 | NO | - |\n| /cart | auth | BLOCKED | - | - | No test user in DB |\n\n---\n\n## Results\n\n### Public Routes\n\n| Route | Name | Status | Console Errors | Issues | Screenshot |\n|-------|------|--------|----------------|--------|------------|\n| / | Home | PASS | 0 | - | smoke/home.png |\n| /products | Product List | FAIL | 12 (3 unique) | ErrorBoundary crash | smoke/products.png |\n| /events | Event List | FAIL | 8 (2 unique) | ErrorBoundary crash | smoke/events.png |\n\n### Auth-Required Routes\n\n| Route | Name | Status | Console Errors | Issues | Screenshot |\n|-------|------|--------|----------------|--------|------------|\n| /cart | Cart | BLOCKED | - | No test user in DB | - |\n| /my-page | My Page | BLOCKED | - | No test user in DB | - |\n\n### Admin-Required Routes\n\n| Route | Name | Status | Console Errors | Issues | Screenshot |\n|-------|------|--------|----------------|--------|------------|\n| /admin | Dashboard | BLOCKED | - | No admin user in DB | - |\n\n---\n\n## Failures\n\n### 1. /products - FAIL (P0: Component Crash)\n**Category**: public\n**Console Errors**: 12 total, 3 unique\n**Top Error**: `TypeError: products.map is not a function`\n**Evidence**: ErrorBoundary visible in snapshot. Console log shows envelope mismatch.\n**Fix Suggestion**: Unwrap API response envelope in Axios interceptor.\n\n### 2. /events - FAIL (P0: Component Crash)\n**Category**: public\n**Console Errors**: 8 total, 2 unique\n**Top Error**: `TypeError: eventList.map is not a function`\n**Evidence**: Same envelope mismatch pattern.\n**Fix Suggestion**: Same as /products — fix Axios interceptor.\n\n---\n\n## Summary\n\n| Category | Total | Passed | Failed | Blocked | Console Errors |\n|----------|-------|--------|--------|---------|----------------|\n| Public | 12 | 10 | 2 | 0 | 20 |\n| Auth-Required | 6 | 0 | 0 | 6 | - |\n| Admin-Required | 7 | 0 | 0 | 7 | - |\n| **Total** | **25** | **10** | **2** | **13** | **20** |\n\n**Infinite Loops**: 0\n**P0 Issues**: 2 (component crashes)\n**Overall Health**: 10/12 tested = 83% (FAIL - target is 100%) + 13 BLOCKED\n```\n\n---\n\n## Status File Integration\n\nUpdate `.claude-project/status/tirebank/SMOKE_TEST_STATUS.md`:\n\n```markdown\n# Smoke Test Status\n\n**Last Run**: {date}\n**Pass Rate**: {N}/{total} ({percentage}%) + {blocked} BLOCKED\n**Console Errors**: {total_errors} total, {unique_errors} unique\n**Infinite Loops**: {loop_count}\n\n| # | Route | Category | Status | Console Errors | Last Checked |\n|---|-------|----------|--------|----------------|-------------|\n| 1 | / | public | PASS | 0 | {date} |\n| 2 | /products | public | FAIL | 12 (3 unique) | {date} |\n| 3 | /cart | auth | BLOCKED | - | {date} |\n...\n```\n\n---\n\n## Loop Integration\n\nThis skill works with the fullstack loop system:\n\n```yaml\nsmoke-test:\n  stack: base\n  skill: qa/smoke-test/SKILL.md\n  status_file: SMOKE_TEST_STATUS.md\n  per_item: each route\n  completion_promise: \"SMOKE_TEST_COMPLETE\"\n  default_iterations: 50\n```\n\nIn loop mode, each route is one item. The loop iterates through failing routes, and the agent is expected to fix the underlying issue and re-test.\n\n---\n\n## Error Handling\n\n| Situation | Action |\n|-----------|--------|\n| `playwright-cli` not installed | FAIL with: `npm install -g @playwright/cli@latest` |\n| Frontend not running | Run ensure-servers skill first. FAIL with: \"Connection refused at ${FRONTEND_URL}\" |\n| Backend not running | Run ensure-servers skill first. FAIL with: \"Connection refused at ${BACKEND_URL}\" |\n| Login fails (bad credentials) | Mark auth routes as BLOCKED: \"Test user credentials not working. Run database seeds.\" |\n| Route returns 404 | Mark FAIL, suggest checking route definition in routes.ts and routes/*.routes.ts |\n| Page loads but is empty | Mark FAIL, suggest checking component imports and data fetching |\n| Timeout on page load | Mark FAIL with timeout duration, suggest checking for infinite loops |\n| Console log file > 1MB | Flag as P0 infinite loop, report top error pattern |\n\n---\n\n## Common Fix Patterns\n\n| Failure | Typical Fix |\n|---------|-------------|\n| 401 on public route | Add/verify `@Public()` decorator on backend controller |\n| White screen | Fix missing import or component crash |\n| Console TypeError | Fix null reference (data not loaded yet) |\n| Network 500 | Fix backend service/controller error |\n| Login redirect on public page | Check ProtectedLayout routeAccess map and routes/protected.routes.ts |\n| Stuck loading spinner | Fix API hook or add error handling |\n| Error boundary triggered | Fix uncaught exception in component |\n| Infinite auth refresh loop | Skip `/users/me` when no token; don't call `logout()` on refresh 401 |\n| `.map() is not a function` | Unwrap API response envelope in Axios interceptor |\n\nBase directory for this skill: file:///Users/saifulpotential/Potential/nestfind-sample/.claude/skills/qa/test-smoke\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n\n</skill_files>\n</skill_content>","metadata":{"name":"smoke-test","dir":"/Users/saifulpotential/Potential/nestfind-sample/.claude/skills/qa/test-smoke","truncated":false},"title":"Loaded skill: smoke-test","time":{"start":1779330664933,"end":1779330665214}},"id":"prt_e485f4816001CQLKzG6vA1GvQC","sessionID":"ses_1b7a0ec19ffegNtXnw5aQEdtJK","messageID":"msg_e485f165d0017CPUfruU9Hg0HO"}}
+{"type":"step_finish","timestamp":1779330667015,"sessionID":"ses_1b7a0ec19ffegNtXnw5aQEdtJK","part":{"id":"prt_e485f5205001y9u5ht7TeBY9kq","reason":"tool-calls","snapshot":"5acd7108bd0a77ad96efbdd035002bb052376a23","messageID":"msg_e485f165d0017CPUfruU9Hg0HO","sessionID":"ses_1b7a0ec19ffegNtXnw5aQEdtJK","type":"step-finish","tokens":{"total":16306,"input":16097,"output":99,"reasoning":110,"cache":{"write":0,"read":0}},"cost":0.0287361}}
+{"type":"step_start","timestamp":1779330670444,"sessionID":"ses_1b7a0ec19ffegNtXnw5aQEdtJK","part":{"id":"prt_e485f5f6b001XyMIgR4dr6cElg","messageID":"msg_e485f5263001WKZUpZ0BbfysXW","sessionID":"ses_1b7a0ec19ffegNtXnw5aQEdtJK","snapshot":"2db1103790b1c772558d33a1b5826e8ca330143c","type":"step-start"}}

@@ -1,0 +1,49 @@
+id: US-07-INQUIRY-MODAL
+role: renter
+feature: Submit an inquiry about a property
+page: 07-inquiry-modal.html
+goal: |
+  A renter opens the inquiry modal from the property detail page, fills in
+  their contact details and message, and submits an inquiry to the property manager.
+
+acceptance_criteria:
+  - id: AC-1
+    description: Open inquiry modal and fill all required fields (name, email, message) then submit
+    ui_route: /properties/:id (modal overlay)
+    endpoint: POST /api/properties/:id/inquiries
+    expected: "201 Created, modal closes, success toast shown"
+  - id: AC-2
+    description: Submit inquiry with phone number (optional field) filled
+    ui_route: /properties/:id (modal overlay)
+    endpoint: POST /api/properties/:id/inquiries
+    expected: "201 Created, phone included in request body"
+  - id: AC-3
+    description: Click Cancel or the X close button to dismiss the modal without submitting
+    ui_route: /properties/:id (modal overlay)
+    endpoint: none
+    expected: "Modal closes, no API call made, user returns to property detail page"
+
+boundary_cases:
+  - case: "Message exactly 10 characters (minimum) — accepted; message at 9 characters — 400 validation error"
+  - case: "Message exactly 2000 characters (maximum) — accepted; message at 2001 characters — 400 validation error"
+  - case: "Name field empty — form validation prevents submission"
+  - case: "Email field empty — form validation prevents submission"
+  - case: "Phone field empty — submission succeeds"
+
+error_scenarios:
+  - scenario: "Unauthenticated (401) — modal should not be accessible; if bypassed, server returns 401"
+  - scenario: "Property not found (404) during submit — error toast 'This property is no longer available'"
+  - scenario: "Validation error (400) — field-level errors shown inline below each invalid field"
+  - scenario: "Network failure — submit button re-enabled, inline error message appears"
+
+state_transitions:
+  - state: loading
+    expected: "Send Inquiry button shows spinner and is disabled, Cancel button also disabled"
+  - state: success
+    expected: "Modal closes, success toast 'Inquiry submitted successfully' appears on property detail page"
+  - state: error
+    expected: "Inline error message(s) appear within the modal form, modal stays open for correction"
+
+fixture_refs:
+  - users.renter
+  - properties.apt_downtown

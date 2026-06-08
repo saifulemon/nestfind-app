@@ -1,0 +1,70 @@
+fixtures:
+  users:
+    renter:
+      name: "Jane Doe"
+      email: "jane@example.com"
+      password: "Password123!"
+      phone: "(555) 123-4567"
+      role: "renter"
+      status: "active"
+    renter_alt:
+      name: "John Smith"
+      email: "john@example.com"
+      password: "Password123!"
+      phone: "(555) 987-6543"
+      role: "renter"
+      status: "active"
+    admin:
+      name: "Admin User"
+      email: "admin@nestfind.com"
+      password: "AdminPass123!"
+      role: "admin"
+      status: "active"
+    suspended:
+      name: "Bob Suspended"
+      email: "bob@suspended.com"
+      password: "Password123!"
+      role: "renter"
+      status: "suspended"
+
+  properties:
+    apt_downtown:
+      id: "00000000-0000-0000-0000-000000000001"
+      title: "Modern Downtown Apartment"
+      price: 2500
+      bedrooms: 3
+      bathrooms: 2
+      squareFeet: 1200
+      propertyType: "apartment"
+      address:
+        street: "1024 Market Street"
+        city: "San Francisco"
+        state: "CA"
+        zipCode: "94103"
+    house_palo_alto:
+      id: "00000000-0000-0000-0000-000000000002"
+      title: "Suburban Family Home"
+      price: 4200
+      bedrooms: 4
+      bathrooms: 3
+      squareFeet: 2400
+      propertyType: "house"
+      address:
+        street: "8842 Willow Lane"
+        city: "Palo Alto"
+        state: "CA"
+        zipCode: "94301"
+
+  inquiries:
+    responded:
+      id: "00000000-0000-0000-0000-000000000010"
+      propertyId: "00000000-0000-0000-0000-000000000001"
+      message: "Is this available this weekend?"
+      status: "responded"
+      response: "Yes, we can schedule a viewing."
+    pending:
+      id: "00000000-0000-0000-0000-000000000011"
+      propertyId: "00000000-0000-0000-0000-000000000001"
+      message: "What utilities are included?"
+      status: "new"
+      response: null

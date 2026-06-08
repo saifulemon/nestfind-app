@@ -1,0 +1,6 @@
+gate: prd
+executed_at: 2026-05-21T02:47:11Z
+score: 1.00
+passed: 6/6
+checks_hash: 7baf66ac66bae23d501702e3ad67cf34bba360b3d421c3b2f8d133f2126942af
+runner_pid: 26785

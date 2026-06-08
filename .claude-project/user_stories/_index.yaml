@@ -1,0 +1,167 @@
+generated: "2026-05-20T04:22:37Z"
+source: per-HTML-page authorship (one yaml per design/html/*.html)
+project: nestfind
+page_parity_generated: true
+html_count: 16
+yaml_count: 16
+stories:
+  - file: index.yaml
+    page: index.html
+    role: all
+    feature: "Splash screen with automatic redirect to property search"
+    scenarios_total: 8
+    buckets:
+      acceptance_criteria: 2
+      boundary_cases: 2
+      error_scenarios: 2
+      state_transitions: 2
+  - file: 02-login.yaml
+    page: 02-login.html
+    role: all
+    feature: "Renter login with email and password"
+    scenarios_total: 11
+    buckets:
+      acceptance_criteria: 3
+      boundary_cases: 3
+      error_scenarios: 3
+      state_transitions: 2
+  - file: 03-signup.yaml
+    page: 03-signup.html
+    role: all
+    feature: "Self-service renter registration"
+    scenarios_total: 13
+    buckets:
+      acceptance_criteria: 3
+      boundary_cases: 4
+      error_scenarios: 3
+      state_transitions: 3
+  - file: 04-forgot-password.yaml
+    page: 04-forgot-password.html
+    role: all
+    feature: "Request password reset email"
+    scenarios_total: 9
+    buckets:
+      acceptance_criteria: 2
+      boundary_cases: 3
+      error_scenarios: 2
+      state_transitions: 2
+  - file: 05-home.yaml
+    page: 05-home.html
+    role: renter
+    feature: "Search and browse rental property listings"
+    scenarios_total: 14
+    buckets:
+      acceptance_criteria: 5
+      boundary_cases: 3
+      error_scenarios: 3
+      state_transitions: 3
+  - file: 06-property-detail.yaml
+    page: 06-property-detail.html
+    role: renter
+    feature: "View full property details, photos, amenities, and location"
+    scenarios_total: 13
+    buckets:
+      acceptance_criteria: 3
+      boundary_cases: 3
+      error_scenarios: 4
+      state_transitions: 3
+  - file: 07-inquiry-modal.yaml
+    page: 07-inquiry-modal.html
+    role: renter
+    feature: "Submit an inquiry about a property"
+    scenarios_total: 15
+    buckets:
+      acceptance_criteria: 3
+      boundary_cases: 5
+      error_scenarios: 4
+      state_transitions: 3
+  - file: 08-favorites.yaml
+    page: 08-favorites.html
+    role: renter
+    feature: "View and manage saved/favorited properties"
+    scenarios_total: 11
+    buckets:
+      acceptance_criteria: 3
+      boundary_cases: 2
+      error_scenarios: 3
+      state_transitions: 3
+  - file: 09-my-inquiries.yaml
+    page: 09-my-inquiries.html
+    role: renter
+    feature: "View submitted inquiries and their status/responses"
+    scenarios_total: 10
+    buckets:
+      acceptance_criteria: 3
+      boundary_cases: 2
+      error_scenarios: 2
+      state_transitions: 3
+  - file: 10-profile.yaml
+    page: 10-profile.html
+    role: renter
+    feature: "Manage personal profile, notification preferences, and security settings"
+    scenarios_total: 18
+    buckets:
+      acceptance_criteria: 5
+      boundary_cases: 5
+      error_scenarios: 4
+      state_transitions: 4
+  - file: 11-admin-dashboard.yaml
+    page: 11-admin-dashboard.html
+    role: admin
+    feature: "View admin dashboard with aggregate statistics, charts, and recent activity"
+    scenarios_total: 14
+    buckets:
+      acceptance_criteria: 5
+      boundary_cases: 2
+      error_scenarios: 4
+      state_transitions: 3
+  - file: 12-admin-properties.yaml
+    page: 12-admin-properties.html
+    role: admin
+    feature: "Manage property listings (view, search, filter, create, edit, delete)"
+    scenarios_total: 16
+    buckets:
+      acceptance_criteria: 6
+      boundary_cases: 3
+      error_scenarios: 4
+      state_transitions: 3
+  - file: 13-admin-renters.yaml
+    page: 13-admin-renters.html
+    role: admin
+    feature: "View and manage registered renter accounts"
+    scenarios_total: 14
+    buckets:
+      acceptance_criteria: 5
+      boundary_cases: 2
+      error_scenarios: 4
+      state_transitions: 3
+  - file: 14-admin-inquiries.yaml
+    page: 14-admin-inquiries.html
+    role: admin
+    feature: "View, filter, and respond to renter inquiries"
+    scenarios_total: 17
+    buckets:
+      acceptance_criteria: 6
+      boundary_cases: 3
+      error_scenarios: 5
+      state_transitions: 3
+  - file: 15-reset-password.yaml
+    page: 15-reset-password.html
+    role: all
+    feature: "Reset password using a token from the forgot-password email"
+    scenarios_total: 13
+    buckets:
+      acceptance_criteria: 3
+      boundary_cases: 4
+      error_scenarios: 3
+      state_transitions: 3
+  - file: 16-admin-login.yaml
+    page: 16-admin-login.html
+    role: all
+    feature: "Admin-only login page with security notice"
+    scenarios_total: 13
+    buckets:
+      acceptance_criteria: 4
+      boundary_cases: 3
+      error_scenarios: 3
+      state_transitions: 3

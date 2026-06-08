@@ -1,0 +1,45 @@
+{
+  "blueprint": "user-stories",
+  "blueprint_source": "user-stories-2.yaml",
+  "target_dir": "/Users/saifulpotential/Potential/nestfind-sample",
+  "started_at": "2026-05-20T04:20:15.295Z",
+  "completed_nodes": [
+    {
+      "id": "require-design-approved",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:20:15.303Z",
+      "duration_ms": 6,
+      "output": "design approved + complete\n"
+    },
+    {
+      "id": "require-html-pages",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:20:15.308Z",
+      "duration_ms": 5,
+      "output": "html_pages=16\n"
+    },
+    {
+      "id": "split-to-per-page",
+      "type": "agentic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:23:33.874Z",
+      "duration_ms": 198563,
+      "turns": 25,
+      "cost_usd": 0.08640689199999999,
+      "artifact": "/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/user_stories/_index.yaml",
+      "agent_log": "/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/agent-logs/split-to-per-page-2026-05-20T04-20-15-310Z.log"
+    },
+    {
+      "id": "evidence-check",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:23:33.974Z",
+      "duration_ms": 99,
+      "output": "PASS: html=16 yaml=16 (1:1 parity, all YAMLs >= 5 scenarios)\n"
+    }
+  ],
+  "current_node": null,
+  "status": "completed"
+}

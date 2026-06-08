@@ -1,0 +1,145 @@
+- generic [ref=e4]:
+  - navigation [ref=e5]:
+    - generic [ref=e6]: NestFind
+    - generic [ref=e7]:
+      - link "Browse" [ref=e8] [cursor=pointer]:
+        - /url: /search
+      - link "How It Works" [ref=e9] [cursor=pointer]:
+        - /url: "#how-it-works"
+      - link "For Owners" [ref=e10] [cursor=pointer]:
+        - /url: /admin/login
+      - link "Sign In" [ref=e11] [cursor=pointer]:
+        - /url: /login
+      - link "Join Now" [ref=e12] [cursor=pointer]:
+        - /url: /register
+  - generic [ref=e13]:
+    - heading "Find Your Perfect Nest, Without the Noise" [level=1] [ref=e14]:
+      - text: Find Your Perfect Nest,
+      - text: Without the Noise
+    - paragraph [ref=e15]: Browse thousands of verified rental properties. Clean, ad-free, and focused on what matters — finding your next home.
+    - generic [ref=e16]:
+      - textbox "Enter city, neighborhood, or ZIP code..." [ref=e17]
+      - button "Search Properties" [ref=e18] [cursor=pointer]
+    - generic [ref=e19]:
+      - button "Apartments" [ref=e20] [cursor=pointer]
+      - button "Houses" [ref=e21] [cursor=pointer]
+      - button "Condos" [ref=e22] [cursor=pointer]
+      - button "Pet-Friendly" [ref=e23] [cursor=pointer]
+      - button "Under $2,000" [ref=e24] [cursor=pointer]
+  - generic [ref=e25]:
+    - generic [ref=e26]: How It Works
+    - heading "Three steps to your next home" [level=2] [ref=e27]
+    - paragraph [ref=e28]: NestFind makes rental hunting simple. No ads, no clutter, just homes you’ll love.
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e31]: "1"
+        - heading "Search & Filter" [level=4] [ref=e32]
+        - paragraph [ref=e33]: Enter your preferred location and refine by price, beds, and property type. Results update instantly.
+      - generic [ref=e34]:
+        - generic [ref=e35]: "2"
+        - heading "Explore & Save" [level=4] [ref=e36]
+        - paragraph [ref=e37]: Browse photos, check amenities, and view locations on the map. Save favorites with one click.
+      - generic [ref=e38]:
+        - generic [ref=e39]: "3"
+        - heading "Inquire & Move" [level=4] [ref=e40]
+        - paragraph [ref=e41]: Send an inquiry directly to the property manager. Simple form, no lengthy applications.
+  - generic [ref=e42]:
+    - generic [ref=e43]: Featured Properties
+    - heading "Homes you might love" [level=2] [ref=e44]
+    - paragraph [ref=e45]: Hand-picked listings from our curated collection.
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e48]: 🏠
+        - generic [ref=e49]:
+          - generic [ref=e50]: Available Now
+          - generic [ref=e51]: $1,850/mo
+          - generic [ref=e52]: 1420 Pine Street, San Francisco, CA
+          - generic [ref=e53]:
+            - generic [ref=e54]: 2 bd
+            - generic [ref=e55]: 1 ba
+            - generic [ref=e56]: 850 sqft
+            - generic [ref=e57]: Apartment
+      - generic [ref=e58]:
+        - generic [ref=e59]: 🏡
+        - generic [ref=e60]:
+          - generic [ref=e61]: Available Now
+          - generic [ref=e62]: $2,950/mo
+          - generic [ref=e63]: 381 Oak Avenue, Austin, TX
+          - generic [ref=e64]:
+            - generic [ref=e65]: 3 bd
+            - generic [ref=e66]: 2 ba
+            - generic [ref=e67]: 1,200 sqft
+            - generic [ref=e68]: House
+      - generic [ref=e69]:
+        - generic [ref=e70]: 🏢
+        - generic [ref=e71]:
+          - generic [ref=e72]: Available Now
+          - generic [ref=e73]: $2,200/mo
+          - generic [ref=e74]: 750 Market Street, Portland, OR
+          - generic [ref=e75]:
+            - generic [ref=e76]: 1 bd
+            - generic [ref=e77]: 1 ba
+            - generic [ref=e78]: 720 sqft
+            - generic [ref=e79]: Condo
+  - generic [ref=e80]:
+    - generic [ref=e81]: Why NestFind
+    - heading "Built for renters, not advertisers" [level=2] [ref=e82]
+    - paragraph [ref=e83]: We focused on what actually matters when finding a rental.
+    - generic [ref=e84]:
+      - generic [ref=e85]:
+        - img [ref=e87]
+        - heading "Ad-Free Browsing" [level=4] [ref=e92]
+        - paragraph [ref=e93]: No sponsored listings cluttering your search. Every result is organic.
+      - generic [ref=e94]:
+        - img [ref=e96]
+        - heading "Instant Filters" [level=4] [ref=e98]
+        - paragraph [ref=e99]: Real-time filtering by price, beds, and type. No page reloads.
+      - generic [ref=e100]:
+        - img [ref=e102]
+        - heading "Quick Favorites" [level=4] [ref=e104]
+        - paragraph [ref=e105]: Save properties with one click. Access your favorites from anywhere.
+      - generic [ref=e106]:
+        - img [ref=e108]
+        - heading "Map View" [level=4] [ref=e111]
+        - paragraph [ref=e112]: See exactly where each property is. Integrated Google Maps on every listing.
+  - contentinfo [ref=e113]:
+    - generic [ref=e114]:
+      - heading "NestFind" [level=5] [ref=e115]
+      - link "About" [ref=e116] [cursor=pointer]:
+        - /url: "#"
+      - link "Careers" [ref=e117] [cursor=pointer]:
+        - /url: "#"
+      - link "Press" [ref=e118] [cursor=pointer]:
+        - /url: "#"
+      - link "Blog" [ref=e119] [cursor=pointer]:
+        - /url: "#"
+    - generic [ref=e120]:
+      - heading "Renters" [level=5] [ref=e121]
+      - link "Browse Properties" [ref=e122] [cursor=pointer]:
+        - /url: /search
+      - link "How It Works" [ref=e123] [cursor=pointer]:
+        - /url: "#how-it-works"
+      - link "Renter Guide" [ref=e124] [cursor=pointer]:
+        - /url: "#"
+      - link "Safety Tips" [ref=e125] [cursor=pointer]:
+        - /url: "#"
+    - generic [ref=e126]:
+      - heading "Owners" [level=5] [ref=e127]
+      - link "List a Property" [ref=e128] [cursor=pointer]:
+        - /url: /admin/properties/new
+      - link "Owner Dashboard" [ref=e129] [cursor=pointer]:
+        - /url: /admin/dashboard
+      - link "Pricing" [ref=e130] [cursor=pointer]:
+        - /url: "#"
+      - link "Resources" [ref=e131] [cursor=pointer]:
+        - /url: "#"
+    - generic [ref=e132]:
+      - heading "Support" [level=5] [ref=e133]
+      - link "Help Center" [ref=e134] [cursor=pointer]:
+        - /url: "#"
+      - link "Contact Us" [ref=e135] [cursor=pointer]:
+        - /url: "#"
+      - link "Privacy Policy" [ref=e136] [cursor=pointer]:
+        - /url: "#"
+      - link "Terms of Service" [ref=e137] [cursor=pointer]:
+        - /url: "#"

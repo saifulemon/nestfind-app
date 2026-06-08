@@ -1,0 +1,4 @@
+{"t":"2026-05-19T04:42:18.956Z","type":"episode_start","episode_id":"ep-2026-05-19T04-42-18-951-a1pn","project":"nestfind","mode":"run-all","argv":["nestfind","--prd","PRD.pdf","--run-all","--skip-spec"],"target_dir":"/Users/saifulpotential/Potential/nestfind-sample","source_dir":"/Users/saifulpotential/Potential/nestfind-sample"}
+{"t":"2026-05-19T04:42:18.957Z","type":"phase_start","episode_id":"ep-2026-05-19T04-42-18-951-a1pn","project":"nestfind","phase":"init","gen":null}
+{"t":"2026-05-19T04:42:19.059Z","type":"phase_end","episode_id":"ep-2026-05-19T04-42-18-951-a1pn","project":"nestfind","phase":"init","success":false,"failed_node":"blueprint-load","duration_ms":0,"score":0}
+{"t":"2026-05-19T04:42:19.059Z","type":"episode_end","episode_id":"ep-2026-05-19T04-42-18-951-a1pn","project":"nestfind","success":false,"failed_phase":null,"failed_node":null,"duration_ms":103}

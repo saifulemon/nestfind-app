@@ -1,0 +1,181 @@
+{
+  "nav": {
+    "home": "홈",
+    "search": "검색",
+    "favorites": "즐겨찾기",
+    "inquiries": "문의",
+    "profile": "프로필",
+    "login": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃",
+    "admin": "관리자"
+  },
+  "auth": {
+    "login": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃",
+    "email": "이메일",
+    "password": "비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "name": "이름",
+    "phone": "전화번호 (선택)",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "resetPassword": "비밀번호 재설정",
+    "setNewPassword": "새 비밀번호 설정",
+    "chooseStrongPassword": "계정에 사용할 강력한 비밀번호를 선택하세요",
+    "newPassword": "새 비밀번호",
+    "enterNewPassword": "새 비밀번호 입력",
+    "atLeast8Chars": "최소 8자 이상",
+    "confirmNewPassword": "새 비밀번호 확인",
+    "reEnterNewPassword": "새 비밀번호 다시 입력",
+    "passwordResetSuccess": "비밀번호 재설정 완료!",
+    "passwordResetMessage": "비밀번호가 업데이트되었습니다. 새 비밀번호로 로그인할 수 있습니다.",
+    "backToSignIn": "로그인으로 돌아가기",
+    "sendResetLink": "재설정 링크 보내기",
+    "noAccount": "계정이 없으신가요?",
+    "hasAccount": "이미 계정이 있으신가요?",
+    "rememberMe": "로그인 유지",
+    "welcomeBack": "다시 오신 것을 환영합니다",
+    "signInSubtitle": "계정에 로그인하세요",
+    "emailAddress": "이메일 주소",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "비밀번호를 입력하세요",
+    "orDivider": "또는",
+    "signUp": "회원가입",
+    "termsPrefix": "로그인하면 당사의",
+    "terms": "이용약관",
+    "privacy": "개인정보 처리방침"
+  },
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "수정",
+    "create": "생성",
+    "search": "검색",
+    "filter": "필터",
+    "clear": "초기화",
+    "loading": "로딩 중...",
+    "noResults": "결과가 없습니다",
+    "error": "오류가 발생했습니다",
+    "submit": "제출",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전",
+    "confirm": "확인",
+    "close": "닫기",
+    "viewDetails": "상세 보기",
+    "language": "언어"
+  },
+  "hero": {
+    "title": "당신의 다음",
+    "titleHighlight": "집을 찾아보세요",
+    "subtitle": "지역 최고의 임대 매물을 둘러보세요. 완벽한 집이 기다리고 있습니다.",
+    "searchPlaceholder": "도시, 동네 또는 주소로 검색..."
+  },
+  "property": {
+    "price": "가격",
+    "bedrooms": "침실",
+    "bathrooms": "욕실",
+    "sqft": "평방피트",
+    "type": "매물 유형",
+    "address": "주소",
+    "description": "설명",
+    "amenities": "편의시설",
+    "location": "위치",
+    "saveToFavorites": "즐겨찾기에 저장",
+    "removeFromFavorites": "즐겨찾기에서 삭제",
+    "submitInquiry": "문의하기",
+    "photoGallery": "사진 갤러리"
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "totalProperties": "총 매물",
+    "totalInquiries": "총 문의",
+    "totalUsers": "총 사용자",
+    "recentActivity": "최근 활동"
+  },
+  "admin": {
+    "properties": "매물 관리",
+    "inquiries": "문의 관리",
+    "users": "사용자 관리",
+    "addProperty": "매물 추가",
+    "editProperty": "매물 수정"
+  },
+  "unauthorized": {
+    "title": "접근 거부",
+    "message": "이 페이지를 볼 수 있는 권한이 없습니다."
+  },
+  "notFound": {
+    "title": "404",
+    "message": "찾으시는 페이지가 존재하지 않습니다.",
+    "goHome": "홈으로 가기"
+  },
+  "landing": {
+    "nav": {
+      "brand": "NestFind",
+      "browse": "둘러보기",
+      "howItWorks": "이용 방법",
+      "forOwners": "임대인",
+      "signIn": "로그인",
+      "joinNow": "가입하기"
+    },
+    "hero": {
+      "line1": "당신의",
+      "highlight": "완벽한 보금자리",
+      "line2": "를 찾아보세요",
+      "subtitle": "검증된 수천 개의 임대 매물을 둘러보세요. 광고 없이, 깔끔하게, 집 찾기에만 집중하세요.",
+      "searchPlaceholder": "도시, 동네 또는 우편번호를 입력하세요...",
+      "searchButton": "매물 검색"
+    },
+    "chips": {
+      "apartments": "아파트",
+      "houses": "주택",
+      "condos": "콘도",
+      "pet-friendly": "반려동물 가능",
+      "under2000": "월 $2,000 미만"
+    },
+    "howItWorks": {
+      "label": "이용 방법",
+      "title": "세 단계로 새 보금자리를 찾으세요",
+      "subtitle": "NestFind는 임대 검색을 간단하게 만듭니다. 광고 없이, 복잡함 없이, 마음에 드는 집만 보여드립니다.",
+      "step1Title": "검색 및 필터",
+      "step1Desc": "원하는 위치를 입력하고 가격, 침실 수, 매물 유형으로 필터링하세요. 결과가 즉시 업데이트됩니다.",
+      "step2Title": "탐색 및 저장",
+      "step2Desc": "사진을 둘러보고 편의시설을 확인하고 지도에서 위치를 보세요. 한 번의 클릭으로 즐겨찾기에 저장하세요.",
+      "step3Title": "문의 및 입주",
+      "step3Desc": "매물 관리자에게 직접 문의하세요. 간단한 양식으로, 긴 신청서가 필요 없습니다."
+    },
+    "featured": {
+      "label": "추천 매물",
+      "title": "마음에 드실 만한 집",
+      "subtitle": "엄선된 컬렉션에서 직접 고른 매물입니다."
+    },
+    "property": {
+      "availableNow": "즉시 입주 가능",
+      "perMonth": "/월",
+      "bd": "침실",
+      "ba": "욕실",
+      "sqft": "sqft"
+    },
+    "why": {
+      "label": "NestFind의 장점",
+      "title": "광고주가 아닌 임차인을 위해 만들어졌습니다",
+      "subtitle": "임대 매물을 찾을 때 실제로 중요한 것에 집중했습니다.",
+      "feat1Title": "광고 없는 검색",
+      "feat1Desc": "스폰서 매물이 검색 결과를 어지럽히지 않습니다. 모든 결과는 자연 검색입니다.",
+      "feat2Title": "즉시 필터",
+      "feat2Desc": "가격, 침실 수, 유형별 실시간 필터링. 페이지 새로고침이 필요 없습니다.",
+      "feat3Title": "빠른 즐겨찾기",
+      "feat3Desc": "한 번의 클릭으로 매물을 저장하세요. 어디서나 즐겨찾기에 접근할 수 있습니다.",
+      "feat4Title": "지도 보기",
+      "feat4Desc": "각 매물의 정확한 위치를 확인하세요. 모든 매물에 Google 지도가 통합되어 있습니다."
+    },
+    "footer": {
+      "col1Title": "NestFind",
+      "col2Title": "임차인",
+      "col3Title": "임대인",
+      "col4Title": "고객지원"
+    }
+  }
+}

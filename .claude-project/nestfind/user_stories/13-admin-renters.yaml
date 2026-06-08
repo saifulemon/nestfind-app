@@ -1,0 +1,57 @@
+id: US-13-ADMIN-RENTERS
+role: admin
+feature: View and manage registered renter accounts
+page: 13-admin-renters.html
+goal: |
+  An administrator views all registered renters in a table with search, status/date
+  filters, pagination, and per-row actions (view profile, edit, delete/suspend).
+
+acceptance_criteria:
+  - id: AC-1
+    description: View paginated renters table with name, email, phone, favorites count, inquiries count, status, created date, and last login
+    ui_route: /admin/renters
+    endpoint: GET /api/admin/users?role=renter
+    expected: "200 OK, table displays renter data with correct columns, pagination shows totals"
+  - id: AC-2
+    description: Search renters by name or email
+    ui_route: /admin/renters
+    endpoint: GET /api/admin/users?search=sarah
+    expected: "200 OK, table filters to matching users"
+  - id: AC-3
+    description: Filter by status (All, Active, Inactive)
+    ui_route: /admin/renters
+    endpoint: GET /api/admin/users?status=active
+    expected: "200 OK, only users with matching status shown"
+  - id: AC-4
+    description: Click view (eye) action to open renter detail with activity summary
+    ui_route: /admin/renters
+    endpoint: GET /api/admin/users/:id
+    expected: "200 OK, detail panel or modal with full user info and activity stats"
+  - id: AC-5
+    description: Use edit action to modify renter information or suspend/reactivate account
+    ui_route: /admin/renters
+    endpoint: PATCH /api/admin/users/:id/status
+    expected: "200 OK, status updates in table, toast confirmation"
+
+boundary_cases:
+  - case: "No renters match search/filter — table shows empty state 'No renters found'"
+  - case: "Bulk select via checkbox — all rows selectable via header checkbox"
+
+error_scenarios:
+  - scenario: "Unauthenticated (401) — redirect to admin login"
+  - scenario: "Not admin (403) — forbidden page"
+  - scenario: "Try to suspend own admin account (400) — error message 'Cannot suspend your own account'"
+  - scenario: "Network failure — error state with retry"
+
+state_transitions:
+  - state: loading
+    expected: "Skeleton rows in table, filters/buttons disabled"
+  - state: empty
+    expected: "Table body shows 'No renters found' row"
+  - state: error
+    expected: "Error banner with retry button"
+
+fixture_refs:
+  - users.admin
+  - users.renter
+  - users.suspended

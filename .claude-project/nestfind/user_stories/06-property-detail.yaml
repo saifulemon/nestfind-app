@@ -1,0 +1,48 @@
+id: US-06-PROPERTY-DETAIL
+role: renter
+feature: View full property details, photos, amenities, and location
+page: 06-property-detail.html
+goal: |
+  A renter views a property's full details including photo gallery, description,
+  amenities, location map, and pricing. They can save the property to favorites
+  and proceed to submit an inquiry.
+
+acceptance_criteria:
+  - id: AC-1
+    description: Navigate to property detail page and view photo gallery, specs, description, amenities, and location map
+    ui_route: /properties/:id
+    endpoint: GET /api/properties/:id
+    expected: "200 OK, all sections rendered: photo gallery, title, address, beds/baths/sqft, about text, amenities grid, map placeholder"
+  - id: AC-2
+    description: Click "Contact About Property" button to open the inquiry modal
+    ui_route: /properties/:id
+    endpoint: none (opens modal, see 07-inquiry-modal)
+    expected: "Inquiry modal opens with property mini-card pre-populated"
+  - id: AC-3
+    description: Toggle "Save to Favorites" button to add/remove from favorites
+    ui_route: /properties/:id
+    endpoint: POST /api/favorites or DELETE /api/favorites/:propertyId
+    expected: "Heart fills red when favorited, returns to outline when unfavorited, 201/200 response"
+
+boundary_cases:
+  - case: "Property has zero photos — photo gallery shows a placeholder image (gray box)"
+  - case: "Property has zero amenities — amenities section shows 'No amenities listed'"
+  - case: "Property ID is invalid UUID format — server returns 400 Bad Request"
+
+error_scenarios:
+  - scenario: "Property not found (404) — page shows a 'Property not found' message with link back to search"
+  - scenario: "Archived/soft-deleted property (404) — same as not found; no public access"
+  - scenario: "Favorite toggle fails with 401 (not logged in) — redirect to login or show login prompt"
+  - scenario: "Network failure loading property — error state with retry CTA"
+
+state_transitions:
+  - state: loading
+    expected: "Skeleton placeholders for photo gallery, title, specs, description, amenities, and sidebar card"
+  - state: error
+    expected: "Error banner with 'Failed to load property' text and retry button"
+  - state: not_found
+    expected: "404 page or 'Property not found' card with link back to /home"
+
+fixture_refs:
+  - users.renter
+  - properties.apt_downtown

@@ -1,0 +1,107 @@
+{
+  "blueprint": "integrate",
+  "blueprint_source": "integrate-2.yaml",
+  "target_dir": "/Users/saifulpotential/Potential/nestfind-sample",
+  "started_at": "2026-05-20T04:46:15.222Z",
+  "completed_nodes": [
+    {
+      "id": "pre-check",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:46:15.241Z",
+      "duration_ms": 17,
+      "output": "Backend: 9 controllers, Frontend: 22 pages (app=22 src=0)\n"
+    },
+    {
+      "id": "extract-api-routes",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:46:15.511Z",
+      "duration_ms": 270,
+      "output": "Wrote 8 routes to /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/docs/PROJECT_API_ROUTES.md\n"
+    },
+    {
+      "id": "integrate",
+      "type": "agentic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:58:57.460Z",
+      "duration_ms": 761944,
+      "turns": 65,
+      "cost_usd": 0.23218351200000004,
+      "artifact": "/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/INTEGRATION_REPORT.md",
+      "agent_log": "/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/agent-logs/integrate-2026-05-20T04-46-15-513Z.log"
+    },
+    {
+      "id": "verify-page-coverage",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:58:57.566Z",
+      "duration_ms": 105,
+      "output": "PASS: 16/17 data-pages wired (94% >= 50% gen 1; 5 static/no-data pages exempted from 22 total)\n"
+    },
+    {
+      "id": "verify-missing-endpoints-yaml",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:58:57.577Z",
+      "duration_ms": 10,
+      "output": "PASS: 1 missing-endpoint resources listed across 2 consuming pages\n"
+    },
+    {
+      "id": "contract-validation",
+      "type": "agentic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T05:07:16.276Z",
+      "duration_ms": 498697,
+      "turns": 68,
+      "cost_usd": 0.183887028,
+      "artifact": "/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/CONTRACT_VALIDATION.md",
+      "agent_log": "/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/agent-logs/contract-validation-2026-05-20T04-58-57-578Z.log"
+    },
+    {
+      "id": "fix-contracts",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T05:22:04.394Z",
+      "exit_code": 1,
+      "error": "atch: frontend `PROPERTY_TYPES = ['apartment', 'house', 'condo', 'townhouse', 'studio']` (`frontend/app/types/api/property.d.ts:1`) vs backend `PropertyTypeEnum` (`backend/src/common/enums/property-type.enum.ts`).\n- **UserStatusEnum values** match: frontend `'active' | 'suspended'` vs backend `UserStatusEnum.ACTIVE = 'active'`, `UserStatusEnum.SUSPENDED = 'suspended'`.\n- **RoleEnum values** match: frontend `'renter' | 'admin'` vs backend `RoleEnum.RENTER = 'renter'`, `RoleEnum.ADMIN = 'admin'`.\n",
+      "duration_ms": 7,
+      "output": "PASS: 0 contract mismatches\n",
+      "fix_attempts": 2,
+      "fix_agent_logs": [
+        "/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/agent-logs/fix-fix-contracts-attempt-1-2026-05-20T05-07-16-287Z.log",
+        "/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/agent-logs/fix-fix-contracts-attempt-2-2026-05-20T05-12-12-233Z.log"
+      ]
+    },
+    {
+      "id": "typecheck",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T05:22:05.634Z",
+      "duration_ms": 1239,
+      "output": ""
+    },
+    {
+      "id": "evidence-check",
+      "type": "deterministic",
+      "status": "FAIL",
+      "timestamp": "2026-05-20T05:22:05.641Z",
+      "exit_code": 1,
+      "error": "FAIL: no API hook/service files in frontend\n"
+    },
+    {
+      "id": "cross-reference-consistency",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "integrate-evaluator",
+      "type": "evaluator",
+      "status": "PENDING",
+      "timestamp": null
+    }
+  ],
+  "current_node": null,
+  "status": "failed"
+}

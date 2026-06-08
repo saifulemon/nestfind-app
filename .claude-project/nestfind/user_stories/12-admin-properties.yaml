@@ -1,0 +1,64 @@
+id: US-12-ADMIN-PROPERTIES
+role: admin
+feature: Manage property listings (view, search, filter, create, edit, delete)
+page: 12-admin-properties.html
+goal: |
+  An administrator manages all property listings via a table with search, status/type
+  filters, pagination, and per-row actions (view, edit, delete). A CTA button
+  opens the "Add Property" form to create new listings.
+
+acceptance_criteria:
+  - id: AC-1
+    description: View paginated property table with photo, title, address, type, price, beds, baths, status, and actions
+    ui_route: /admin/properties
+    endpoint: GET /api/properties (admin context)
+    expected: "200 OK, table displays properties with correct columns, pagination shows page info"
+  - id: AC-2
+    description: Search properties by text input to filter by title or address
+    ui_route: /admin/properties
+    endpoint: GET /api/properties?search=loft
+    expected: "200 OK, table filters to matching properties"
+  - id: AC-3
+    description: Filter properties by status dropdown (All, Active, Pending, Sold)
+    ui_route: /admin/properties
+    endpoint: GET /api/properties?status=active (or admin filter param)
+    expected: "200 OK, only properties matching status are shown"
+  - id: AC-4
+    description: Click "Add Property" to open creation form and submit new property with all fields
+    ui_route: /admin/properties
+    endpoint: POST /api/properties
+    expected: "201 Created, new property appears in table, success toast"
+  - id: AC-5
+    description: Click the edit (pencil) action on a row to edit property details
+    ui_route: /admin/properties
+    endpoint: PATCH /api/properties/:id
+    expected: "200 OK, property updated in table"
+  - id: AC-6
+    description: Click the delete (trash) action on a row to archive/soft-delete a property
+    ui_route: /admin/properties
+    endpoint: DELETE /api/properties/:id
+    expected: "200 OK, property removed from table (archived)"
+
+boundary_cases:
+  - case: "No properties match search/filter — table shows empty state 'No properties found'"
+  - case: "Bulk select via checkbox — all rows can be selected/deselected via header checkbox"
+  - case: "Property creation with missing required fields — 400 validation error with field-level messages"
+
+error_scenarios:
+  - scenario: "Unauthenticated (401) — redirect to admin login"
+  - scenario: "Not admin (403) — forbidden page"
+  - scenario: "Delete already-deleted property (404) — error toast 'Property not found'"
+  - scenario: "Network failure — loading state persists, error toast with retry"
+
+state_transitions:
+  - state: loading
+    expected: "Skeleton rows in table, action buttons disabled"
+  - state: empty
+    expected: "Table body shows 'No properties found' row spanning all columns"
+  - state: error
+    expected: "Error banner above table with retry button"
+
+fixture_refs:
+  - users.admin
+  - properties.apt_downtown
+  - properties.house_palo_alto

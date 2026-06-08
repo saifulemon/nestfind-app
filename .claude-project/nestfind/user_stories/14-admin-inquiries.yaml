@@ -1,0 +1,65 @@
+id: US-14-ADMIN-INQUIRIES
+role: admin
+feature: View, filter, and respond to renter inquiries
+page: 14-admin-inquiries.html
+goal: |
+  An administrator views all renter inquiries in a table with search, status/date
+  filters, pagination, and per-row actions (view detail, reply, delete). Admins
+  can mark inquiries as read and submit responses.
+
+acceptance_criteria:
+  - id: AC-1
+    description: View paginated inquiries table with renter name/avatar, email, property, message preview, status, created date, and responded date
+    ui_route: /admin/inquiries
+    endpoint: GET /api/inquiries
+    expected: "200 OK, table displays inquiries with correct columns and status badges"
+  - id: AC-2
+    description: Search inquiries by renter name or email
+    ui_route: /admin/inquiries
+    endpoint: GET /api/inquiries?search=alice
+    expected: "200 OK, table filters to matching inquiries"
+  - id: AC-3
+    description: Filter inquiries by status (All, Pending, Responded)
+    ui_route: /admin/inquiries
+    endpoint: GET /api/inquiries?status=pending
+    expected: "200 OK, only inquiries with matching status shown"
+  - id: AC-4
+    description: Click reply action on a pending inquiry to open response form and submit a reply
+    ui_route: /admin/inquiries
+    endpoint: POST /api/inquiries/:id/respond
+    expected: "200 OK, status changes to 'Responded', respondedAt populated, toast confirmation"
+  - id: AC-5
+    description: Click view (eye) action to see full inquiry detail including renter info and full message
+    ui_route: /admin/inquiries
+    endpoint: GET /api/inquiries/:id
+    expected: "200 OK, detail modal or page with full inquiry data"
+  - id: AC-6
+    description: Mark a 'new' inquiry as read
+    ui_route: /admin/inquiries
+    endpoint: PATCH /api/inquiries/:id/read
+    expected: "200 OK, status changes from 'new' to 'read'"
+
+boundary_cases:
+  - case: "No inquiries match filter — table shows empty state 'No inquiries found'"
+  - case: "Reply with less than 10 characters — 400 validation error, minimum length not met"
+  - case: "Reply with exactly 5000 characters (maximum) — accepted"
+
+error_scenarios:
+  - scenario: "Unauthenticated (401) — redirect to admin login"
+  - scenario: "Not admin (403) — forbidden page"
+  - scenario: "Reply to already-responded inquiry (400) — error 'Inquiry has already been responded to'"
+  - scenario: "Mark as read on already-read inquiry (400) — error 'Inquiry already read or responded'"
+  - scenario: "Inquiry not found (404) — error toast"
+
+state_transitions:
+  - state: loading
+    expected: "Skeleton rows in table, filters/buttons disabled"
+  - state: empty
+    expected: "Table body shows 'No inquiries found' row spanning all columns"
+  - state: error
+    expected: "Error banner with retry button"
+
+fixture_refs:
+  - users.admin
+  - inquiries.pending
+  - inquiries.responded

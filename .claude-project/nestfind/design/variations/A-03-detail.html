@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NestFind — Property Detail (Variant A)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@iconify/iconify@2.2.1/dist/iconify.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',system-ui,sans-serif;background:#0B0F1A;color:#F1F5F9;line-height:1.6}
+    .root{max-width:1440px;margin:0 auto}
+    nav.topnav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;z-index:40;background:rgba(11,15,26,0.85);backdrop-filter:blur(12px)}
+    .nav-logo{font-size:20px;font-weight:700;background:linear-gradient(135deg,#4A90D9,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-links{display:flex;gap:24px;align-items:center}
+    .nav-links a{color:#94A3B8;text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+    .nav-links a:hover{color:#F1F5F9}
+    .btn{display:inline-flex;align-items:center;justify-content:center;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:inherit}
+    .btn-back{background:transparent;color:#94A3B8;height:40px;padding:0 12px;border-radius:8px;font-size:13px;gap:6px}
+    .btn-back:hover{color:#F1F5F9;background:rgba(255,255,255,0.06)}
+    .btn-primary{background:linear-gradient(135deg,#4A90D9,#7C3AED);color:#fff;height:48px;padding:0 24px;border-radius:12px;font-size:14px}
+    .btn-primary:hover{box-shadow:0 0 24px rgba(74,144,217,0.3);transform:translateY(-1px)}
+    .btn-secondary{background:rgba(255,255,255,0.06);color:#F1F5F9;border:1px solid rgba(255,255,255,0.08);height:48px;padding:0 24px;border-radius:12px;font-size:14px}
+    .btn-secondary:hover{background:rgba(255,255,255,0.1)}
+    .gallery{position:relative;width:100%;height:440px;overflow:hidden;display:flex}
+    .gallery-main{flex:1;background:linear-gradient(135deg,rgba(74,144,217,0.25),rgba(124,58,237,0.25));display:flex;align-items:center;justify-content:center;font-size:96px;color:rgba(255,255,255,0.08)}
+    .gallery-nav{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+    .gallery-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;transition:all .2s}
+    .gallery-dot.active{background:#fff;width:24px;border-radius:4px}
+    .gallery-overlay{position:absolute;bottom:20px;right:20px;background:rgba(11,15,26,0.8);backdrop-filter:blur(8px);padding:6px 12px;border-radius:8px;font-size:12px;color:#94A3B8}
+    .gallery-heart{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:10px;background:rgba(11,15,26,0.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;color:#94A3B8;transition:all .2s}
+    .gallery-heart:hover{color:#F97068}
+    .content-layout{display:flex;gap:40px;padding:32px 48px}
+    .content-main{flex:1;min-width:0}
+    .content-side{width:340px;flex-shrink:0}
+    .prop-header{margin-bottom:32px}
+    .prop-price{font-size:32px;font-weight:700;margin-bottom:4px}
+    .prop-addr{font-size:16px;color:#94A3B8;margin-bottom:16px}
+    .prop-stats{display:flex;gap:32px}
+    .prop-stat{text-align:center}
+    .prop-stat-val{font-size:22px;font-weight:700}
+    .prop-stat-label{font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:.05em}
+    .section-block{margin-bottom:32px}
+    .section-block h3{font-size:20px;font-weight:600;margin-bottom:12px}
+    .section-block p{color:#94A3B8;font-size:15px;line-height:1.7}
+    .amenities-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .amenity-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;color:#94A3B8}
+    .amenity-item iconify-icon{color:#4A90D9}
+    .map-placeholder{width:100%;height:240px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#64748B;font-size:14px;flex-direction:column;gap:8px}
+    .inquiry-box{background:rgba(255,255,255,0.04);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:24px;position:sticky;top:96px}
+    .inquiry-box h3{font-size:18px;font-weight:600;margin-bottom:8px}
+    .inquiry-box .sub{font-size:13px;color:#94A3B8;margin-bottom:20px}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;font-size:12px;font-weight:600;color:#64748B;margin-bottom:6px}
+    .form-group input,.form-group textarea{width:100%;padding:12px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#F1F5F9;font-family:inherit;font-size:14px;outline:none;transition:all .2s}
+    .form-group input:focus,.form-group textarea:focus{border-color:rgba(74,144,217,0.5);box-shadow:0 0 0 3px rgba(74,144,217,0.1)}
+    .form-group textarea{height:100px;resize:vertical}
+    .form-group input::placeholder,.form-group textarea::placeholder{color:#64748B}
+    .var-nav-bar{position:fixed;top:16px;right:16px;display:flex;gap:8px;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);padding:8px 14px;border-radius:10px;z-index:9999;border:1px solid rgba(255,255,255,0.1)}
+    .var-nav-bar a{color:#94A3B8;text-decoration:none;font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;transition:all .2s}
+    .var-nav-bar a.active{background:linear-gradient(135deg,#4A90D9,#7C3AED);color:#fff}
+    .var-nav-bar a:hover:not(.active){color:#F1F5F9;background:rgba(255,255,255,0.08)}
+    .var-nav-bar .sep{color:rgba(255,255,255,0.2);font-size:12px;line-height:1.8}
+  </style>
+</head>
+<body>
+<nav class="var-nav-bar">
+  <a href="A-03-detail.html" class="active">A</a>
+  <a href="B-03-detail.html">B</a>
+  <a href="C-03-detail.html">C</a>
+  <span class="sep">|</span><span style="color:#64748B;font-size:11px;padding:4px 4px">Detail</span>
+</nav>
+<div class="root">
+  <nav class="topnav">
+    <div style="display:flex;align-items:center;gap:16px">
+      <button class="btn btn-back">&larr; Back to Search</button>
+      <div class="nav-logo">NestFind</div>
+    </div>
+    <div class="nav-links"><a href="#">Browse</a><button class="btn btn-primary">Join Now</button></div>
+  </nav>
+  <div class="gallery">
+    <div class="gallery-main">🏠</div>
+    <div class="gallery-heart">&#9825;</div>
+    <div class="gallery-overlay">1 / 8 photos</div>
+    <div class="gallery-nav">
+      <div class="gallery-dot active"></div><div class="gallery-dot"></div><div class="gallery-dot"></div><div class="gallery-dot"></div><div class="gallery-dot"></div>
+    </div>
+  </div>
+  <div class="content-layout">
+    <div class="content-main">
+      <div class="prop-header">
+        <div class="prop-price">$1,850<span style="font-size:18px;font-weight:400;color:#94A3B8"> /month</span></div>
+        <div class="prop-addr">1420 Pine Street, Apt 4B &middot; San Francisco, CA 94117</div>
+        <div class="prop-stats">
+          <div class="prop-stat"><div class="prop-stat-val">2</div><div class="prop-stat-label">Beds</div></div>
+          <div class="prop-stat"><div class="prop-stat-val">1</div><div class="prop-stat-label">Bath</div></div>
+          <div class="prop-stat"><div class="prop-stat-val">850</div><div class="prop-stat-label">Sq Ft</div></div>
+          <div class="prop-stat"><div class="prop-stat-val">Apartment</div><div class="prop-stat-label">Type</div></div>
+        </div>
+      </div>
+      <div class="section-block">
+        <h3>Description</h3>
+        <p>Beautifully renovated 2-bedroom apartment in the heart of Sunset Heights. Featuring hardwood floors throughout, updated kitchen with quartz countertops and stainless steel appliances. Floor-to-ceiling windows provide abundant natural light. In-unit washer/dryer included. Walking distance to Golden Gate Park, restaurants, and public transit.</p>
+      </div>
+      <div class="section-block">
+        <h3>Amenities</h3>
+        <div class="amenities-grid">
+          <div class="amenity-item"><iconify-icon icon="mdi:washing-machine" width="18"></iconify-icon>In-unit Laundry</div>
+          <div class="amenity-item"><iconify-icon icon="mdi:parking" width="18"></iconify-icon>Garage Parking</div>
+          <div class="amenity-item"><iconify-icon icon="mdi:dog" width="18"></iconify-icon>Pet Friendly</div>
+          <div class="amenity-item"><iconify-icon icon="mdi:air-conditioner" width="18"></iconify-icon>Central AC</div>
+          <div class="amenity-item"><iconify-icon icon="mdi:dumbbell" width="18"></iconify-icon>Fitness Center</div>
+          <div class="amenity-item"><iconify-icon icon="mdi:pool" width="18"></iconify-icon>Swimming Pool</div>
+          <div class="amenity-item"><iconify-icon icon="mdi:stove" width="18"></iconify-icon>Dishwasher</div>
+          <div class="amenity-item"><iconify-icon icon="mdi:balcony" width="18"></iconify-icon>Balcony</div>
+          <div class="amenity-item"><iconify-icon icon="mdi:security" width="18"></iconify-icon>Security System</div>
+        </div>
+      </div>
+      <div class="section-block">
+        <h3>Location</h3>
+        <div class="map-placeholder">
+          <iconify-icon icon="mdi:map-marker" width="32" style="opacity:0.3"></iconify-icon>
+          <span>Google Maps &mdash; 1420 Pine Street, San Francisco, CA 94117</span>
+        </div>
+      </div>
+    </div>
+    <div class="content-side">
+      <div class="inquiry-box">
+        <h3>Interested in this property?</h3>
+        <div class="sub">Send an inquiry and the property manager will respond within 24 hours.</div>
+        <div class="form-group"><label>Full Name</label><input type="text" placeholder="Your name"></div>
+        <div class="form-group"><label>Email</label><input type="email" placeholder="you@email.com"></div>
+        <div class="form-group"><label>Phone (optional)</label><input type="tel" placeholder="(555) 123-4567"></div>
+        <div class="form-group"><label>Message</label><textarea placeholder="I&#39;m interested in this property and would like to schedule a viewing..."></textarea></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px">Send Inquiry</button>
+        <div style="display:flex;justify-content:center;margin-top:14px">
+          <button class="btn btn-secondary" style="width:100%;gap:8px">&#9825; Save to Favorites</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

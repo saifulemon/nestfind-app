@@ -1,0 +1,10 @@
+page: A-04-forgot-password
+component_name: ForgotPassword
+component_path: frontend/app/pages/auth/forgot-password.tsx
+suggested_route: /forgot-password
+text_elements_matched: 6
+form_fields_matched: 1
+buttons_matched: 1
+css_arbitrary_values_used: 46
+testids_added: 3
+fidelity_estimate: 0.95

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login - NestFind</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+background-color: #1A1A1A; /* Dark Gray 900 as requested */
+}
+.iconify g, .iconify path {
+stroke-width: 1.5;
+}
+/* Custom scrollbar to match dark theme if needed */
+::-webkit-scrollbar {
+width: 8px;
+}
+::-webkit-scrollbar-track {
+background: #1A1A1A;
+}
+::-webkit-scrollbar-thumb {
+background: #333;
+border-radius: 4px;
+}
+</style></head>
+<body class="text-gray-900 antialiased min-h-screen flex items-center justify-center p-4">
+
+    <!-- MAIN CARD -->
+    <main class="w-full max-w-[480px] bg-white rounded-[12px] shadow-lg relative overflow-hidden">
+        
+        <!-- PADDING CONTAINER (48px = p-12) -->
+        <div class="p-8 sm:p-12">
+            
+            <!-- BRAND LOGO -->
+            <div class="flex items-center justify-center gap-2.5 mb-10">
+                <div class="w-8 h-8 bg-[#0066CC] rounded-lg flex items-center justify-center text-white shadow-sm">
+                    <span class="iconify" data-icon="lucide:layout-grid" data-width="18" data-height="18"></span>
+                </div>
+                <span class="text-lg font-semibold tracking-tight text-gray-900">NestFind Admin</span>
+            </div>
+
+            <!-- HEADER SECTION -->
+            <div class="text-center mb-8">
+                <!-- Shield Icon -->
+                <div class="w-12 h-12 bg-[#0066CC]/10 text-[#0066CC] rounded-full flex items-center justify-center mx-auto mb-5 ring-8 ring-[#0066CC]/5">
+                    <span class="iconify" data-icon="lucide:shield-check" data-width="24" data-height="24"></span>
+                </div>
+                <h1 class="text-2xl font-semibold text-gray-900 tracking-tight mb-2">Admin Login</h1>
+                <p class="text-sm text-gray-600">Sign in to NestFind Admin Panel</p>
+            </div>
+
+            <!-- FORM -->
+            <form action="#" class="space-y-5">
+                
+                <!-- Email Field -->
+                <div class="space-y-1.5">
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#0066CC] transition-colors pointer-events-none">
+                            <span class="iconify" data-icon="lucide:mail" data-width="18" data-height="18"></span>
+                        </div>
+                        <input type="email" id="email" class="w-full h-12 pl-11 pr-4 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] transition-all" placeholder="admin@nestfind.com">
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="space-y-1.5">
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <div class="relative group">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#0066CC] transition-colors pointer-events-none">
+                            <span class="iconify" data-icon="lucide:lock" data-width="18" data-height="18"></span>
+                        </div>
+                        <input type="password" id="password" class="w-full h-12 pl-11 pr-11 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0066CC]/20 focus:border-[#0066CC] transition-all" placeholder="••••••••">
+                        <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none cursor-pointer">
+                            <span class="iconify" data-icon="lucide:eye" data-width="18" data-height="18"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Options Row -->
+                <div class="flex items-center justify-between">
+                    <!-- Custom Checkbox -->
+                    <label class="flex items-center gap-2 cursor-pointer group select-none">
+                        <input type="checkbox" class="peer sr-only">
+                        <div class="w-4 h-4 border border-gray-300 rounded bg-white peer-checked:bg-[#0066CC] peer-checked:border-[#0066CC] flex items-center justify-center transition-all text-white group-hover:border-[#0066CC]">
+                            <span class="iconify opacity-0 peer-checked:opacity-100" data-icon="lucide:check" data-width="12" data-height="12"></span>
+                        </div>
+                        <span class="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">Remember me</span>
+                    </label>
+
+                    <a href="./04-forgot-password.html" class="text-sm font-medium text-[#0066CC] hover:text-[#0055aa] hover:underline decoration-[#0066CC]/30 underline-offset-2 transition-colors">
+                        Forgot Password?
+                    </a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full h-12 bg-[#0066CC] hover:bg-[#0055aa] text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-2">
+                    Sign In to Admin Panel
+                </button>
+
+            </form>
+
+            <!-- Security Notice -->
+            <div class="mt-6 flex items-start justify-center gap-2 px-4 py-3 bg-gray-50 rounded-lg border border-gray-100">
+                <span class="iconify text-gray-400 mt-0.5 shrink-0" data-icon="lucide:lock" data-width="14" data-height="14"></span>
+                <p class="text-xs text-gray-500 text-center leading-tight">
+                    This area is restricted to authorized administrators only.
+                </p>
+            </div>
+
+            <!-- Footer Link -->
+            <div class="mt-8 text-center pt-6 border-t border-gray-100">
+                <a href="./05-home.html" class="inline-flex items-center gap-1.5 text-sm font-medium text-[#0066CC] hover:text-[#0055aa] transition-colors group">
+                    <span class="iconify group-hover:-translate-x-0.5 transition-transform" data-icon="lucide:arrow-left" data-width="16" data-height="16"></span>
+                    Back to main site
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Admin login form handler
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (email && password) {
+                // Demo admin login - redirect to admin dashboard
+                location.href = './11-admin-dashboard.html';
+            }
+        });
+    </script>
+
+</body></html>

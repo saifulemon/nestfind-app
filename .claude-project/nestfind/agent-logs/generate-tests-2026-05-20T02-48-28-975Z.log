@@ -1,0 +1,879 @@
+=== NODE: generate-tests ===
+timestamp: 2026-05-20T02:48:28.976Z
+backend: opencode
+model: (default)
+command: opencode run --format json "<prompt>"
+
+=== PROMPT (23256 chars) ===
+=== CONTEXT FILES ===
+
+--- /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/docs/PROJECT_API.md ---
+# PROJECT_API
+
+NestFind API Contract — canonical reference for all API endpoints.
+
+**Base URL:** `http://localhost:3000/api`
+
+---
+
+## Endpoints
+
+---
+
+### Authentication
+
+---
+
+#### Register
+
+| Method | Path | Auth |
+|--------|------|------|
+| `POST` | `/auth/register` | Public |
+
+**Description:** Self-service registration. Creates a new user account with the `renter` role. Returns user data and sets httpOnly cookies for access + refresh tokens.
+
+**Request Body:**
+```json
+{
+  "name": "string (2–100 chars, required)",
+  "email": "string (valid email, required)",
+  "password": "string (min 8 chars, required)",
+  "phone": "string (optional, max 20 chars)"
+}
+```
+
+**Success Response** `201 Created`:
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "User registered successfully",
+  "data": {
+    "id": "uuid",
+    "name": "string",
+    "email": "string",
+    "phone": "string | null",
+    "role": "renter",
+    "status": "active",
+    "createdAt": "ISO 8601 timestamp",
+    "updatedAt": "ISO 8601 timestamp"
+  },
+  "timestamp": "ISO 8601 timestamp",
+  "path": "/api/auth/register"
+}
+```
+
+**Error Responses:**
+- `400` — Validation failed (missing fields, invalid email, weak password)
+- `409` — Email already registered
+
+---
+
+#### Login
+
+| Method | Path | Auth |
+|--------|------|------|
+| `POST` | `/auth/login` | Public |
+
+**Description:** Authenticate with email and password. Sets httpOnly cookies: `access_token` (1h) and `refresh_token` (7d).
+
+**Request Body:**
+```json
+{
+  "email": "string (required)",
+  "password": "string (required)"
+}
+```
+
+**Success Response** `200 OK`:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": "uuid",
+      "name": "string",
+      "email": "string",
+      "phone": "string | null",
+      "role": "renter | admin",
+      "status": "active | suspended"
+    }
+  },
+  "timestamp": "ISO 8601 timestamp",
+  "path": "/api/auth/login"
+}
+```
+
+**Error Responses:**
+- `400` — Validation failed
+- `401` — Invalid email or password
+- `403` — Account suspended
+
+---
+
+#### Logout
+
+| Method | Path | Auth |
+|--------|------|------|
+| `POST` | `/auth/logout` | Authenticated |
+
+**Description:** Revokes the current refresh token and clears auth cookies.
+
+**Request Body:** none
+
+**Success Response** `200 OK`:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Logged out successfully",
+  "data": null,
+  "timestamp": "ISO 8601 timestamp",
+  "path": "/api/auth/logout"
+}
+```
+
+**Error Responses:**
+- `401` — Not authenticated
+
+---
+
+#### Refresh Token
+
+| Method | Path | Auth |
+|--------|------|------|
+| `POST` | `/auth/refresh` | Public (requires refresh cookie) |
+
+**Description:** Rotates the refresh token and issues a new access token. Old refresh token is revoked.
+
+**Request Body:** none (reads `refresh_token` from httpOnly cookie)
+
+**Success Response** `200 OK`:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Token refreshed successfully",
+  "data": {
+    "user": {
+      "id": "uuid",
+      "name": "string",
+      "email": "string",
+      "role": "renter | admin"
+    }
+  },
+  "timestamp": "ISO 8601 timestamp",
+  "path": "/api/auth/refresh"
+}
+```
+
+**Error Responses:**
+- `401` — Missing, expired, or revoked refresh token
+
+---
+
+#### Forgot Password
+
+| Method | Path | Auth |
+|--------|------|------|
+| `POST` | `/auth/forgot-password` | Public |
+
+**Description:** Sends a password reset email with a secure reset token. Always returns 200 regardless of whether the email exists (prevents enumeration).
+
+**Request Body:**
+```json
+{
+  "email": "string (required)"
+}
+```
+
+**Success Response** `200 OK`:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "If an account with that email exists, a password reset link has been sent",
+  "data": null,
+  "timestamp": "ISO 8601 timestamp",
+  "path": "/api/auth/forgot-password"
+}
+```
+
+**Error Responses:**
+- `400` — Invalid email format
+
+---
+
+#### Reset Password
+
+| Method | Path | Auth |
+|--------|------|------|
+| `POST` | `/auth/reset-password` | Public |
+
+**Description:** Resets the user's password using a valid reset token.
+
+**Request Body:**
+```json
+{
+  "token": "string (required)",
+  "password": "string (min 8 chars, required)"
+}
+```
+
+**Success Response** `200 OK`:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Password reset successfully",
+  "data": null,
+  "timestamp": "ISO 8601 timestamp",
+  "path": "/api/auth/reset-password"
+}
+```
+
+**Error Responses:**
+- `400` — Validation failed or expired token
+- `404` — Invalid token
+
+---
+
+#### Get Current User
+
+| Method | Path | Auth |
+|--------|------|------|
+| `GET` | `/auth/me` | Authenticated |
+
+**Description:** Returns the currently authenticated user's profile.
+
+**Success Response** `200 OK`:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "User retrieved successfully",
+  "data": {
+    "id": "uuid",
+    "name": "string",
+    "email": "string",
+    "phone": "string | null",
+    "role": "renter
+
+--- /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/docs/PROJECT_DATABASE.md ---
+# PROJECT_DATABASE
+
+## Schema Overview
+
+All entities extend `BaseEntity` which provides:
+- `id` — UUID primary key
+- `createdAt` — `timestamp` (auto-managed)
+- `updatedAt` — `timestamp` (auto-managed)
+- `deletedAt` — `timestamp | null` (soft delete support)
+
+Column naming convention: `snake_case` in the database (`@CreateDateColumn({ name: 'created_at' })`).
+
+---
+
+## Entities
+
+### User
+
+Represents all registered users (Renters and Admins). Extends `BaseEntity` with soft delete.
+
+**Table:** `users`
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `uuid` | PK, default: `uuid_generate_v4()` | Inherited from BaseEntity |
+| `name` | `varchar(100)` | NOT NULL | User's full name |
+| `email` | `varchar(255)` | UNIQUE, NOT NULL | Login email address |
+| `password` | `varchar(255)` | NOT NULL | bcrypt-hashed password |
+| `phone` | `varchar(20)` | NULLABLE | Optional phone number |
+| `role` | `enum` (`RoleEnum`) | NOT NULL, default: `'renter'` | `renter` \| `admin` |
+| `status` | `enum` (`UserStatusEnum`) | NOT NULL, default: `'active'` | `active` \| `suspended` |
+| `email_verified_at` | `timestamp` | NULLABLE | Null until email verification completes |
+| `created_at` | `timestamp` | NOT NULL, default: `now()` | Inherited from BaseEntity |
+| `updated_at` | `timestamp` | NOT NULL, default: `now()` | Inherited from BaseEntity |
+| `deleted_at` | `timestamp` | NULLABLE | Soft delete timestamp |
+
+**Indexes:**
+- `UNIQUE` on `email`
+- `INDEX` on `role`
+- `INDEX` on `status`
+- `INDEX` on `(role, status)` composite
+
+**Relationships:**
+- `hasMany` → `RefreshToken` (one user has many refresh tokens)
+- `hasMany` → `PasswordResetToken` (one user has many reset tokens)
+- `hasMany` → `Favorite` (one user has many favorites)
+- `hasMany` → `Inquiry` (one user submits many inquiries)
+
+---
+
+### RefreshToken
+
+Stores JWT refresh tokens for rotation and invalidation. Each refresh creates a new row; the old row is marked deleted when rotated. Not extending `BaseEntity` (no need for update timestamps or soft delete — expiries handle lifecycle).
+
+**Table:** `refresh_tokens`
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `uuid` | PK, default: `uuid_generate_v4()` | Primary key |
+| `user_id` | `uuid` | FK → `users.id`, NOT NULL, ON DELETE CASCADE | Owning user |
+| `token` | `varchar(500)` | NOT NULL, UNIQUE | Encoded JWT refresh token string |
+| `expires_at` | `timestamp` | NOT NULL | Token expiration time (7 days from issue) |
+| `revoked_at` | `timestamp` | NULLABLE | Set when token is rotated or user logs out |
+| `created_at` | `timestamp` | NOT NULL, default: `now()` | Token creation time |
+
+**Indexes:**
+- `UNIQUE` on `token`
+- `INDEX` on `user_id`
+- `INDEX` on `expires_at`
+
+**Relationships:**
+- `belongsTo` → `User` via `user_id`
+
+---
+
+### PasswordResetToken
+
+Stores tokens for the forgot-password / reset-password flow. Tokens expire after a configurable window (e.g., 1 hour).
+
+**Table:** `password_reset_tokens`
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `uuid` | PK, default: `uuid_generate_v4()` | Primary key |
+| `user_id` | `uuid` | FK → `users.id`, NOT NULL, ON DELETE CASCADE | Owning user |
+| `token` | `varchar(500)` | NOT NULL, UNIQUE | Secure random reset token |
+| `expires_at` | `timestamp` | NOT NULL | Token expiry (e.g., 1 hour from creation) |
+| `used_at` | `timestamp` | NULLABLE | Set when password is successfully reset |
+| `created_at` | `timestamp` | NOT NULL, default: `now()` | Token creation time |
+
+**Indexes:**
+- `UNIQUE` on `token`
+- `INDEX` on `user_id`
+
+**Relationships:**
+- `belongsTo` → `User` via `user_id`
+
+---
+
+### Property
+
+Represents a rental property listing. Supports soft delete (archiving). Address fields are stored as individual columns for search/indexing; API layer nests them into an `address` object.
+
+**Table:** `properties`
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `uuid` | PK, default: `uuid_generate_v4()` | Inherited from BaseEntity |
+| `title` | `varchar(200)` | NOT NULL | Listing title (5–200 chars) |
+| `description` | `text` | NOT NULL | Full description (20–5000 chars) |
+| `price` | `decimal(10,2)` | NOT NULL | Monthly rent (> 0) |
+| `bedrooms` | `integer` | NOT NULL, CHECK (≥ 0) | Number of bedrooms |
+| `bathrooms` | `integer` | NOT NULL, CHECK (≥ 0) | Number of bathrooms |
+| `square_feet` | `integer` | NULLABLE, CHECK (> 0) | Living area in square feet |
+| `property_type` | `enum` (`PropertyTypeEnum`) | NOT NULL | `apartment` \| `house` \| `condo` \| `townhouse` \| `studio` |
+| `address_street` | `varchar(200)` | NOT NULL | Street address |
+| `address_city` | `varchar(100)` | NOT NULL | City |
+| `address_state` | `varchar(100)` | NOT NULL | State / province |
+| `address_zip_code` | `varchar(10)` | NOT NULL | ZIP / postal code |
+| `address_latitude` | `decimal(10,7)` | NULLABLE | Geocoordi
+
+--- /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/MISSING_ENDPOINTS.yaml ---
+generated_at: "2026-05-19T20:00:00.000Z"
+gen: 1
+total_pages: 22
+wired_pages: 17
+skipped_pages: 0
+missing_endpoints:
+  - resource: inquiries
+    module_name: inquiries
+    reason: >
+      GET /inquiries is admin-only per API contract, but renter/inquiries.tsx
+      needs the authenticated renter's own inquiries. Either scoping GET /inquiries
+      by role (admin→all, renter→own) or add a dedicated renter endpoint.
+    suggested_routes:
+      - method: GET
+        path: /inquiries
+        description: >
+          List inquiries — admin sees all; renter sees their own.
+          If scoping by role is undesirable, add a separate /inquiries/my endpoint.
+        scope: worker
+        response_shape: { items: InquiryDto[], meta: PaginationMeta }
+
+      - method: GET
+        path: /inquiries/my
+        description: List inquiries submitted by the authenticated renter (dedicated endpoint)
+        scope: renter
+        response_shape: { items: InquiryDto[], meta: PaginationMeta }
+
+    consuming_pages:
+      - frontend/app/pages/renter/inquiries.tsx
+
+
+--- .claude/nestjs/guides/testing-guide.md ---
+# Testing Guide - Backend Testing Strategies
+
+Complete guide to testing backend services with Jest and best practices.
+
+## Table of Contents
+
+- [Unit Testing](#unit-testing)
+- [Integration Testing](#integration-testing)
+- [Mocking Strategies](#mocking-strategies)
+- [Test Data Management](#test-data-management)
+- [Testing Authenticated Routes](#testing-authenticated-routes)
+- [Coverage Targets](#coverage-targets)
+
+---
+
+## Unit Testing
+
+### Test Structure
+
+```typescript
+// services/userService.test.ts
+import { UserService } from './userService';
+import { UserRepository } from '../repositories/UserRepository';
+
+jest.mock('../repositories/UserRepository');
+
+describe('UserService', () => {
+    let service: UserService;
+    let mockRepository: jest.Mocked<UserRepository>;
+
+    beforeEach(() => {
+        mockRepository = {
+            findByEmail: jest.fn(),
+            create: jest.fn(),
+        } as any;
+
+        service = new UserService();
+        (service as any).userRepository = mockRepository;
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    describe('create', () => {
+        it('should throw error if email exists', async () => {
+            mockRepository.findByEmail.mockResolvedValue({ id: '123' } as any);
+
+            await expect(
+                service.create({ email: 'test@example.com' }),
+            ).rejects.toThrow('Email already in use');
+        });
+
+        it('should create user if email is unique', async () => {
+            mockRepository.findByEmail.mockResolvedValue(null);
+            mockRepository.create.mockResolvedValue({ id: '123' } as any);
+
+            const user = await service.create({
+                email: 'test@example.com',
+                firstName: 'John',
+                lastName: 'Doe',
+            });
+
+            expect(user).toBeDefined();
+            expect(mockRepository.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    email: 'test@example.com',
+                }),
+            );
+        });
+    });
+});
+```
+
+---
+
+## Integration Testing
+
+### Test with Real Database
+
+```typescript
+import { PrismaService } from '@project-lifecycle-portal/database';
+
+describe('UserService Integration', () => {
+    let testUser: any;
+
+    beforeAll(async () => {
+        // Create test data
+        testUser = await PrismaService.main.user.create({
+            data: {
+                email: 'test@example.com',
+                profile: { create: { firstName: 'Test', lastName: 'User' } },
+            },
+        });
+    });
+
+    afterAll(async () => {
+        // Cleanup
+        await PrismaService.main.user.delete({ where: { id: testUser.id } });
+    });
+
+    it('should find user by email', async () => {
+        const user = await userService.findByEmail('test@example.com');
+        expect(user).toBeDefined();
+        expect(user?.email).toBe('test@example.com');
+    });
+});
+```
+
+---
+
+## Mocking Strategies
+
+### Mock PrismaService
+
+```typescript
+jest.mock('@project-lifecycle-portal/database', () => ({
+    PrismaService: {
+        main: {
+            user: {
+                findMany: jest.fn(),
+                findUnique: jest.fn(),
+                create: jest.fn(),
+                update: jest.fn(),
+            },
+        },
+        isAvailable: true,
+    },
+}));
+```
+
+### Mock Services
+
+```typescript
+const mockUserService = {
+    findById: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+} as jest.Mocked<UserService>;
+```
+
+---
+
+## Test Data Management
+
+### Setup and Teardown
+
+```typescript
+describe('PermissionService', () => {
+    let instanceId: number;
+
+    beforeAll(async () => {
+        // Create test post
+        const post = await PrismaService.main.post.create({
+            data: {
+                title: 'Test Post',
+                content: 'Test',
+                authorId: 'test-user',
+            },
+        });
+        instanceId = post.id;
+    });
+
+    afterAll(async () => {
+        // Cleanup
+        await PrismaService.main.post.delete({
+            where: { id: instanceId },
+        });
+    });
+
+    beforeEach(() => {
+        // Clear caches
+        permissionService.clearCache();
+    });
+
+    it('should check permissions', async () => {
+        const hasPermission = await permissionService.checkPermission(
+            'user-id',
+            instanceId,
+            'VIEW_WORKFLOW',
+        );
+        expect(hasPermission).toBeDefined();
+    });
+});
+```
+
+---
+
+## Testing Authenticated Routes
+
+### Using test-auth-route.js
+
+```bash
+# Test authenticated endpoint
+node scripts/test-auth-route.js http://localhost:3002/form/api/users
+
+# Test with POST data
+node scripts/test-auth-route.js http://localhost:3002/form/api/users POST '{"email":"test@example.com"}'
+```
+
+### Mock Authentication in Tests
+
+```typescript
+// Mock auth middleware
+jest.mock('../middleware/SSOMiddleware', () => ({
+    SSOMiddlewareClient: {
+        verifyLoginStatus: (req, res, next) => {
+            res.locals.claims = {
+                sub: 't
+
+--- .claude/nestjs/guides/workflow-generate-e2e-tests.md ---
+# E2E Test Generator Guide
+
+Complete guide to generating end-to-end tests for NestJS controllers and API endpoints.
+
+## Table of Contents
+
+- [When to Generate Tests](#when-to-generate-tests)
+- [Test Infrastructure](#test-infrastructure)
+- [Quick Start - Generate Tests](#quick-start---generate-tests)
+- [Test Patterns by Endpoint Type](#test-patterns-by-endpoint-type)
+- [Using Fixtures](#using-fixtures)
+- [Creating Mocks](#creating-mocks)
+- [Smart Detection Rules](#smart-detection-rules)
+- [Complete Examples](#complete-examples)
+- [Test Checklist](#test-checklist)
+
+---
+
+## When to Generate Tests
+
+This guide activates automatically when:
+
+- Creating a new controller or adding routes
+- Creating or modifying entities
+- You ask to "generate tests" or "create e2e tests"
+- You finish implementing an API endpoint
+
+**Manual invocation:** Ask Claude to "generate e2e tests for [module/controller]"
+
+---
+
+## Test Infrastructure
+
+### Directory Structure
+
+```
+test/
+├── e2e/                          # E2E test files
+│   ├── auth.e2e-spec.ts         # Auth module tests
+│   ├── users.e2e-spec.ts        # Users module tests
+│   └── [module].e2e-spec.ts     # Your module tests
+├── setup/                        # Test infrastructure
+│   ├── test-app.factory.ts      # NestJS test app bootstrap
+│   ├── test-database.ts         # DB connection & cleanup
+│   └── global-setup.ts          # Jest global hooks
+├── fixtures/                     # Test data factories
+│   ├── user.fixture.ts          # User creation helpers
+│   └── auth.fixture.ts          # JWT token generation
+├── mocks/                        # Service mocks
+│   └── mail.service.mock.ts     # Mock email service
+└── jest-e2e.json                # E2E Jest config
+```
+
+### Running Tests
+
+```bash
+# Start test database
+npm run docker:test
+
+# Run all E2E tests
+npm run test:e2e
+
+# Run specific test file
+npm run test:e2e -- --testPathPattern=auth
+
+# Run with coverage
+npm run test:e2e:cov
+
+# Watch mode
+npm run test:e2e:watch
+```
+
+---
+
+## Quick Start - Generate Tests
+
+### Step 1: Create Test File
+
+```typescript
+// test/e2e/[module].e2e-spec.ts
+import { INestApplication } from '@nestjs/common';
+import { TestingModule } from '@nestjs/testing';
+import request from 'supertest';
+import { DataSource } from 'typeorm';
+
+import {
+    createTestApp,
+    closeTestApp,
+    TestAppContext,
+} from '../setup/test-app.factory';
+import {
+    getTestDataSource,
+    cleanDatabase,
+    closeDatabase,
+} from '../setup/test-database';
+import {
+    createTestUser,
+    testUsers,
+    TEST_PASSWORD,
+    seedTestUsers,
+} from '../fixtures/user.fixture';
+import { generateAccessToken, authHeader } from '../fixtures/auth.fixture';
+import { User } from 'src/modules/users/user.entity';
+
+describe('[ModuleName] E2E Tests', () => {
+    let app: INestApplication;
+    let module: TestingModule;
+    let dataSource: DataSource;
+
+    beforeAll(async () => {
+        dataSource = await getTestDataSource();
+        const context: TestAppContext = await createTestApp();
+        app = context.app;
+        module = context.module;
+    });
+
+    afterAll(async () => {
+        await closeTestApp({ app, module });
+        await closeDatabase();
+    });
+
+    beforeEach(async () => {
+        await cleanDatabase(dataSource);
+    });
+
+    // Add describe blocks for each endpoint
+});
+```
+
+### Step 2: Add Endpoint Tests
+
+For each endpoint, add a `describe` block with test cases.
+
+---
+
+## Test Patterns by Endpoint Type
+
+### CRUD Endpoints (BaseController)
+
+```typescript
+describe('[Resource] CRUD E2E', () => {
+    let testUser: User;
+    let validToken: string;
+
+    beforeEach(async () => {
+        testUser = await createTestUser(dataSource, testUsers.admin);
+        validToken = generateAccessToken(testUser);
+    });
+
+    describe('POST /[resource]', () => {
+        it('should create resource with valid data', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/[resource]')
+                .set(authHeader(validToken))
+                .send({
+                    // Valid DTO fields
+                    name: 'Test Resource',
+                })
+                .expect(201);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.data).toHaveProperty('id');
+        });
+
+        it('should return 400 for invalid data', async () => {
+            await request(app.getHttpServer())
+                .post('/[resource]')
+                .set(authHeader(validToken))
+                .send({
+                    // Invalid/missing required fields
+                })
+                .expect(400);
+        });
+
+        it('should return 401 without authentication', async () => {
+            await request(app.getHttpServer())
+                .post('/[resource]')
+                .send({ name: 'Test' })
+                .expect(401);
+        });
+    });
+
+    describe('GET /[resource]', () => {
+        it('should return paginated list', async () => {
+            // Create test 
+
+
+=== END CONTEXT ===
+
+
+You are in the RED phase of TDD. Write failing e2e tests for EVERY endpoint in PROJECT_API.md.
+
+OUTPUT:
+1. backend/test/**/*.e2e-spec.ts — one spec file per controller/resource
+2. .claude-project/nestfind/status/BACKEND_TESTS_GENERATED.md — report with fields:
+     phase: backend-red
+     tests_generated: <int>
+     endpoints_covered: <int>
+     test_files: [list]
+
+EACH TEST MUST:
+- Assert status code from PROJECT_API.md
+- Assert response shape (at least top-level keys)
+- Cover auth requirement (public / user / admin)
+- Include boundary cases: invalid body, missing auth, wrong role
+
+CROSS-GENERATION SELF-HEAL:
+If .claude-project/nestfind/status/MISSING_ENDPOINTS.yaml exists AND
+its missing_endpoints list is non-empty, ALSO generate tests for those
+resources — the previous generation's integrate phase identified them
+as needed by the frontend but missing from the backend API surface.
+For each entry: use the suggested_routes as the endpoint spec and
+produce one e2e-spec.ts per resource. Treat those as first-class
+endpoints on equal footing with PROJECT_API.md.
+
+DO NOT:
+- Create or modify controllers, services, or DTOs
+- Write tests that trivially pass without implementation
+
+
+
+=== MANDATORY ARTIFACT CONTRACT ===
+You MUST produce a file at this exact path:
+  /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/BACKEND_TESTS_GENERATED.md
+
+The orchestrator will verify this file exists after your run.
+If the file is missing, your work is REJECTED regardless of what you say.
+
+The file MUST contain content matching this regex:
+  tests_generated:\s*[0-9]+
+This pattern is verified by code, not interpretation.
+
+Do not claim the task is complete without writing this file.
+
+=== STDOUT ===
+[stderr] Performing one time database migration, may take a few minutes...
+[stderr] sqlite-migration:done
+Database migration complete.
+[stderr] [cc-analytics] loaded — server=http://211.188.49.111:8080 dir=/Users/saifulpotential/Potential/nestfind-sample
+{"type":"step_start","timestamp":1779245314013,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"id":"prt_e4348efdb001GIRAahT344T0b3","messageID":"msg_e4348e3fa0014a0VkKQwm9yCGG","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","snapshot":"2902b0f0f343ca28f277aaa7f35d5986597091ff","type":"step-start"}}
+{"type":"tool_use","timestamp":1779245325969,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"type":"tool","tool":"todowrite","callID":"call_00_olo4zWWs9cwpleF1xLlS7466","state":{"status":"completed","input":{"todos":[{"content":"Read full PROJECT_API.md and MISSING_ENDPOINTS.yaml to enumerate all endpoints","status":"in_progress","priority":"high"},{"content":"Read project structure: existing tests, test utilities, fixtures, modules","status":"pending","priority":"high"},{"content":"Read testing guide and e2e guide for patterns","status":"pending","priority":"high"},{"content":"Generate e2e spec files for every resource/controller","status":"pending","priority":"high"},{"content":"Generate BACKEND_TESTS_GENERATED.md status report","status":"pending","priority":"high"}]},"output":"[\n  {\n    \"content\": \"Read full PROJECT_API.md and MISSING_ENDPOINTS.yaml to enumerate all endpoints\",\n    \"status\": \"in_progress\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Read project structure: existing tests, test utilities, fixtures, modules\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Read testing guide and e2e guide for patterns\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Generate e2e spec files for every resource/controller\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Generate BACKEND_TESTS_GENERATED.md status report\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  }\n]","metadata":{"todos":[{"content":"Read full PROJECT_API.md and MISSING_ENDPOINTS.yaml to enumerate all endpoints","status":"in_progress","priority":"high"},{"content":"Read project structure: existing tests, test utilities, fixtures, modules","status":"pending","priority":"high"},{"content":"Read testing guide and e2e guide for patterns","status":"pending","priority":"high"},{"content":"Generate e2e spec files for every resource/controller","status":"pending","priority":"high"},{"content":"Generate BACKEND_TESTS_GENERATED.md status report","status":"pending","priority":"high"}],"truncated":false},"title":"5 todos","time":{"start":1779245325674,"end":1779245325968}},"id":"prt_e43490653001t9ectt6ml2snoi","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","messageID":"msg_e4348e3fa0014a0VkKQwm9yCGG"}}
+{"type":"step_finish","timestamp":1779245327683,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"id":"prt_e43492540001wV9S46Oq8BHkkt","reason":"tool-calls","snapshot":"817f3671e4ada6357852b2e158fa1e02913710fc","messageID":"msg_e4348e3fa0014a0VkKQwm9yCGG","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","type":"step-finish","tokens":{"total":20718,"input":20440,"output":197,"reasoning":81,"cache":{"write":0,"read":0}},"cost":0.03653304}}
+{"type":"step_start","timestamp":1779245329453,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"id":"prt_e43492c2b001r6pY7W2RglVx71","messageID":"msg_e4349258d001462IQjtT8WZ3ff","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","snapshot":"4825005dbd77d0715a5fa92bd7ee23307a44b2a9","type":"step-start"}}
+{"type":"tool_use","timestamp":1779245333323,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"type":"tool","tool":"read","callID":"call_00_mZFSzrOlHNqYo6UmwmMZ4432","state":{"status":"completed","input":{"filePath":"/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/docs/PROJECT_API.md"},"output":"<path>/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/docs/PROJECT_API.md</path>\n<type>file</type>\n<content>\n1: # PROJECT_API\n2: \n3: NestFind API Contract — canonical reference for all API endpoints.\n4: \n5: **Base URL:** `http://localhost:3000/api`\n6: \n7: ---\n8: \n9: ## Endpoints\n10: \n11: ---\n12: \n13: ### Authentication\n14: \n15: ---\n16: \n17: #### Register\n18: \n19: | Method | Path | Auth |\n20: |--------|------|------|\n21: | `POST` | `/auth/register` | Public |\n22: \n23: **Description:** Self-service registration. Creates a new user account with the `renter` role. Returns user data and sets httpOnly cookies for access + refresh tokens.\n24: \n25: **Request Body:**\n26: ```json\n27: {\n28:   \"name\": \"string (2–100 chars, required)\",\n29:   \"email\": \"string (valid email, required)\",\n30:   \"password\": \"string (min 8 chars, required)\",\n31:   \"phone\": \"string (optional, max 20 chars)\"\n32: }\n33: ```\n34: \n35: **Success Response** `201 Created`:\n36: ```json\n37: {\n38:   \"success\": true,\n39:   \"statusCode\": 201,\n40:   \"message\": \"User registered successfully\",\n41:   \"data\": {\n42:     \"id\": \"uuid\",\n43:     \"name\": \"string\",\n44:     \"email\": \"string\",\n45:     \"phone\": \"string | null\",\n46:     \"role\": \"renter\",\n47:     \"status\": \"active\",\n48:     \"createdAt\": \"ISO 8601 timestamp\",\n49:     \"updatedAt\": \"ISO 8601 timestamp\"\n50:   },\n51:   \"timestamp\": \"ISO 8601 timestamp\",\n52:   \"path\": \"/api/auth/register\"\n53: }\n54: ```\n55: \n56: **Error Responses:**\n57: - `400` — Validation failed (missing fields, invalid email, weak password)\n58: - `409` — Email already registered\n59: \n60: ---\n61: \n62: #### Login\n63: \n64: | Method | Path | Auth |\n65: |--------|------|------|\n66: | `POST` | `/auth/login` | Public |\n67: \n68: **Description:** Authenticate with email and password. Sets httpOnly cookies: `access_token` (1h) and `refresh_token` (7d).\n69: \n70: **Request Body:**\n71: ```json\n72: {\n73:   \"email\": \"string (required)\",\n74:   \"password\": \"string (required)\"\n75: }\n76: ```\n77: \n78: **Success Response** `200 OK`:\n79: ```json\n80: {\n81:   \"success\": true,\n82:   \"statusCode\": 200,\n83:   \"message\": \"Login successful\",\n84:   \"data\": {\n85:     \"user\": {\n86:       \"id\": \"uuid\",\n87:       \"name\": \"string\",\n88:       \"email\": \"string\",\n89:       \"phone\": \"string | null\",\n90:       \"role\": \"renter | admin\",\n91:       \"status\": \"active | suspended\"\n92:     }\n93:   },\n94:   \"timestamp\": \"ISO 8601 timestamp\",\n95:   \"path\": \"/api/auth/login\"\n96: }\n97: ```\n98: \n99: **Error Responses:**\n100: - `400` — Validation failed\n101: - `401` — Invalid email or password\n102: - `403` — Account suspended\n103: \n104: ---\n105: \n106: #### Logout\n107: \n108: | Method | Path | Auth |\n109: |--------|------|------|\n110: | `POST` | `/auth/logout` | Authenticated |\n111: \n112: **Description:** Revokes the current refresh token and clears auth cookies.\n113: \n114: **Request Body:** none\n115: \n116: **Success Response** `200 OK`:\n117: ```json\n118: {\n119:   \"success\": true,\n120:   \"statusCode\": 200,\n121:   \"message\": \"Logged out successfully\",\n122:   \"data\": null,\n123:   \"timestamp\": \"ISO 8601 timestamp\",\n124:   \"path\": \"/api/auth/logout\"\n125: }\n126: ```\n127: \n128: **Error Responses:**\n129: - `401` — Not authenticated\n130: \n131: ---\n132: \n133: #### Refresh Token\n134: \n135: | Method | Path | Auth |\n136: |--------|------|------|\n137: | `POST` | `/auth/refresh` | Public (requires refresh cookie) |\n138: \n139: **Description:** Rotates the refresh token and issues a new access token. Old refresh token is revoked.\n140: \n141: **Request Body:** none (reads `refresh_token` from httpOnly cookie)\n142: \n143: **Success Response** `200 OK`:\n144: ```json\n145: {\n146:   \"success\": true,\n147:   \"statusCode\": 200,\n148:   \"message\": \"Token refreshed successfully\",\n149:   \"data\": {\n150:     \"user\": {\n151:       \"id\": \"uuid\",\n152:       \"name\": \"string\",\n153:       \"email\": \"string\",\n154:       \"role\": \"renter | admin\"\n155:     }\n156:   },\n157:   \"timestamp\": \"ISO 8601 timestamp\",\n158:   \"path\": \"/api/auth/refresh\"\n159: }\n160: ```\n161: \n162: **Error Responses:**\n163: - `401` — Missing, expired, or revoked refresh token\n164: \n165: ---\n166: \n167: #### Forgot Password\n168: \n169: | Method | Path | Auth |\n170: |--------|------|------|\n171: | `POST` | `/auth/forgot-password` | Public |\n172: \n173: **Description:** Sends a password reset email with a secure reset token. Always returns 200 regardless of whether the email exists (prevents enumeration).\n174: \n175: **Request Body:**\n176: ```json\n177: {\n178:   \"email\": \"string (required)\"\n179: }\n180: ```\n181: \n182: **Success Response** `200 OK`:\n183: ```json\n184: {\n185:   \"success\": true,\n186:   \"statusCode\": 200,\n187:   \"message\": \"If an account with that email exists, a password reset link has been sent\",\n188:   \"data\": null,\n189:   \"timestamp\": \"ISO 8601 timestamp\",\n190:   \"path\": \"/api/auth/forgot-password\"\n191: }\n192: ```\n193: \n194: **Error Responses:**\n195: - `400` — Invalid email format\n196: \n197: ---\n198: \n199: #### Reset Password\n200: \n201: | Method | Path | Auth |\n202: |--------|------|------|\n203: | `POST` | `/auth/reset-password` | Public |\n204: \n205: **Description:** Resets the user's password using a valid reset token.\n206: \n207: **Request Body:**\n208: ```json\n209: {\n210:   \"token\": \"string (required)\",\n211:   \"password\": \"string (min 8 chars, required)\"\n212: }\n213: ```\n214: \n215: **Success Response** `200 OK`:\n216: ```json\n217: {\n218:   \"success\": true,\n219:   \"statusCode\": 200,\n220:   \"message\": \"Password reset successfully\",\n221:   \"data\": null,\n222:   \"timestamp\": \"ISO 8601 timestamp\",\n223:   \"path\": \"/api/auth/reset-password\"\n224: }\n225: ```\n226: \n227: **Error Responses:**\n228: - `400` — Validation failed or expired token\n229: - `404` — Invalid token\n230: \n231: ---\n232: \n233: #### Get Current User\n234: \n235: | Method | Path | Auth |\n236: |--------|------|------|\n237: | `GET` | `/auth/me` | Authenticated |\n238: \n239: **Description:** Returns the currently authenticated user's profile.\n240: \n241: **Success Response** `200 OK`:\n242: ```json\n243: {\n244:   \"success\": true,\n245:   \"statusCode\": 200,\n246:   \"message\": \"User retrieved successfully\",\n247:   \"data\": {\n248:     \"id\": \"uuid\",\n249:     \"name\": \"string\",\n250:     \"email\": \"string\",\n251:     \"phone\": \"string | null\",\n252:     \"role\": \"renter | admin\",\n253:     \"status\": \"active | suspended\",\n254:     \"emailVerifiedAt\": \"ISO 8601 timestamp | null\",\n255:     \"createdAt\": \"ISO 8601 timestamp\",\n256:     \"updatedAt\": \"ISO 8601 timestamp\"\n257:   },\n258:   \"timestamp\": \"ISO 8601 timestamp\",\n259:   \"path\": \"/api/auth/me\"\n260: }\n261: ```\n262: \n263: **Error Responses:**\n264: - `401` — Not authenticated\n265: \n266: ---\n267: \n268: ### Profile\n269: \n270: ---\n271: \n272: #### Get Profile\n273: \n274: | Method | Path | Auth |\n275: |--------|------|------|\n276: | `GET` | `/profile` | Authenticated |\n277: \n278: **Description:** Returns the authenticated user's profile details.\n279: \n280: **Success Response** `200 OK`:\n281: ```json\n282: {\n283:   \"success\": true,\n284:   \"statusCode\": 200,\n285:   \"message\": \"Profile retrieved successfully\",\n286:   \"data\": {\n287:     \"id\": \"uuid\",\n288:     \"name\": \"string\",\n289:     \"email\": \"string\",\n290:     \"phone\": \"string | null\",\n291:     \"role\": \"renter | admin\",\n292:     \"status\": \"active | suspended\",\n293:     \"emailVerifiedAt\": \"ISO 8601 timestamp | null\",\n294:     \"createdAt\": \"ISO 8601 timestamp\",\n295:     \"updatedAt\": \"ISO 8601 timestamp\"\n296:   },\n297:   \"timestamp\": \"ISO 8601 timestamp\",\n298:   \"path\": \"/api/profile\"\n299: }\n300: ```\n301: \n302: **Error Responses:**\n303: - `401` — Not authenticated\n304: \n305: ---\n306: \n307: #### Update Profile\n308: \n309: | Method | Path | Auth |\n310: |--------|------|------|\n311: | `PATCH` | `/profile` | Authenticated |\n312: \n313: **Description:** Updates the authenticated user's profile fields.\n314: \n315: **Request Body:**\n316: ```json\n317: {\n318:   \"name\": \"string (2–100 chars, optional)\",\n319:   \"phone\": \"string (max 20 chars, optional)\"\n320: }\n321: ```\n322: \n323: **Success Response** `200 OK`:\n324: ```json\n325: {\n326:   \"success\": true,\n327:   \"statusCode\": 200,\n328:   \"message\": \"Profile updated successfully\",\n329:   \"data\": {\n330:     \"id\": \"uuid\",\n331:     \"name\": \"string\",\n332:     \"email\": \"string\",\n333:     \"phone\": \"string | null\",\n334:     \"role\": \"renter | admin\",\n335:     \"status\": \"active | suspended\",\n336:     \"createdAt\": \"ISO 8601 timestamp\",\n337:     \"updatedAt\": \"ISO 8601 timestamp\"\n338:   },\n339:   \"timestamp\": \"ISO 8601 timestamp\",\n340:   \"path\": \"/api/profile\"\n341: }\n342: ```\n343: \n344: **Error Responses:**\n345: - `400` — Validation failed\n346: - `401` — Not authenticated\n347: \n348: ---\n349: \n350: ### Properties\n351: \n352: ---\n353: \n354: #### Search Properties\n355: \n356: | Method | Path | Auth |\n357: |--------|------|------|\n358: | `GET` | `/properties` | Public |\n359: \n360: **Description:** Search and filter rental property listings. Returns paginated results. Only returns non-archived (non-soft-deleted) properties.\n361: \n362: **Query Parameters:**\n363: | Param | Type | Required | Description |\n364: |-------|------|----------|-------------|\n365: | `search` | string | no | Full-text search across title, description, city, state |\n366: | `propertyType` | enum | no | Filter: `apartment`, `house`, `condo`, `townhouse`, `studio` |\n367: | `minPrice` | number | no | Minimum monthly rent |\n368: | `maxPrice` | number | no | Maximum monthly rent |\n369: | `bedrooms` | number | no | Minimum number of bedrooms |\n370: | `bathrooms` | number | no | Minimum number of bathrooms |\n371: | `city` | string | no | Filter by city |\n372: | `state` | string | no | Filter by state |\n373: | `latitude` | number | no | Latitude for geolocation search |\n374: | `longitude` | number | no | Longitude for geolocation search |\n375: | `radius` | number | no | Search radius in miles (requires lat/lon) |\n376: | `sortBy` | enum | no | `price_asc`, `price_desc`, `newest`, `oldest` |\n377: | `page` | number | no | Page number (default: 1) |\n378: | `limit` | number | no | Items per page (default: 20, max: 100) |\n379: \n380: **Success Response** `200 OK`:\n381: ```json\n382: {\n383:   \"success\": true,\n384:   \"statusCode\": 200,\n385:   \"message\": \"Properties retrieved successfully\",\n386:   \"data\": {\n387:     \"items\": [\n388:       {\n389:         \"id\": \"uuid\",\n390:         \"title\": \"string\",\n391:         \"description\": \"string\",\n392:         \"price\": 2500.00,\n393:         \"bedrooms\": 2,\n394:         \"bathrooms\": 1,\n395:         \"squareFeet\": 950,\n396:         \"propertyType\": \"apartment\",\n397:         \"address\": {\n398:           \"street\": \"string\",\n399:           \"city\": \"string\",\n400:           \"state\": \"string\",\n401:           \"zipCode\": \"string\",\n402:           \"latitude\": 40.7127753,\n403:           \"longitude\": -74.0059728\n404:         },\n405:         \"availableFrom\": \"2026-06-01\",\n406:         \"primaryPhoto\": \"string (URL) | null\",\n407:         \"amenities\": [\n408:           { \"id\": \"uuid\", \"name\": \"Parking\", \"icon\": \"parking\" }\n409:         ],\n410:         \"createdAt\": \"ISO 8601 timestamp\"\n411:       }\n412:     ],\n413:     \"meta\": {\n414:       \"total\": 150,\n415:       \"page\": 1,\n416:       \"limit\": 20,\n417:       \"totalPages\": 8\n418:     }\n419:   },\n420:   \"timestamp\": \"ISO 8601 timestamp\",\n421:   \"path\": \"/api/properties\"\n422: }\n423: ```\n424: \n425: **Error Responses:**\n426: - `400` — Invalid query parameters\n427: \n428: ---\n429: \n430: #### Get Property Detail\n431: \n432: | Method | Path | Auth |\n433: |--------|------|------|\n434: | `GET` | `/properties/:id` | Public |\n435: \n436: **Description:** Returns full property details including all photos, amenities, and address.\n437: \n438: **Success Response** `200 OK`:\n439: ```json\n440: {\n441:   \"success\": true,\n442:   \"statusCode\": 200,\n443:   \"message\": \"Property retrieved successfully\",\n444:   \"data\": {\n445:     \"id\": \"uuid\",\n446:     \"title\": \"string\",\n447:     \"description\": \"string\",\n448:     \"price\": 2500.00,\n449:     \"bedrooms\": 2,\n450:     \"bathrooms\": 1,\n451:     \"squareFeet\": 950,\n452:     \"propertyType\": \"apartment\",\n453:     \"address\": {\n454:       \"street\": \"string\",\n455:       \"city\": \"string\",\n456:       \"state\": \"string\",\n457:       \"zipCode\": \"string\",\n458:       \"latitude\": 40.7127753,\n459:       \"longitude\": -74.0059728\n460:     },\n461:     \"availableFrom\": \"2026-06-01\",\n462:     \"photos\": [\n463:       {\n464:         \"id\": \"uuid\",\n465:         \"url\": \"string\",\n466:         \"isPrimary\": true,\n467:         \"sortOrder\": 0\n468:       }\n469:     ],\n470:     \"amenities\": [\n471:       { \"id\": \"uuid\", \"name\": \"Parking\", \"icon\": \"parking\" }\n472:     ],\n473:     \"isFavorited\": false,\n474:     \"createdAt\": \"ISO 8601 timestamp\",\n475:     \"updatedAt\": \"ISO 8601 timestamp\"\n476:   },\n477:   \"timestamp\": \"ISO 8601 timestamp\",\n478:   \"path\": \"/api/properties/uuid\"\n479: }\n480: ```\n481: \n482: **Error Responses:**\n483: - `400` — Invalid UUID format\n484: - `404` — Property not found or archived\n485: \n486: ---\n487: \n488: #### Create Property\n489: \n490: | Method | Path | Auth |\n491: |--------|------|------|\n492: | `POST` | `/properties` | Admin |\n493: \n494: **Description:** Create a new rental property listing.\n495: \n496: **Request Body:**\n497: ```json\n498: {\n499:   \"title\": \"string (5–200 chars, required)\",\n500:   \"description\": \"string (20–5000 chars, required)\",\n501:   \"price\": \"number (>0, required)\",\n502:   \"bedrooms\": \"number (>=0, required)\",\n503:   \"bathrooms\": \"number (>=0, required)\",\n504:   \"squareFeet\": \"number (>0, optional)\",\n505:   \"propertyType\": \"enum (apartment | house | condo | townhouse | studio, required)\",\n506:   \"address\": {\n507:     \"street\": \"string (required, max 200)\",\n508:     \"city\": \"string (required, max 100)\",\n509:     \"state\": \"string (required, max 100)\",\n510:     \"zipCode\": \"string (required, max 10)\",\n511:     \"latitude\": \"number (-90 to 90, optional)\",\n512:     \"longitude\": \"number (-180 to 180, optional)\"\n513:   },\n514:   \"availableFrom\": \"date string (ISO date format, optional)\",\n515:   \"amenityIds\": [\"uuid\", \"uuid\"]\n516: }\n517: ```\n518: \n519: **Success Response** `201 Created`:\n520: ```json\n521: {\n522:   \"success\": true,\n523:   \"statusCode\": 201,\n524:   \"message\": \"Property created successfully\",\n525:   \"data\": {\n526:     \"id\": \"uuid\",\n527:     \"title\": \"string\",\n528:     \"description\": \"string\",\n529:     \"price\": 2500.00,\n530:     \"bedrooms\": 2,\n531:     \"bathrooms\": 1,\n532:     \"squareFeet\": 950,\n533:     \"propertyType\": \"apartment\",\n534:     \"address\": {\n535:       \"street\": \"string\",\n536:       \"city\": \"string\",\n537:       \"state\": \"string\",\n538:       \"zipCode\": \"string\",\n539:       \"latitude\": 40.7127753,\n540:       \"longitude\": -74.0059728\n541:     },\n542:     \"availableFrom\": \"2026-06-01\",\n543:     \"amenities\": [\n544:       { \"id\": \"uuid\", \"name\": \"Parking\", \"icon\": \"parking\" }\n545:     ],\n546:     \"photos\": [],\n547:     \"createdAt\": \"ISO 8601 timestamp\",\n548:     \"updatedAt\": \"ISO 8601 timestamp\"\n549:   },\n550:   \"timestamp\": \"ISO 8601 timestamp\",\n551:   \"path\": \"/api/properties\"\n552: }\n553: ```\n554: \n555: **Error Responses:**\n556: - `400` — Validation failed\n557: - `401` — Not authenticated\n558: - `403` — Insufficient permissions (not admin)\n559: \n560: ---\n561: \n562: #### Update Property\n563: \n564: | Method | Path | Auth |\n565: |--------|------|------|\n566: | `PATCH` | `/properties/:id` | Admin |\n567: \n568: **Description:** Update an existing property listing. Only provided fields are updated.\n569: \n570: **Request Body (all fields optional):**\n571: ```json\n572: {\n573:   \"title\": \"string (5–200 chars)\",\n574:   \"description\": \"string (20–5000 chars)\",\n575:   \"price\": \"number (>0)\",\n576:   \"bedrooms\": \"number (>=0)\",\n577:   \"bathrooms\": \"number (>=0)\",\n578:   \"squareFeet\": \"number (>0)\",\n579:   \"propertyType\": \"enum (apartment | house | condo | townhouse | studio)\",\n580:   \"address\": {\n581:     \"street\": \"string (max 200)\",\n582:     \"city\": \"string (max 100)\",\n583:     \"state\": \"string (max 100)\",\n584:     \"zipCode\": \"string (max 10)\",\n585:     \"latitude\": \"number (-90 to 90)\",\n586:     \"longitude\": \"number (-180 to 180)\"\n587:   },\n588:   \"availableFrom\": \"date string (ISO date format)\",\n589:   \"amenityIds\": [\"uuid\", \"uuid\"]\n590: }\n591: ```\n592: \n593: **Success Response** `200 OK`:\n594: ```json\n595: {\n596:   \"success\": true,\n597:   \"statusCode\": 200,\n598:   \"message\": \"Property updated successfully\",\n599:   \"data\": {\n600:     \"id\": \"uuid\",\n601:     \"title\": \"string\",\n602:     \"description\": \"string\",\n603:     \"price\": 2500.00,\n604:     \"bedrooms\": 2,\n605:     \"bathrooms\": 1,\n606:     \"squareFeet\": 950,\n607:     \"propertyType\": \"apartment\",\n608:     \"address\": {\n609:       \"street\": \"string\",\n610:       \"city\": \"string\",\n611:       \"state\": \"string\",\n612:       \"zipCode\": \"string\",\n613:       \"latitude\": 40.7127753,\n614:       \"longitude\": -74.0059728\n615:     },\n616:     \"availableFrom\": \"2026-06-01\",\n617:     \"amenities\": [\n618:       { \"id\": \"uuid\", \"name\": \"Parking\", \"icon\": \"parking\" }\n619:     ],\n620:     \"photos\": [\n621:       {\n622:         \"id\": \"uuid\",\n623:         \"url\": \"string\",\n624:         \"isPrimary\": true,\n625:         \"sortOrder\": 0\n626:       }\n627:     ],\n628:     \"createdAt\": \"ISO 8601 timestamp\",\n629:     \"updatedAt\": \"ISO 8601 timestamp\"\n630:   },\n631:   \"timestamp\": \"ISO 8601 timestamp\",\n632:   \"path\": \"/api/properties/uuid\"\n633: }\n634: ```\n635: \n636: **Error Responses:**\n637: - `400` — Validation failed or invalid UUID\n638: - `401` — Not authenticated\n639: - `403` — Insufficient permissions (not admin)\n640: - `404` — Property not found\n641: \n642: ---\n643: \n644: #### Delete (Archive) Property\n645: \n646: | Method | Path | Auth |\n647: |--------|------|------|\n648: | `DELETE` | `/properties/:id` | Admin |\n649: \n650: **Description:** Soft-deletes (archives) a property listing. The property is removed from public search results but retained in the database.\n651: \n652: **Success Response** `200 OK`:\n653: ```json\n654: {\n655:   \"success\": true,\n656:   \"statusCode\": 200,\n657:   \"message\": \"Property archived successfully\",\n658:   \"data\": null,\n659:   \"timestamp\": \"ISO 8601 timestamp\",\n660:   \"path\": \"/api/properties/uuid\"\n661: }\n662: ```\n663: \n664: **Error Responses:**\n665: - `400` — Invalid UUID format\n666: - `401` — Not authenticated\n667: - `403` — Insufficient permissions (not admin)\n668: - `404` — Property not found\n669: \n670: ---\n671: \n672: #### Upload Property Photos\n673: \n674: | Method | Path | Auth |\n675: |--------|------|------|\n676: | `POST` | `/properties/:id/photos` | Admin |\n677: \n678: **Description:** Upload one or more photos for a property. The first photo uploaded is automatically set as primary if no primary exists.\n679: \n680: **Request:** `multipart/form-data`\n681: | Field | Type | Required | Description |\n682: |-------|------|----------|-------------|\n683: | `files` | file[] | yes | Image files (max 10 per request, accepted: jpg, jpeg, png, webp; max 5MB each) |\n684: \n685: **Success Response** `201 Created`:\n686: ```json\n687: {\n688:   \"success\": true,\n689:   \"statusCode\": 201,\n690:   \"message\": \"Photos uploaded successfully\",\n691:   \"data\": [\n692:     {\n693:       \"id\": \"uuid\",\n694:       \"url\": \"string\",\n695:       \"isPrimary\": true,\n696:       \"sortOrder\": 0\n697:     }\n698:   ],\n699:   \"timestamp\": \"ISO 8601 timestamp\",\n700:   \"path\": \"/api/properties/uuid/photos\"\n701: }\n702: ```\n703: \n704: **Error Responses:**\n705: - `400` — Invalid file type, file too large, or no file provided\n706: - `401` — Not authenticated\n707: - `403` — Insufficient permissions (not admin)\n708: - `404` — Property not found\n709: \n710: ---\n711: \n712: #### Delete Property Photo\n713: \n714: | Method | Path | Auth |\n715: |--------|------|------|\n716: | `DELETE` | `/properties/:id/photos/:photoId` | Admin |\n717: \n718: **Description:** Delete a specific photo from a property.\n719: \n720: **Success Response** `200 OK`:\n721: ```json\n722: {\n723:   \"success\": true,\n724:   \"statusCode\": 200,\n725:   \"message\": \"Photo deleted successfully\",\n726:   \"data\": null,\n727:   \"timestamp\": \"ISO 8601 timestamp\",\n728:   \"path\": \"/api/properties/uuid/photos/uuid\"\n729: }\n730: ```\n731: \n732: **Error Responses:**\n733: - `400` — Invalid UUID format\n734: - `401` — Not authenticated\n735: - `403` — Insufficient permissions (not admin)\n736: - `404` — Property or photo not found\n737: \n738: ---\n739: \n740: #### Set Primary Photo\n741: \n742: | Method | Path | Auth |\n743: |--------|------|------|\n744: | `PATCH` | `/properties/:id/photos/:photoId/primary` | Admin |\n745: \n746: **Description:** Set a specific photo as the primary/thumbnail photo for the property. The previous primary is unset.\n747: \n748: **Success Response** `200 OK`:\n749: ```json\n750: {\n751:   \"success\": true,\n752:   \"statusCode\": 200,\n753:   \"message\": \"Primary photo updated successfully\",\n754:   \"data\": {\n755:     \"id\": \"uuid\",\n756:     \"url\": \"string\",\n757:     \"isPrimary\": true,\n758:     \"sortOrder\": 0\n759:   },\n760:   \"timestamp\": \"ISO 8601 timestamp\",\n761:   \"path\": \"/api/properties/uuid/photos/uuid/primary\"\n762: }\n763: ```\n764: \n765: **Error Responses:**\n766: - `400` — Invalid UUID format\n767: - `401` — Not authenticated\n768: - `403` — Insufficient permissions (not admin)\n769: - `404` — Property or photo not found\n770: \n771: ---\n772: \n773: #### Reorder Property Photos\n774: \n775: | Method | Path | Auth |\n776: |--------|------|------|\n777: | `PATCH` | `/properties/:id/photos/reorder` | Admin |\n778: \n779: **Description:** Reorder the display order of photos for a property.\n780: \n781: **Request Body:**\n782: ```json\n783: {\n784:   \"photoIds\": [\"uuid\", \"uuid\", \"uuid\"]\n785: }\n786: ```\n787: \n788: **Success Response** `200 OK`:\n789: ```json\n790: {\n791:   \"success\": true,\n792:   \"statusCode\": 200,\n793:   \"message\": \"Photo order updated successfully\",\n794:   \"data\": [\n795:     {\n796:       \"id\": \"uuid\",\n797:       \"url\": \"string\",\n798:       \"isPrimary\": true,\n799:       \"sortOrder\": 0\n800:     },\n801:     {\n802:       \"id\": \"uuid\",\n803:       \"url\": \"string\",\n804:       \"isPrimary\": false,\n805:       \"sortOrder\": 1\n806:     }\n807:   ],\n808:   \"timestamp\": \"ISO 8601 timestamp\",\n809:   \"path\": \"/api/properties/uuid/photos/reorder\"\n810: }\n811: ```\n812: \n813: **Error Responses:**\n814: - `400` — Invalid photo IDs or missing photos in array\n815: - `401` — Not authenticated\n816: - `403` — Insufficient permissions (not admin)\n817: - `404` — Property not found\n818: \n819: ---\n820: \n821: ### Favorites\n822: \n823: ---\n824: \n825: #### List Favorites\n826: \n827: | Method | Path | Auth |\n828: |--------|------|------|\n829: | `GET` | `/favorites` | Renter |\n830: \n831: **Description:** List all properties favorited by the authenticated renter. Returns paginated results.\n832: \n833: **Query Parameters:**\n834: | Param | Type | Required | Description |\n835: |-------|------|----------|-------------|\n836: | `page` | number | no | Page number (default: 1) |\n837: | `limit` | number | no | Items per page (default: 20, max: 100) |\n838: \n839: **Success Response** `200 OK`:\n840: ```json\n841: {\n842:   \"success\": true,\n843:   \"statusCode\": 200,\n844:   \"message\": \"Favorites retrieved successfully\",\n845:   \"data\": {\n846:     \"items\": [\n847:       {\n848:         \"id\": \"uuid (favorite record ID)\",\n849:         \"property\": {\n850:           \"id\": \"uuid\",\n851:           \"title\": \"string\",\n852:           \"price\": 2500.00,\n853:           \"bedrooms\": 2,\n854:           \"bathrooms\": 1,\n855:           \"propertyType\": \"apartment\",\n856:           \"address\": {\n857:             \"city\": \"string\",\n858:             \"state\": \"string\"\n859:           },\n860:           \"primaryPhoto\": \"string (URL) | null\"\n861:         },\n862:         \"createdAt\": \"ISO 8601 timestamp\"\n863:       }\n864:     ],\n865:     \"meta\": {\n866:       \"total\": 12,\n867:       \"page\": 1,\n868:       \"limit\": 20,\n869:       \"totalPages\": 1\n870:     }\n871:   },\n872:   \"timestamp\": \"ISO 8601 timestamp\",\n873:   \"path\": \"/api/favorites\"\n874: }\n875: ```\n876: \n877: **Error Responses:**\n878: - `401` — Not authenticated\n879: \n880: ---\n881: \n882: #### Add to Favorites\n883: \n884: | Method | Path | Auth |\n885: |--------|------|------|\n886: | `POST` | `/favorites` | Renter |\n887: \n888: **Description:** Add a property to the authenticated renter's favorites. Idempotent — adding a duplicate returns the existing record without error.\n889: \n890: **Request Body:**\n891: ```json\n892: {\n893:   \"propertyId\": \"uuid (required)\"\n894: }\n895: ```\n896: \n897: **Success Response** `201 Created`:\n898: ```json\n899: {\n900:   \"success\": true,\n901:   \"statusCode\": 201,\n902:   \"message\": \"Property added to favorites\",\n903:   \"data\": {\n904:     \"id\": \"uuid\",\n905:     \"propertyId\": \"uuid\",\n906:     \"createdAt\": \"ISO 8601 timestamp\"\n907:   },\n908:   \"timestamp\": \"ISO 8601 timestamp\",\n909:   \"path\": \"/api/favorites\"\n910: }\n911: ```\n912: \n913: **Error Responses:**\n914: - `400` — Invalid property ID or validation failed\n915: - `401` — Not authenticated\n916: - `404` — Property not found\n917: \n918: ---\n919: \n920: #### Remove from Favorites\n921: \n922: | Method | Path | Auth |\n923: |--------|------|------|\n924: | `DELETE` | `/favorites/:propertyId` | Renter |\n925: \n926: **Description:** Remove a property from the authenticated renter's favorites.\n927: \n928: **Success Response** `200 OK`:\n929: ```json\n930: {\n931:   \"success\": true,\n932:   \"statusCode\": 200,\n933:   \"message\": \"Property removed from favorites\",\n934:   \"data\": null,\n935:   \"timestamp\": \"ISO 8601 timestamp\",\n936:   \"path\": \"/api/favorites/uuid\"\n937: }\n938: ```\n939: \n940: **Error Responses:**\n941: - `400` — Invalid UUID format\n942: - `401` — Not authenticated\n943: - `404` — Favorite not found\n944: \n945: ---\n946: \n947: ### Inquiries\n948: \n949: ---\n950: \n951: #### Submit Inquiry\n952: \n953: | Method | Path | Auth |\n954: |--------|------|------|\n955: | `POST` | `/properties/:id/inquiries` | Renter |\n956: \n957: **Description:** Submit an inquiry about a specific property. Name, email, and phone are denormalized from the authenticated user's profile at submission time.\n958: \n959: **Request Body:**\n960: ```json\n961: {\n962:   \"message\": \"string (10–2000 chars, required)\",\n963:   \"name\": \"string (optional, defaults to user's name)\",\n964:   \"email\": \"string (optional, defaults to user's email)\",\n965:   \"phone\": \"string (optional, defaults to user's phone)\"\n966: }\n967: ```\n968: \n969: **Success Response** `201 Created`:\n970: ```json\n971: {\n972:   \"success\": true,\n973:   \"statusCode\": 201,\n974:   \"message\": \"Inquiry submitted successfully\",\n975:   \"data\": {\n976:     \"id\": \"uuid\",\n977:     \"propertyId\": \"uuid\",\n978:     \"name\": \"string\",\n979:     \"email\": \"string\",\n980:     \"phone\": \"string | null\",\n981:     \"message\": \"string\",\n982:     \"status\": \"new\",\n983:     \"response\": null,\n984:     \"respondedAt\": null,\n985:     \"createdAt\": \"ISO 8601 timestamp\"\n986:   },\n987:   \"timestamp\": \"ISO 8601 timestamp\",\n988:   \"path\": \"/api/properties/uuid/inquiries\"\n989: }\n990: ```\n991: \n992: **Error Responses:**\n993: - `400` — Validation failed or invalid UUID\n994: - `401` — Not authenticated\n995: - `404` — Property not found\n996: \n997: ---\n998: \n999: #### List All Inquiries (Admin)\n1000: \n1001: | Method | Path | Auth |\n1002: |--------|------|------|\n1003: | `GET` | `/inquiries` | Admin |\n1004: \n1005: **Description:** Admin endpoint to view all inquiries with filtering and pagination.\n1006: \n1007: **Query Parameters:**\n1008: | Param | Type | Required | Description |\n1009: |-------|------|----------|-------------|\n1010: | `status` | enum | no | Filter: `new`, `read`, `responded` |\n1011: | `propertyId` | uuid | no | Filter by property |\n1012: | `search` | string | no | Search by name or email |\n1013: | `sortBy` | enum | no | `newest` (default), `oldest` |\n1014: | `page` | number | no | Page number (default: 1) |\n1015: | `limit` | number | no | Items per page (default: 20, max: 100) |\n1016: \n1017: **Success Response** `200 OK`:\n1018: ```json\n1019: {\n1020:   \"success\": true,\n1021:   \"statusCode\": 200,\n1022:   \"message\": \"Inquiries retrieved successfully\",\n1023:   \"data\": {\n1024:     \"items\": [\n1025:       {\n1026:         \"id\": \"uuid\",\n1027:         \"property\": {\n1028:           \"id\": \"uuid\",\n1029:           \"title\": \"string\"\n1030:         },\n1031:         \"renter\": {\n1032:           \"id\": \"uuid\",\n1033:           \"name\": \"string\",\n1034:           \"email\": \"string\"\n1035:         },\n1036:         \"name\": \"string\",\n1037:         \"email\": \"string\",\n1038:         \"phone\": \"string | null\",\n1039:         \"message\": \"string\",\n1040:         \"status\": \"new | read | responded\",\n1041:         \"response\": \"string | null\",\n1042:         \"respondedAt\": \"ISO 8601 timestamp | null\",\n1043:         \"createdAt\": \"ISO 8601 timestamp\",\n1044:         \"updatedAt\": \"ISO 8601 timestamp\"\n1045:       }\n1046:     ],\n1047:     \"meta\": {\n1048:       \"total\": 45,\n1049:       \"page\": 1,\n1050:       \"limit\": 20,\n1051:       \"totalPages\": 3\n1052:     }\n1053:   },\n1054:   \"timestamp\": \"ISO 8601 timestamp\",\n1055:   \"path\": \"/api/inquiries\"\n1056: }\n1057: ```\n1058: \n1059: **Error Responses:**\n1060: - `401` — Not authenticated\n1061: - `403` — Insufficient permissions (not admin)\n1062: \n1063: ---\n1064: \n1065: #### Get Inquiry Detail\n1066: \n1067: | Method | Path | Auth |\n1068: |--------|------|------|\n1069: | `GET` | `/inquiries/:id` | Admin |\n1070: \n1071: **Description:** Get full details of a single inquiry.\n1072: \n1073: **Success Response** `200 OK`:\n1074: ```json\n1075: {\n1076:   \"success\": true,\n1077:   \"statusCode\": 200,\n1078:   \"message\": \"Inquiry retrieved successfully\",\n1079:   \"data\": {\n1080:     \"id\": \"uuid\",\n1081:     \"property\": {\n1082:       \"id\": \"uuid\",\n1083:       \"title\": \"string\"\n1084:     },\n1085:     \"renter\": {\n1086:       \"id\": \"uuid\",\n1087:       \"name\": \"string\",\n1088:       \"email\": \"string\"\n1089:     },\n1090:     \"name\": \"string\",\n1091:     \"email\": \"string\",\n1092:     \"phone\": \"string | null\",\n1093:     \"message\": \"string\",\n1094:     \"status\": \"new | read | responded\",\n1095:     \"response\": \"string | null\",\n1096:     \"respondedAt\": \"ISO 8601 timestamp | null\",\n1097:     \"createdAt\": \"ISO 8601 timestamp\",\n1098:     \"updatedAt\": \"ISO 8601 timestamp\"\n1099:   },\n1100:   \"timestamp\": \"ISO 8601 timestamp\",\n1101:   \"path\": \"/api/inquiries/uuid\"\n1102: }\n1103: ```\n1104: \n1105: **Error Responses:**\n1106: - `400` — Invalid UUID\n1107: - `401` — Not authenticated\n1108: - `403` — Insufficient permissions (not admin)\n1109: - `404` — Inquiry not found\n1110: \n1111: ---\n1112: \n1113: #### Mark Inquiry as Read\n1114: \n1115: | Method | Path | Auth |\n1116: |--------|------|------|\n1117: | `PATCH` | `/inquiries/:id/read` | Admin |\n1118: \n1119: **Description:** Mark an inquiry as read. Only applicable to inquiries with `new` status.\n1120: \n1121: **Request Body:** none\n1122: \n1123: **Success Response** `200 OK`:\n1124: ```json\n1125: {\n1126:   \"success\": true,\n1127:   \"statusCode\": 200,\n1128:   \"message\": \"Inquiry marked as read\",\n1129:   \"data\": {\n1130:     \"id\": \"uuid\",\n1131:     \"status\": \"read\",\n1132:     \"updatedAt\": \"ISO 8601 timestamp\"\n1133:   },\n1134:   \"timestamp\": \"ISO 8601 timestamp\",\n1135:   \"path\": \"/api/inquiries/uuid/read\"\n1136: }\n1137: ```\n1138: \n1139: **Error Responses:**\n1140: - `400` — Invalid UUID or inquiry already read/responded\n1141: - `401` — Not authenticated\n1142: - `403` — Insufficient permissions (not admin)\n1143: - `404` — Inquiry not found\n1144: \n1145: ---\n1146: \n1147: #### Respond to Inquiry\n1148: \n1149: | Method | Path | Auth |\n1150: |--------|------|------|\n1151: | `POST` | `/inquiries/:id/respond` | Admin |\n1152: \n1153: **Description:** Admin responds to an inquiry. Sets status to `responded` and records the response and timestamp.\n1154: \n1155: **Request Body:**\n1156: ```json\n1157: {\n1158:   \"response\": \"string (10–5000 chars, required)\"\n1159: }\n1160: ```\n1161: \n1162: **Success Response** `200 OK`:\n1163: ```json\n1164: {\n1165:   \"success\": true,\n1166:   \"statusCode\": 200,\n1167:   \"message\": \"Response sent successfully\",\n1168:   \"data\": {\n1169:     \"id\": \"uuid\",\n1170:     \"status\": \"responded\",\n1171:     \"response\": \"string\",\n1172:     \"respondedAt\": \"ISO 8601 timestamp\",\n1173:     \"updatedAt\": \"ISO 8601 timestamp\"\n1174:   },\n1175:   \"timestamp\": \"ISO 8601 timestamp\",\n1176:   \"path\": \"/api/inquiries/uuid/respond\"\n1177: }\n1178: ```\n1179: \n1180: **Error Responses:**\n1181: - `400` — Validation failed or invalid UUID\n1182: - `401` — Not authenticated\n1183: - `403` — Insufficient permissions (not admin)\n1184: - `404` — Inquiry not found\n1185: \n1186: ---\n1187: \n1188: ### Amenities\n1189: \n1190: ---\n1191: \n1192: #### List Amenities\n1193: \n1194: | Method | Path | Auth |\n1195: |--------|------|------|\n1196: | `GET` | `/amenities` | Public |\n1197: \n1198: **Description:** List all available amenities. Used for property creation/editing forms and property detail display.\n1199: \n1200: **Success Response** `200 OK`:\n1201: ```json\n1202: {\n1203:   \"success\": true,\n1204:   \"statusCode\": 200,\n1205:   \"message\": \"Amenities retrieved successfully\",\n1206:   \"data\": [\n1207:     {\n1208:       \"id\": \"uuid\",\n1209:       \"name\": \"Parking\",\n1210:       \"icon\": \"parking\"\n1211:     },\n1212:     {\n1213:       \"id\": \"uuid\",\n1214:       \"name\": \"Gym\",\n1215:       \"icon\": \"gym\"\n1216:     }\n1217:   ],\n1218:   \"timestamp\": \"ISO 8601 timestamp\",\n1219:   \"path\": \"/api/amenities\"\n1220: }\n1221: ```\n1222: \n1223: **Error Responses:** none (always returns array, empty if no amenities exist)\n1224: \n1225: ---\n1226: \n1227: #### Create Amenity\n1228: \n1229: | Method | Path | Auth |\n1230: |--------|------|------|\n1231: | `POST` | `/amenities` | Admin |\n1232: \n1233: **Description:** Create a new amenity option.\n1234: \n1235: **Request Body:**\n1236: ```json\n1237: {\n1238:   \"name\": \"string (1–50 chars, required, unique)\",\n1239:   \"icon\": \"string (1–50 chars, required)\"\n1240: }\n1241: ```\n1242: \n1243: **Success Response** `201 Created`:\n1244: ```json\n1245: {\n1246:   \"success\": true,\n1247:   \"statusCode\": 201,\n1248:   \"message\": \"Amenity created successfully\",\n1249:   \"data\": {\n1250:     \"id\": \"uuid\",\n1251:     \"name\": \"Parking\",\n1252:     \"icon\": \"parking\",\n1253:     \"createdAt\": \"ISO 8601 timestamp\",\n1254:     \"updatedAt\": \"ISO 8601 timestamp\"\n1255:   },\n1256:   \"timestamp\": \"ISO 8601 timestamp\",\n1257:   \"path\": \"/api/amenities\"\n1258: }\n1259: ```\n1260: \n1261: **Error Responses:**\n1262: - `400` — Validation failed\n1263: - `401` — Not authenticated\n1264: - `403` — Insufficient permissions (not admin)\n1265: - `409` — Amenity name already exists\n1266: \n1267: ---\n1268: \n1269: #### Update Amenity\n1270: \n1271: | Method | Path | Auth |\n1272: |--------|------|------|\n1273: | `PATCH` | `/amenities/:id` | Admin |\n1274: \n1275: **Description:** Update an existing amenity name or icon.\n1276: \n1277: **Request Body (all fields optional):**\n1278: ```json\n1279: {\n1280:   \"name\": \"string (1–50 chars)\",\n1281:   \"icon\": \"string (1–50 chars)\"\n1282: }\n1283: ```\n1284: \n1285: **Success Response** `200 OK`:\n1286: ```json\n1287: {\n1288:   \"success\": true,\n1289:   \"statusCode\": 200,\n1290:   \"message\": \"Amenity updated successfully\",\n1291:   \"data\": {\n1292:     \"id\": \"uuid\",\n1293:     \"name\": \"Parking\",\n1294:     \"icon\": \"parking\",\n1295:     \"updatedAt\": \"ISO 8601 timestamp\"\n1296:   },\n1297:   \"timestamp\": \"ISO 8601 timestamp\",\n1298:   \"path\": \"/api/amenities/uuid\"\n1299: }\n1300: ```\n1301: \n1302: **Error Responses:**\n1303: - `400` — Validation failed or invalid UUID\n1304: - `401` — Not authenticated\n1305: - `403` — Insufficient permissions (not admin)\n1306: - `404` — Amenity not found\n1307: - `409` — Amenity name already exists\n1308: \n1309: ---\n1310: \n1311: #### Delete Amenity\n1312: \n1313: | Method | Path | Auth |\n1314: |--------|------|------|\n1315: | `DELETE` | `/amenities/:id` | Admin |\n1316: \n1317: **Description:** Soft-delete an amenity. Properties already associated retain the amenity but it no longer appears in the amenity list for new associations.\n1318: \n1319: **Success Response** `200 OK`:\n1320: ```json\n1321: {\n1322:   \"success\": true,\n1323:   \"statusCode\": 200,\n1324:   \"message\": \"Amenity deleted successfully\",\n1325:   \"data\": null,\n1326:   \"timestamp\": \"ISO 8601 timestamp\",\n1327:   \"path\": \"/api/amenities/uuid\"\n1328: }\n1329: ```\n1330: \n1331: **Error Responses:**\n1332: - `400` — Invalid UUID\n1333: - `401` — Not authenticated\n1334: - `403` — Insufficient permissions (not admin)\n1335: - `404` — Amenity not found\n1336: \n1337: ---\n1338: \n1339: ### Admin Dashboard\n1340: \n1341: ---\n1342: \n1343: #### Dashboard Statistics\n1344: \n1345: | Method | Path | Auth |\n1346: |--------|------|------|\n1347: | `GET` | `/admin/dashboard` | Admin |\n1348: \n1349: **Description:** Returns aggregate statistics for the admin dashboard overview.\n1350: \n1351: **Success Response** `200 OK`:\n1352: ```json\n1353: {\n1354:   \"success\": true,\n1355:   \"statusCode\": 200,\n1356:   \"message\": \"Dashboard statistics retrieved\",\n1357:   \"data\": {\n1358:     \"totalProperties\": 150,\n1359:     \"totalInquiries\": 45,\n1360:     \"newInquiries\": 12,\n1361:     \"totalUsers\": 520,\n1362:     \"recentInquiries\": [\n1363:       {\n1364:         \"id\": \"uuid\",\n1365:         \"name\": \"string\",\n1366:         \"email\": \"string\",\n1367:         \"propertyTitle\": \"string\",\n1368:         \"status\": \"new\",\n1369:         \"createdAt\": \"ISO 8601 timestamp\"\n1370:       }\n1371:     ],\n1372:     \"recentProperties\": [\n1373:       {\n1374:         \"id\": \"uuid\",\n1375:         \"title\": \"string\",\n1376:         \"price\": 2500.00,\n1377:         \"propertyType\": \"apartment\",\n1378:         \"createdAt\": \"ISO 8601 timestamp\"\n1379:       }\n1380:     ]\n1381:   },\n1382:   \"timestamp\": \"ISO 8601 timestamp\",\n1383:   \"path\": \"/api/admin/dashboard\"\n1384: }\n1385: ```\n1386: \n1387: **Error Responses:**\n1388: - `401` — Not authenticated\n1389: - `403` — Insufficient permissions (not admin)\n1390: \n1391: ---\n1392: \n1393: ### Admin User Management\n1394: \n1395: ---\n1396: \n1397: #### List Users\n1398: \n1399: | Method | Path | Auth |\n1400: |--------|------|------|\n1401: | `GET` | `/admin/users` | Admin |\n1402: \n1403: **Description:** List all registered users with filtering and pagination.\n1404: \n1405: **Query Parameters:**\n1406: | Param | Type | Required | Description |\n1407: |-------|------|----------|-------------|\n1408: | `role` | enum | no | Filter: `renter`, `admin` |\n1409: | `status` | enum | no | Filter: `active`, `suspended` |\n1410: | `search` | string | no | Search by name or email |\n1411: | `sortBy` | enum | no | `newest` (default), `oldest`, `name_asc`, `name_desc` |\n1412: | `page` | number | no | Page number (default: 1) |\n1413: | `limit` | number | no | Items per page (default: 20, max: 100) |\n1414: \n1415: **Success Response** `200 OK`:\n1416: ```json\n1417: {\n1418:   \"success\": true,\n1419:   \"statusCode\": 200,\n1420:   \"message\": \"Users retrieved successfully\",\n1421:   \"data\": {\n1422:     \"items\": [\n1423:       {\n1424:         \"id\": \"uuid\",\n1425:         \"name\": \"string\",\n1426:         \"email\": \"string\",\n1427:         \"phone\": \"string | null\",\n1428:         \"role\": \"renter\",\n1429:         \"status\": \"active\",\n1430:         \"emailVerifiedAt\": \"ISO 8601 timestamp | null\",\n1431:         \"createdAt\": \"ISO 8601 timestamp\"\n1432:       }\n1433:     ],\n1434:     \"meta\": {\n1435:       \"total\": 520,\n1436:       \"page\": 1,\n1437:       \"limit\": 20,\n1438:       \"totalPages\": 26\n1439:     }\n1440:   },\n1441:   \"timestamp\": \"ISO 8601 timestamp\",\n1442:   \"path\": \"/api/admin/users\"\n1443: }\n1444: ```\n1445: \n1446: **Error Responses:**\n1447: - `401` — Not authenticated\n1448: - `403` — Insufficient permissions (not admin)\n1449: \n1450: ---\n1451: \n1452: #### Get User Detail\n1453: \n1454: | Method | Path | Auth |\n1455: |--------|------|------|\n1456: | `GET` | `/admin/users/:id` | Admin |\n1457: \n1458: **Description:** Get full details of a specific user, including activity summary.\n1459: \n1460: **Success Response** `200 OK`:\n1461: ```json\n1462: {\n1463:   \"success\": true,\n1464:   \"statusCode\": 200,\n1465:   \"message\": \"User retrieved successfully\",\n1466:   \"data\": {\n1467:     \"id\": \"uuid\",\n1468:     \"name\": \"string\",\n1469:     \"email\": \"string\",\n1470:     \"phone\": \"string | null\",\n1471:     \"role\": \"renter | admin\",\n1472:     \"status\": \"active | suspended\",\n1473:     \"emailVerifiedAt\": \"ISO 8601 timestamp | null\",\n1474:     \"activity\": {\n1475:       \"totalFavorites\": 5,\n1476:       \"totalInquiries\": 3,\n1477:       \"lastLoginAt\": \"ISO 8601 timestamp | null\"\n1478:     },\n1479:     \"createdAt\": \"ISO 8601 timestamp\",\n1480:     \"updatedAt\": \"ISO 8601 timestamp\"\n1481:   },\n1482:   \"timestamp\": \"ISO 8601 timestamp\",\n1483:   \"path\": \"/api/admin/users/uuid\"\n1484: }\n1485: ```\n1486: \n1487: **Error Responses:**\n1488: - `400` — Invalid UUID\n1489: - `401` — Not authenticated\n1490: - `403` — Insufficient permissions (not admin)\n1491: - `404` — User not found\n1492: \n1493: ---\n1494: \n1495: #### Update User Status\n1496: \n1497: | Method | Path | Auth |\n1498: |--------|------|------|\n1499: | `PATCH` | `/admin/users/:id/status` | Admin |\n1500: \n1501: **Description:** Suspend or reactivate a user account. Admins cannot suspend their own account.\n1502: \n1503: **Request Body:**\n1504: ```json\n1505: {\n1506:   \"status\": \"enum (active | suspended, required)\"\n1507: }\n1508: ```\n1509: \n1510: **Success Response** `200 OK`:\n1511: ```json\n1512: {\n1513:   \"success\": true,\n1514:   \"statusCode\": 200,\n1515:   \"message\": \"User status updated to 'suspended'\",\n1516:   \"data\": {\n1517:     \"id\": \"uuid\",\n1518:     \"name\": \"string\",\n1519:     \"email\": \"string\",\n1520:     \"status\": \"suspended\",\n1521:     \"updatedAt\": \"ISO 8601 timestamp\"\n1522:   },\n1523:   \"timestamp\": \"ISO 8601 timestamp\",\n1524:   \"path\": \"/api/admin/users/uuid/status\"\n1525: }\n1526: ```\n1527: \n1528: **Error Responses:**\n1529: - `400` — Invalid status value or cannot suspend own account\n1530: - `401` — Not authenticated\n1531: - `403` — Insufficient permissions (not admin)\n1532: - `404` — User not found\n1533: \n1534: ---\n1535: \n1536: ## Standard Response Format\n1537: \n1538: All API responses follow this consistent envelope structure:\n1539: \n1540: ```json\n1541: {\n1542:   \"success\": true,\n1543:   \"statusCode\": 200,\n1544:   \"message\": \"Human-readable message\",\n1545:   \"data\": { ... } | [ ... ] | null,\n1546:   \"timestamp\": \"2026-05-19T12:00:00.000Z\",\n1547:   \"path\": \"/api/endpoint\"\n1548: }\n1549: ```\n1550: \n1551: ### Paginated Responses\n1552: \n1553: List endpoints return paginated data in this shape:\n1554: \n1555: ```json\n1556: {\n1557:   \"success\": true,\n1558:   \"statusCode\": 200,\n1559:   \"message\": \"...\",\n1560:   \"data\": {\n1561:     \"items\": [ ... ],\n1562:     \"meta\": {\n1563:       \"total\": 150,\n1564:       \"page\": 1,\n1565:       \"limit\": 20,\n1566:       \"totalPages\": 8\n1567:     }\n1568:   },\n1569:   \"timestamp\": \"...\",\n1570:   \"path\": \"/api/...\"\n1571: }\n1572: ```\n1573: \n1574: ### Error Responses\n1575: \n1576: ```json\n1577: {\n1578:   \"success\": false,\n1579:   \"statusCode\": 400,\n1580:   \"message\": \"Validation failed\",\n1581:   \"error\": \"Bad Request\",\n1582:   \"errors\": [\n1583:     { \"field\": \"email\", \"message\": \"email must be a valid email address\" }\n1584:   ],\n1585:   \"timestamp\": \"2026-05-19T12:00:00.000Z\",\n1586:   \"path\": \"/api/endpoint\"\n1587: }\n1588: ```\n1589: \n1590: ---\n1591: \n1592: ## Authentication\n1593: \n1594: All endpoints except those marked **Public** require authentication via JWT access token stored in an httpOnly cookie (`access_token`).\n1595: \n1596: - **Public endpoints** can be accessed without authentication\n1597: - **Authenticated** endpoints require a valid access token (any role)\n1598: - **Renter** endpoints require authentication + `renter` role\n1599: - **Admin** endpoints require authentication + `admin` role\n1600: \n1601: Rate limiting is applied to auth endpoints: login, register, forgot-password, reset-password (default: 10 requests per 60 seconds).\n1602: \n1603: ---\n1604: \n1605: ## HTTP Status Codes Summary\n1606: \n1607: | Code | Meaning |\n1608: |------|---------|\n1609: | 200 | OK — Success (read, update, delete, action) |\n1610: | 201 | Created — Resource created successfully |\n1611: | 400 | Bad Request — Validation failed, invalid input |\n1612: | 401 | Unauthorized — Missing or invalid access token |\n1613: | 403 | Forbidden — Insufficient role permissions |\n1614: | 404 | Not Found — Resource does not exist or is soft-deleted |\n1615: | 409 | Conflict — Duplicate resource (e.g., email, amenity name) |\n1616: | 413 | Payload Too Large — File upload exceeds size limit |\n1617: | 429 | Too Many Requests — Rate limit exceeded |\n1618: \n1619: ---\n1620: \n1621: *Generated: 2026-05-19 | Source: PROJECT_KNOWLEDGE.md + PROJECT_DATABASE.md*\n\n(End of file - total 1621 lines)\n</content>","metadata":{"preview":"# PROJECT_API\n\nNestFind API Contract — canonical reference for all API endpoints.\n\n**Base URL:** `http://localhost:3000/api`\n\n---\n\n## Endpoints\n\n---\n\n### Authentication\n\n---\n\n#### Register\n\n| Method | Path | Auth |\n|--------|------|------|","truncated":false,"loaded":[]},"title":".claude-project/nestfind/docs/PROJECT_API.md","time":{"start":1779245333018,"end":1779245333321}},"id":"prt_e434934e9001S66zj7IGPmoHe3","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","messageID":"msg_e4349258d001462IQjtT8WZ3ff"}}
+{"type":"tool_use","timestamp":1779245335137,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"type":"tool","tool":"read","callID":"call_01_KmZol6d6hTozFHCn6HsF2835","state":{"status":"completed","input":{"filePath":"/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/MISSING_ENDPOINTS.yaml"},"output":"<path>/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/MISSING_ENDPOINTS.yaml</path>\n<type>file</type>\n<content>\n1: generated_at: \"2026-05-19T20:00:00.000Z\"\n2: gen: 1\n3: total_pages: 22\n4: wired_pages: 17\n5: skipped_pages: 0\n6: missing_endpoints:\n7:   - resource: inquiries\n8:     module_name: inquiries\n9:     reason: >\n10:       GET /inquiries is admin-only per API contract, but renter/inquiries.tsx\n11:       needs the authenticated renter's own inquiries. Either scoping GET /inquiries\n12:       by role (admin→all, renter→own) or add a dedicated renter endpoint.\n13:     suggested_routes:\n14:       - method: GET\n15:         path: /inquiries\n16:         description: >\n17:           List inquiries — admin sees all; renter sees their own.\n18:           If scoping by role is undesirable, add a separate /inquiries/my endpoint.\n19:         scope: worker\n20:         response_shape: { items: InquiryDto[], meta: PaginationMeta }\n21: \n22:       - method: GET\n23:         path: /inquiries/my\n24:         description: List inquiries submitted by the authenticated renter (dedicated endpoint)\n25:         scope: renter\n26:         response_shape: { items: InquiryDto[], meta: PaginationMeta }\n27: \n28:     consuming_pages:\n29:       - frontend/app/pages/renter/inquiries.tsx\n\n(End of file - total 29 lines)\n</content>","metadata":{"preview":"generated_at: \"2026-05-19T20:00:00.000Z\"\ngen: 1\ntotal_pages: 22\nwired_pages: 17\nskipped_pages: 0\nmissing_endpoints:\n  - resource: inquiries\n    module_name: inquiries\n    reason: >\n      GET /inquiries is admin-only per API contract, but renter/inquiries.tsx\n      needs the authenticated renter's own inquiries. Either scoping GET /inquiries\n      by role (admin→all, renter→own) or add a dedicated renter endpoint.\n    suggested_routes:\n      - method: GET\n        path: /inquiries\n        description: >\n          List inquiries — admin sees all; renter sees their own.\n          If scoping by role is undesirable, add a separate /inquiries/my endpoint.\n        scope: worker\n        response_shape: { items: InquiryDto[], meta: PaginationMeta }","truncated":false,"loaded":[]},"title":".claude-project/nestfind/status/MISSING_ENDPOINTS.yaml","time":{"start":1779245334838,"end":1779245335135}},"id":"prt_e43493b83001Jz2IlcW1Vb3UJW","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","messageID":"msg_e4349258d001462IQjtT8WZ3ff"}}
+{"type":"tool_use","timestamp":1779245336767,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"type":"tool","tool":"read","callID":"call_02_dA5Y6FZkbXlJOUF4pLBc9399","state":{"status":"completed","input":{"filePath":"/Users/saifulpotential/Potential/nestfind-sample/.claude/nestjs/guides/testing-guide.md"},"output":"<path>/Users/saifulpotential/Potential/nestfind-sample/.claude/nestjs/guides/testing-guide.md</path>\n<type>file</type>\n<content>\n1: # Testing Guide - Backend Testing Strategies\n2: \n3: Complete guide to testing backend services with Jest and best practices.\n4: \n5: ## Table of Contents\n6: \n7: - [Unit Testing](#unit-testing)\n8: - [Integration Testing](#integration-testing)\n9: - [Mocking Strategies](#mocking-strategies)\n10: - [Test Data Management](#test-data-management)\n11: - [Testing Authenticated Routes](#testing-authenticated-routes)\n12: - [Coverage Targets](#coverage-targets)\n13: \n14: ---\n15: \n16: ## Unit Testing\n17: \n18: ### Test Structure\n19: \n20: ```typescript\n21: // services/userService.test.ts\n22: import { UserService } from './userService';\n23: import { UserRepository } from '../repositories/UserRepository';\n24: \n25: jest.mock('../repositories/UserRepository');\n26: \n27: describe('UserService', () => {\n28:     let service: UserService;\n29:     let mockRepository: jest.Mocked<UserRepository>;\n30: \n31:     beforeEach(() => {\n32:         mockRepository = {\n33:             findByEmail: jest.fn(),\n34:             create: jest.fn(),\n35:         } as any;\n36: \n37:         service = new UserService();\n38:         (service as any).userRepository = mockRepository;\n39:     });\n40: \n41:     afterEach(() => {\n42:         jest.clearAllMocks();\n43:     });\n44: \n45:     describe('create', () => {\n46:         it('should throw error if email exists', async () => {\n47:             mockRepository.findByEmail.mockResolvedValue({ id: '123' } as any);\n48: \n49:             await expect(\n50:                 service.create({ email: 'test@example.com' }),\n51:             ).rejects.toThrow('Email already in use');\n52:         });\n53: \n54:         it('should create user if email is unique', async () => {\n55:             mockRepository.findByEmail.mockResolvedValue(null);\n56:             mockRepository.create.mockResolvedValue({ id: '123' } as any);\n57: \n58:             const user = await service.create({\n59:                 email: 'test@example.com',\n60:                 firstName: 'John',\n61:                 lastName: 'Doe',\n62:             });\n63: \n64:             expect(user).toBeDefined();\n65:             expect(mockRepository.create).toHaveBeenCalledWith(\n66:                 expect.objectContaining({\n67:                     email: 'test@example.com',\n68:                 }),\n69:             );\n70:         });\n71:     });\n72: });\n73: ```\n74: \n75: ---\n76: \n77: ## Integration Testing\n78: \n79: ### Test with Real Database\n80: \n81: ```typescript\n82: import { PrismaService } from '@project-lifecycle-portal/database';\n83: \n84: describe('UserService Integration', () => {\n85:     let testUser: any;\n86: \n87:     beforeAll(async () => {\n88:         // Create test data\n89:         testUser = await PrismaService.main.user.create({\n90:             data: {\n91:                 email: 'test@example.com',\n92:                 profile: { create: { firstName: 'Test', lastName: 'User' } },\n93:             },\n94:         });\n95:     });\n96: \n97:     afterAll(async () => {\n98:         // Cleanup\n99:         await PrismaService.main.user.delete({ where: { id: testUser.id } });\n100:     });\n101: \n102:     it('should find user by email', async () => {\n103:         const user = await userService.findByEmail('test@example.com');\n104:         expect(user).toBeDefined();\n105:         expect(user?.email).toBe('test@example.com');\n106:     });\n107: });\n108: ```\n109: \n110: ---\n111: \n112: ## Mocking Strategies\n113: \n114: ### Mock PrismaService\n115: \n116: ```typescript\n117: jest.mock('@project-lifecycle-portal/database', () => ({\n118:     PrismaService: {\n119:         main: {\n120:             user: {\n121:                 findMany: jest.fn(),\n122:                 findUnique: jest.fn(),\n123:                 create: jest.fn(),\n124:                 update: jest.fn(),\n125:             },\n126:         },\n127:         isAvailable: true,\n128:     },\n129: }));\n130: ```\n131: \n132: ### Mock Services\n133: \n134: ```typescript\n135: const mockUserService = {\n136:     findById: jest.fn(),\n137:     create: jest.fn(),\n138:     update: jest.fn(),\n139: } as jest.Mocked<UserService>;\n140: ```\n141: \n142: ---\n143: \n144: ## Test Data Management\n145: \n146: ### Setup and Teardown\n147: \n148: ```typescript\n149: describe('PermissionService', () => {\n150:     let instanceId: number;\n151: \n152:     beforeAll(async () => {\n153:         // Create test post\n154:         const post = await PrismaService.main.post.create({\n155:             data: {\n156:                 title: 'Test Post',\n157:                 content: 'Test',\n158:                 authorId: 'test-user',\n159:             },\n160:         });\n161:         instanceId = post.id;\n162:     });\n163: \n164:     afterAll(async () => {\n165:         // Cleanup\n166:         await PrismaService.main.post.delete({\n167:             where: { id: instanceId },\n168:         });\n169:     });\n170: \n171:     beforeEach(() => {\n172:         // Clear caches\n173:         permissionService.clearCache();\n174:     });\n175: \n176:     it('should check permissions', async () => {\n177:         const hasPermission = await permissionService.checkPermission(\n178:             'user-id',\n179:             instanceId,\n180:             'VIEW_WORKFLOW',\n181:         );\n182:         expect(hasPermission).toBeDefined();\n183:     });\n184: });\n185: ```\n186: \n187: ---\n188: \n189: ## Testing Authenticated Routes\n190: \n191: ### Using test-auth-route.js\n192: \n193: ```bash\n194: # Test authenticated endpoint\n195: node scripts/test-auth-route.js http://localhost:3002/form/api/users\n196: \n197: # Test with POST data\n198: node scripts/test-auth-route.js http://localhost:3002/form/api/users POST '{\"email\":\"test@example.com\"}'\n199: ```\n200: \n201: ### Mock Authentication in Tests\n202: \n203: ```typescript\n204: // Mock auth middleware\n205: jest.mock('../middleware/SSOMiddleware', () => ({\n206:     SSOMiddlewareClient: {\n207:         verifyLoginStatus: (req, res, next) => {\n208:             res.locals.claims = {\n209:                 sub: 'test-user-id',\n210:                 preferred_username: 'testuser',\n211:             };\n212:             next();\n213:         },\n214:     },\n215: }));\n216: ```\n217: \n218: ---\n219: \n220: ## Coverage Targets\n221: \n222: ### Recommended Coverage\n223: \n224: - **Unit Tests**: 70%+ coverage\n225: - **Integration Tests**: Critical paths covered\n226: - **E2E Tests**: Happy paths covered\n227: \n228: ### Run Coverage\n229: \n230: ```bash\n231: npm test -- --coverage\n232: ```\n233: \n234: ---\n235: \n236: **Related Files:**\n237: \n238: - [E2E Testing Skill](../skills/e2e-testing/SKILL.md)\n239: - [services-and-repositories.md](services-and-repositories.md)\n240: - [complete-examples.md](../examples/complete-examples.md)\n\n(End of file - total 240 lines)\n</content>","metadata":{"preview":"# Testing Guide - Backend Testing Strategies\n\nComplete guide to testing backend services with Jest and best practices.\n\n## Table of Contents\n\n- [Unit Testing](#unit-testing)\n- [Integration Testing](#integration-testing)\n- [Mocking Strategies](#mocking-strategies)\n- [Test Data Management](#test-data-management)\n- [Testing Authenticated Routes](#testing-authenticated-routes)\n- [Coverage Targets](#coverage-targets)\n\n---\n\n## Unit Testing\n\n### Test Structure\n\n```typescript","truncated":false,"loaded":[]},"title":".claude/nestjs/guides/testing-guide.md","time":{"start":1779245336469,"end":1779245336766}},"id":"prt_e43494261001OE8xkpvZB8W7iZ","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","messageID":"msg_e4349258d001462IQjtT8WZ3ff"}}
+{"type":"tool_use","timestamp":1779245338586,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"type":"tool","tool":"read","callID":"call_03_tNnEymVWRG45KT9fWajB4502","state":{"status":"completed","input":{"filePath":"/Users/saifulpotential/Potential/nestfind-sample/.claude/nestjs/guides/workflow-generate-e2e-tests.md"},"output":"<path>/Users/saifulpotential/Potential/nestfind-sample/.claude/nestjs/guides/workflow-generate-e2e-tests.md</path>\n<type>file</type>\n<content>\n1: # E2E Test Generator Guide\n2: \n3: Complete guide to generating end-to-end tests for NestJS controllers and API endpoints.\n4: \n5: ## Table of Contents\n6: \n7: - [When to Generate Tests](#when-to-generate-tests)\n8: - [Test Infrastructure](#test-infrastructure)\n9: - [Quick Start - Generate Tests](#quick-start---generate-tests)\n10: - [Test Patterns by Endpoint Type](#test-patterns-by-endpoint-type)\n11: - [Using Fixtures](#using-fixtures)\n12: - [Creating Mocks](#creating-mocks)\n13: - [Smart Detection Rules](#smart-detection-rules)\n14: - [Complete Examples](#complete-examples)\n15: - [Test Checklist](#test-checklist)\n16: \n17: ---\n18: \n19: ## When to Generate Tests\n20: \n21: This guide activates automatically when:\n22: \n23: - Creating a new controller or adding routes\n24: - Creating or modifying entities\n25: - You ask to \"generate tests\" or \"create e2e tests\"\n26: - You finish implementing an API endpoint\n27: \n28: **Manual invocation:** Ask Claude to \"generate e2e tests for [module/controller]\"\n29: \n30: ---\n31: \n32: ## Test Infrastructure\n33: \n34: ### Directory Structure\n35: \n36: ```\n37: test/\n38: ├── e2e/                          # E2E test files\n39: │   ├── auth.e2e-spec.ts         # Auth module tests\n40: │   ├── users.e2e-spec.ts        # Users module tests\n41: │   └── [module].e2e-spec.ts     # Your module tests\n42: ├── setup/                        # Test infrastructure\n43: │   ├── test-app.factory.ts      # NestJS test app bootstrap\n44: │   ├── test-database.ts         # DB connection & cleanup\n45: │   └── global-setup.ts          # Jest global hooks\n46: ├── fixtures/                     # Test data factories\n47: │   ├── user.fixture.ts          # User creation helpers\n48: │   └── auth.fixture.ts          # JWT token generation\n49: ├── mocks/                        # Service mocks\n50: │   └── mail.service.mock.ts     # Mock email service\n51: └── jest-e2e.json                # E2E Jest config\n52: ```\n53: \n54: ### Running Tests\n55: \n56: ```bash\n57: # Start test database\n58: npm run docker:test\n59: \n60: # Run all E2E tests\n61: npm run test:e2e\n62: \n63: # Run specific test file\n64: npm run test:e2e -- --testPathPattern=auth\n65: \n66: # Run with coverage\n67: npm run test:e2e:cov\n68: \n69: # Watch mode\n70: npm run test:e2e:watch\n71: ```\n72: \n73: ---\n74: \n75: ## Quick Start - Generate Tests\n76: \n77: ### Step 1: Create Test File\n78: \n79: ```typescript\n80: // test/e2e/[module].e2e-spec.ts\n81: import { INestApplication } from '@nestjs/common';\n82: import { TestingModule } from '@nestjs/testing';\n83: import request from 'supertest';\n84: import { DataSource } from 'typeorm';\n85: \n86: import {\n87:     createTestApp,\n88:     closeTestApp,\n89:     TestAppContext,\n90: } from '../setup/test-app.factory';\n91: import {\n92:     getTestDataSource,\n93:     cleanDatabase,\n94:     closeDatabase,\n95: } from '../setup/test-database';\n96: import {\n97:     createTestUser,\n98:     testUsers,\n99:     TEST_PASSWORD,\n100:     seedTestUsers,\n101: } from '../fixtures/user.fixture';\n102: import { generateAccessToken, authHeader } from '../fixtures/auth.fixture';\n103: import { User } from 'src/modules/users/user.entity';\n104: \n105: describe('[ModuleName] E2E Tests', () => {\n106:     let app: INestApplication;\n107:     let module: TestingModule;\n108:     let dataSource: DataSource;\n109: \n110:     beforeAll(async () => {\n111:         dataSource = await getTestDataSource();\n112:         const context: TestAppContext = await createTestApp();\n113:         app = context.app;\n114:         module = context.module;\n115:     });\n116: \n117:     afterAll(async () => {\n118:         await closeTestApp({ app, module });\n119:         await closeDatabase();\n120:     });\n121: \n122:     beforeEach(async () => {\n123:         await cleanDatabase(dataSource);\n124:     });\n125: \n126:     // Add describe blocks for each endpoint\n127: });\n128: ```\n129: \n130: ### Step 2: Add Endpoint Tests\n131: \n132: For each endpoint, add a `describe` block with test cases.\n133: \n134: ---\n135: \n136: ## Test Patterns by Endpoint Type\n137: \n138: ### CRUD Endpoints (BaseController)\n139: \n140: ```typescript\n141: describe('[Resource] CRUD E2E', () => {\n142:     let testUser: User;\n143:     let validToken: string;\n144: \n145:     beforeEach(async () => {\n146:         testUser = await createTestUser(dataSource, testUsers.admin);\n147:         validToken = generateAccessToken(testUser);\n148:     });\n149: \n150:     describe('POST /[resource]', () => {\n151:         it('should create resource with valid data', async () => {\n152:             const response = await request(app.getHttpServer())\n153:                 .post('/[resource]')\n154:                 .set(authHeader(validToken))\n155:                 .send({\n156:                     // Valid DTO fields\n157:                     name: 'Test Resource',\n158:                 })\n159:                 .expect(201);\n160: \n161:             expect(response.body.success).toBe(true);\n162:             expect(response.body.data).toHaveProperty('id');\n163:         });\n164: \n165:         it('should return 400 for invalid data', async () => {\n166:             await request(app.getHttpServer())\n167:                 .post('/[resource]')\n168:                 .set(authHeader(validToken))\n169:                 .send({\n170:                     // Invalid/missing required fields\n171:                 })\n172:                 .expect(400);\n173:         });\n174: \n175:         it('should return 401 without authentication', async () => {\n176:             await request(app.getHttpServer())\n177:                 .post('/[resource]')\n178:                 .send({ name: 'Test' })\n179:                 .expect(401);\n180:         });\n181:     });\n182: \n183:     describe('GET /[resource]', () => {\n184:         it('should return paginated list', async () => {\n185:             // Create test data first\n186:             await request(app.getHttpServer())\n187:                 .post('/[resource]')\n188:                 .set(authHeader(validToken))\n189:                 .send({ name: 'Test 1' });\n190: \n191:             const response = await request(app.getHttpServer())\n192:                 .get('/[resource]')\n193:                 .set(authHeader(validToken))\n194:                 .expect(200);\n195: \n196:             expect(response.body.success).toBe(true);\n197:             expect(Array.isArray(response.body.data)).toBe(true);\n198:         });\n199: \n200:         it('should filter by query params', async () => {\n201:             const response = await request(app.getHttpServer())\n202:                 .get('/[resource]?search=test')\n203:                 .set(authHeader(validToken))\n204:                 .expect(200);\n205: \n206:             expect(response.body.success).toBe(true);\n207:         });\n208:     });\n209: \n210:     describe('GET /[resource]/:id', () => {\n211:         it('should return resource by id', async () => {\n212:             // Create resource first\n213:             const createResponse = await request(app.getHttpServer())\n214:                 .post('/[resource]')\n215:                 .set(authHeader(validToken))\n216:                 .send({ name: 'Test' });\n217: \n218:             const resourceId = createResponse.body.data.id;\n219: \n220:             const response = await request(app.getHttpServer())\n221:                 .get(`/[resource]/${resourceId}`)\n222:                 .set(authHeader(validToken))\n223:                 .expect(200);\n224: \n225:             expect(response.body.data.id).toBe(resourceId);\n226:         });\n227: \n228:         it('should return 404 for non-existent id', async () => {\n229:             await request(app.getHttpServer())\n230:                 .get('/[resource]/00000000-0000-0000-0000-000000000000')\n231:                 .set(authHeader(validToken))\n232:                 .expect(404);\n233:         });\n234:     });\n235: \n236:     describe('PATCH /[resource]/:id', () => {\n237:         it('should update resource', async () => {\n238:             // Create first\n239:             const createResponse = await request(app.getHttpServer())\n240:                 .post('/[resource]')\n241:                 .set(authHeader(validToken))\n242:                 .send({ name: 'Original' });\n243: \n244:             const resourceId = createResponse.body.data.id;\n245: \n246:             const response = await request(app.getHttpServer())\n247:                 .patch(`/[resource]/${resourceId}`)\n248:                 .set(authHeader(validToken))\n249:                 .send({ name: 'Updated' })\n250:                 .expect(200);\n251: \n252:             expect(response.body.data.name).toBe('Updated');\n253:         });\n254: \n255:         it('should return 404 for non-existent id', async () => {\n256:             await request(app.getHttpServer())\n257:                 .patch('/[resource]/00000000-0000-0000-0000-000000000000')\n258:                 .set(authHeader(validToken))\n259:                 .send({ name: 'Updated' })\n260:                 .expect(404);\n261:         });\n262:     });\n263: \n264:     describe('DELETE /[resource]/:id', () => {\n265:         it('should delete resource', async () => {\n266:             // Create first\n267:             const createResponse = await request(app.getHttpServer())\n268:                 .post('/[resource]')\n269:                 .set(authHeader(validToken))\n270:                 .send({ name: 'To Delete' });\n271: \n272:             const resourceId = createResponse.body.data.id;\n273: \n274:             await request(app.getHttpServer())\n275:                 .delete(`/[resource]/${resourceId}`)\n276:                 .set(authHeader(validToken))\n277:                 .expect(200);\n278: \n279:             // Verify deleted\n280:             await request(app.getHttpServer())\n281:                 .get(`/[resource]/${resourceId}`)\n282:                 .set(authHeader(validToken))\n283:                 .expect(404);\n284:         });\n285:     });\n286: });\n287: ```\n288: \n289: ### Role-Based Access (Manager/Member)\n290: \n291: ```typescript\n292: describe('[Resource] Role-Based Access', () => {\n293:     let manager: User;\n294:     let member: User;\n295:     let otherManager: User;\n296:     let managerToken: string;\n297:     let memberToken: string;\n298:     let otherManagerToken: string;\n299: \n300:     beforeEach(async () => {\n301:         const users = await seedTestUsers(dataSource);\n302:         manager = users.admin;\n303:         member = users.user;\n304:         otherManager = await createTestUser(dataSource, {\n305:             email: 'other-manager@example.com',\n306:             password: TEST_PASSWORD,\n307:             firstName: 'Other',\n308:             lastName: 'Manager',\n309:             role: RolesEnum.ADMIN,\n310:         });\n311: \n312:         managerToken = generateAccessToken(manager);\n313:         memberToken = generateAccessToken(member);\n314:         otherManagerToken = generateAccessToken(otherManager);\n315: \n316:         // Setup relationship assignment if needed\n317:     });\n318: \n319:     it('should allow assigned manager to access member data', async () => {\n320:         const response = await request(app.getHttpServer())\n321:             .get(`/[resource]/users/${member.id}`)\n322:             .set(authHeader(managerToken))\n323:             .expect(200);\n324: \n325:         expect(response.body.success).toBe(true);\n326:     });\n327: \n328:     it('should deny unassigned manager access', async () => {\n329:         await request(app.getHttpServer())\n330:             .get(`/[resource]/users/${member.id}`)\n331:             .set(authHeader(otherManagerToken))\n332:             .expect(403);\n333:     });\n334: \n335:     it('should allow member to access own data', async () => {\n336:         const response = await request(app.getHttpServer())\n337:             .get(`/[resource]/my-data`)\n338:             .set(authHeader(memberToken))\n339:             .expect(200);\n340: \n341:         expect(response.body.success).toBe(true);\n342:     });\n343: \n344:     it('should deny member access to other member data', async () => {\n345:         const otherMember = await createTestUser(dataSource, {\n346:             email: 'other-member@example.com',\n347:             password: TEST_PASSWORD,\n348:             firstName: 'Other',\n349:             lastName: 'Member',\n350:             role: RolesEnum.USER,\n351:         });\n352: \n353:         await request(app.getHttpServer())\n354:             .get(`/[resource]/users/${otherMember.id}`)\n355:             .set(authHeader(memberToken))\n356:             .expect(403);\n357:     });\n358: });\n359: ```\n360: \n361: ### Admin-Only Endpoints\n362: \n363: ```typescript\n364: describe('[Resource] Admin-Only', () => {\n365:     let adminUser: User;\n366:     let regularUser: User;\n367:     let adminToken: string;\n368:     let userToken: string;\n369: \n370:     beforeEach(async () => {\n371:         const users = await seedTestUsers(dataSource);\n372:         adminUser = users.admin;\n373:         regularUser = users.user;\n374:         adminToken = generateAccessToken(adminUser);\n375:         userToken = generateAccessToken(regularUser);\n376:     });\n377: \n378:     it('should allow admin access', async () => {\n379:         const response = await request(app.getHttpServer())\n380:             .get('/[resource]/admin-only')\n381:             .set(authHeader(adminToken))\n382:             .expect(200);\n383: \n384:         expect(response.body.success).toBe(true);\n385:     });\n386: \n387:     it('should deny non-admin users', async () => {\n388:         await request(app.getHttpServer())\n389:             .get('/[resource]/admin-only')\n390:             .set(authHeader(userToken))\n391:             .expect(403);\n392:     });\n393: });\n394: ```\n395: \n396: ---\n397: \n398: ## Using Fixtures\n399: \n400: ### User Fixture (test/fixtures/user.fixture.ts)\n401: \n402: ```typescript\n403: // Pre-defined test users\n404: import {\n405:     testUsers,\n406:     TEST_PASSWORD,\n407:     createTestUser,\n408:     seedTestUsers,\n409: } from '../fixtures/user.fixture';\n410: \n411: // Create single user\n412: const admin = await createTestUser(dataSource, testUsers.admin);\n413: const manager = await createTestUser(dataSource, testUsers.admin);\n414: const member = await createTestUser(dataSource, testUsers.user);\n415: \n416: // Create all users at once\n417: const users = await seedTestUsers(dataSource);\n418: // users.admin, users.user\n419: \n420: // Custom user\n421: const customUser = await createTestUser(dataSource, {\n422:     email: 'custom@example.com',\n423:     password: TEST_PASSWORD,\n424:     firstName: 'Custom',\n425:     lastName: 'User',\n426:     role: RolesEnum.ADMIN,\n427: });\n428: ```\n429: \n430: ### Auth Fixture (test/fixtures/auth.fixture.ts)\n431: \n432: ```typescript\n433: import {\n434:     generateAccessToken,\n435:     generateRefreshToken,\n436:     authHeader,\n437: } from '../fixtures/auth.fixture';\n438: \n439: // Generate tokens\n440: const accessToken = generateAccessToken(user);\n441: const refreshToken = generateRefreshToken(user);\n442: \n443: // Use in requests\n444: await request(app.getHttpServer())\n445:     .get('/protected-route')\n446:     .set(authHeader(accessToken)) // { Authorization: 'Bearer xxx' }\n447:     .expect(200);\n448: ```\n449: \n450: ### Creating New Fixtures\n451: \n452: ```typescript\n453: // test/fixtures/[entity].fixture.ts\n454: import { DataSource } from 'typeorm';\n455: import { YourEntity } from 'src/modules/[module]/[entity].entity';\n456: \n457: export const testEntities = {\n458:     default: {\n459:         name: 'Test Entity',\n460:         // ... other fields\n461:     },\n462:     variant: {\n463:         name: 'Another Entity',\n464:         // ... other fields\n465:     },\n466: };\n467: \n468: export async function createTestEntity(\n469:     dataSource: DataSource,\n470:     data: Partial<YourEntity>,\n471: ): Promise<YourEntity> {\n472:     const repository = dataSource.getRepository(YourEntity);\n473:     const entity = repository.create(data);\n474:     return await repository.save(entity);\n475: }\n476: ```\n477: \n478: ---\n479: \n480: ## Creating Mocks\n481: \n482: ### Mock Service Pattern\n483: \n484: ```typescript\n485: // test/mocks/[service].mock.ts\n486: import { Injectable } from '@nestjs/common';\n487: \n488: @Injectable()\n489: export class Mock[Service]Service {\n490:     private capturedData: any[] = [];\n491: \n492:     // Implement all methods from original service\n493:     async sendNotification(data: any): Promise<void> {\n494:         this.capturedData.push(data);\n495:     }\n496: \n497:     // Test utilities\n498:     getCapturedData(): any[] {\n499:         return this.capturedData;\n500:     }\n501: \n502:     getLastCaptured(): any | undefined {\n503:         return this.capturedData[this.capturedData.length - 1];\n504:     }\n505: \n506:     clear(): void {\n507:         this.capturedData = [];\n508:     }\n509: }\n510: ```\n511: \n512: ### Using Mocks in Tests\n513: \n514: ```typescript\n515: // In test-app.factory.ts, override the service:\n516: .overrideProvider(OriginalService)\n517: .useClass(MockService)\n518: \n519: // In tests:\n520: const mockService = module.get<MockService>(OriginalService);\n521: \n522: // After action\n523: const captured = mockService.getLastCaptured();\n524: expect(captured).toBeDefined();\n525: expect(captured.recipient).toBe('test@example.com');\n526: \n527: // Cleanup\n528: beforeEach(() => {\n529:     mockService.clear();\n530: });\n531: ```\n532: \n533: ---\n534: \n535: ## Smart Detection Rules\n536: \n537: ### Generate Complete Tests When:\n538: \n539: - Endpoint extends BaseController with standard CRUD\n540: - Standard REST patterns (GET, POST, PATCH, DELETE)\n541: - Single entity operations\n542: - No external service dependencies\n543: - Clear DTO validation\n544: \n545: ### Generate Skeleton Tests When:\n546: \n547: - Custom business logic beyond CRUD\n548: - Multiple entity interactions\n549: - External service calls (payment, notification, etc.)\n550: - WebSocket endpoints\n551: - File upload/download\n552: - Complex query parameters\n553: \n554: ### Skeleton Test Format\n555: \n556: ```typescript\n557: describe('[Complex Endpoint]', () => {\n558:     it.todo('should handle [specific scenario]');\n559:     // TODO: Implement test for complex business logic\n560:     // Consider: [specific considerations]\n561: \n562:     it('should return expected response structure', async () => {\n563:         // Basic structure test - implement details\n564:         const response = await request(app.getHttpServer())\n565:             .post('/complex-endpoint')\n566:             .set(authHeader(validToken))\n567:             .send({\n568:                 // TODO: Add valid request body\n569:             });\n570: \n571:         // TODO: Add specific assertions\n572:         expect(response.status).toBeLessThan(500);\n573:     });\n574: });\n575: ```\n576: \n577: ---\n578: \n579: ## Complete Examples\n580: \n581: ### Items Module E2E Test\n582: \n583: ```typescript\n584: // test/e2e/items.e2e-spec.ts\n585: import { INestApplication } from '@nestjs/common';\n586: import { TestingModule } from '@nestjs/testing';\n587: import request from 'supertest';\n588: import { DataSource } from 'typeorm';\n589: \n590: import {\n591:     createTestApp,\n592:     closeTestApp,\n593:     TestAppContext,\n594: } from '../setup/test-app.factory';\n595: import {\n596:     getTestDataSource,\n597:     cleanDatabase,\n598:     closeDatabase,\n599: } from '../setup/test-database';\n600: import {\n601:     createTestUser,\n602:     testUsers,\n603:     seedTestUsers,\n604: } from '../fixtures/user.fixture';\n605: import { generateAccessToken, authHeader } from '../fixtures/auth.fixture';\n606: import { User } from 'src/modules/users/user.entity';\n607: import { RolesEnum } from 'src/shared/enums';\n608: \n609: describe('Items E2E Tests', () => {\n610:     let app: INestApplication;\n611:     let module: TestingModule;\n612:     let dataSource: DataSource;\n613: \n614:     beforeAll(async () => {\n615:         dataSource = await getTestDataSource();\n616:         const context: TestAppContext = await createTestApp();\n617:         app = context.app;\n618:         module = context.module;\n619:     });\n620: \n621:     afterAll(async () => {\n622:         await closeTestApp({ app, module });\n623:         await closeDatabase();\n624:     });\n625: \n626:     beforeEach(async () => {\n627:         await cleanDatabase(dataSource);\n628:     });\n629: \n630:     describe('Item CRUD (Admin Only)', () => {\n631:         let adminUser: User;\n632:         let adminToken: string;\n633:         let regularUser: User;\n634:         let userToken: string;\n635: \n636:         beforeEach(async () => {\n637:             const users = await seedTestUsers(dataSource);\n638:             adminUser = users.admin;\n639:             regularUser = users.user;\n640:             adminToken = generateAccessToken(adminUser);\n641:             userToken = generateAccessToken(regularUser);\n642:         });\n643: \n644:         describe('POST /items', () => {\n645:             it('should create item as admin', async () => {\n646:                 const response = await request(app.getHttpServer())\n647:                     .post('/items')\n648:                     .set(authHeader(adminToken))\n649:                     .send({\n650:                         title: 'Sample Item',\n651:                         description: 'A sample item for testing',\n652:                         category: 'GENERAL',\n653:                     })\n654:                     .expect(201);\n655: \n656:                 expect(response.body.success).toBe(true);\n657:                 expect(response.body.data.title).toBe('Sample Item');\n658:             });\n659: \n660:             it('should deny non-admin users', async () => {\n661:                 await request(app.getHttpServer())\n662:                     .post('/items')\n663:                     .set(authHeader(userToken))\n664:                     .send({\n665:                         title: 'Sample Item',\n666:                         description: 'A sample item',\n667:                         category: 'GENERAL',\n668:                     })\n669:                     .expect(403);\n670:             });\n671:         });\n672: \n673:         describe('GET /items', () => {\n674:             it('should return item list', async () => {\n675:                 // Create item first\n676:                 await request(app.getHttpServer())\n677:                     .post('/items')\n678:                     .set(authHeader(adminToken))\n679:                     .send({\n680:                         title: 'Sample Item',\n681:                         description: 'Test',\n682:                         category: 'GENERAL',\n683:                     });\n684: \n685:                 const response = await request(app.getHttpServer())\n686:                     .get('/items')\n687:                     .set(authHeader(userToken))\n688:                     .expect(200);\n689: \n690:                 expect(response.body.success).toBe(true);\n691:                 expect(Array.isArray(response.body.data)).toBe(true);\n692:             });\n693: \n694:             it('should filter by category', async () => {\n695:                 const response = await request(app.getHttpServer())\n696:                     .get('/items?category=GENERAL')\n697:                     .set(authHeader(userToken))\n698:                     .expect(200);\n699: \n700:                 expect(response.body.success).toBe(true);\n701:             });\n702:         });\n703:     });\n704: \n705:     describe('Item Assignments (Admin to User)', () => {\n706:         let admin: User;\n707:         let user: User;\n708:         let adminToken: string;\n709:         let itemId: string;\n710: \n711:         beforeEach(async () => {\n712:             const users = await seedTestUsers(dataSource);\n713:             admin = users.admin;\n714:             user = users.user;\n715:             adminToken = generateAccessToken(admin);\n716: \n717:             // Create an item\n718:             const itemResponse = await request(app.getHttpServer())\n719:                 .post('/items')\n720:                 .set(authHeader(adminToken))\n721:                 .send({\n722:                     title: 'Test Item',\n723:                     description: 'For assignment',\n724:                     category: 'GENERAL',\n725:                 });\n726:             itemId = itemResponse.body.data.id;\n727:         });\n728: \n729:         it('should assign item to user', async () => {\n730:             const response = await request(app.getHttpServer())\n731:                 .post('/items/assignments')\n732:                 .set(authHeader(adminToken))\n733:                 .send({\n734:                     userId: user.id,\n735:                     itemId: itemId,\n736:                     notes: 'Please review',\n737:                 })\n738:                 .expect(201);\n739: \n740:             expect(response.body.success).toBe(true);\n741:             expect(response.body.data.userId).toBe(user.id);\n742:         });\n743: \n744:         it('should get user assignments', async () => {\n745:             // Create assignment first\n746:             await request(app.getHttpServer())\n747:                 .post('/items/assignments')\n748:                 .set(authHeader(adminToken))\n749:                 .send({\n750:                     userId: user.id,\n751:                     itemId: itemId,\n752:                 });\n753: \n754:             const response = await request(app.getHttpServer())\n755:                 .get(`/items/assignments/user/${user.id}`)\n756:                 .set(authHeader(adminToken))\n757:                 .expect(200);\n758: \n759:             expect(response.body.success).toBe(true);\n760:             expect(Array.isArray(response.body.data)).toBe(true);\n761:         });\n762:     });\n763: });\n764: ```\n765: \n766: ---\n767: \n768: ## Test Checklist\n769: \n770: ### For Every New Endpoint\n771: \n772: - [ ] **Authentication Tests**\n773:     - [ ] Returns 401 without token\n774:     - [ ] Returns 401 with invalid token\n775:     - [ ] Accepts valid token\n776: \n777: - [ ] **Authorization Tests** (if role-restricted)\n778:     - [ ] Allows authorized roles\n779:     - [ ] Returns 403 for unauthorized roles\n780: \n781: - [ ] **Validation Tests**\n782:     - [ ] Returns 400 for missing required fields\n783:     - [ ] Returns 400 for invalid field formats\n784:     - [ ] Accepts valid input\n785: \n786: - [ ] **Success Cases**\n787:     - [ ] Returns correct status code (200/201)\n788:     - [ ] Returns expected response structure\n789:     - [ ] Data is persisted/modified correctly\n790: \n791: - [ ] **Error Cases**\n792:     - [ ] Returns 404 for non-existent resources\n793:     - [ ] Returns 409 for conflicts (if applicable)\n794:     - [ ] Handles edge cases gracefully\n795: \n796: ### For CRUD Endpoints\n797: \n798: - [ ] POST - Create with valid data\n799: - [ ] POST - Validation errors\n800: - [ ] GET (list) - Returns paginated results\n801: - [ ] GET (list) - Filter/search works\n802: - [ ] GET (single) - Returns by ID\n803: - [ ] GET (single) - 404 for invalid ID\n804: - [ ] PATCH - Updates successfully\n805: - [ ] PATCH - Partial update works\n806: - [ ] DELETE - Removes resource\n807: - [ ] DELETE - 404 for invalid ID\n808: \n809: ### For Role-Based Endpoints\n810: \n811: - [ ] Admin can access admin routes\n812: - [ ] User can access user routes\n813: - [ ] Admin can access assigned user data\n814: - [ ] Admin cannot access unassigned user data (if relationship guards exist)\n815: - [ ] User can access own data\n816: - [ ] User cannot access other user data\n817: \n818: ---\n819: \n820: **Related Files:**\n821: \n822: - [testing-guide.md](testing-guide.md) - General testing strategies\n823: - [middleware-guide.md](middleware-guide.md) - Authentication guards\n824: - [complete-examples.md](../examples/complete-examples.md) - Full implementation examples\n\n(End of file - total 824 lines)\n</content>","metadata":{"preview":"# E2E Test Generator Guide\n\nComplete guide to generating end-to-end tests for NestJS controllers and API endpoints.\n\n## Table of Contents\n\n- [When to Generate Tests](#when-to-generate-tests)\n- [Test Infrastructure](#test-infrastructure)\n- [Quick Start - Generate Tests](#quick-start---generate-tests)\n- [Test Patterns by Endpoint Type](#test-patterns-by-endpoint-type)\n- [Using Fixtures](#using-fixtures)\n- [Creating Mocks](#creating-mocks)\n- [Smart Detection Rules](#smart-detection-rules)\n- [Complete Examples](#complete-examples)\n- [Test Checklist](#test-checklist)\n\n---\n\n## When to Generate Tests\n","truncated":false,"loaded":[]},"title":".claude/nestjs/guides/workflow-generate-e2e-tests.md","time":{"start":1779245338281,"end":1779245338584}},"id":"prt_e434948fb001bM0xuvQmbBOpHw","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","messageID":"msg_e4349258d001462IQjtT8WZ3ff"}}
+{"type":"step_finish","timestamp":1779245339218,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"id":"prt_e43495250001h9dp1AOY5bwKkH","reason":"tool-calls","snapshot":"bb1d03f416bb6763b3341c1c7aaa97f59b93a754","messageID":"msg_e4349258d001462IQjtT8WZ3ff","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","type":"step-finish","tokens":{"total":21156,"input":540,"output":242,"reasoning":22,"cache":{"write":0,"read":20352}},"cost":0.002153424}}
+{"type":"step_start","timestamp":1779245340900,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"id":"prt_e434958e2001eqm5dcN3DdWYuF","messageID":"msg_e434952990018kRXyLP68ptq1n","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","snapshot":"dc369ace60b40b851a549a98c5ebc918df672919","type":"step-start"}}
+{"type":"text","timestamp":1779245364602,"sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","part":{"id":"prt_e434968a0001rPKKIwmVcXUqPL","messageID":"msg_e434952990018kRXyLP68ptq1n","sessionID":"ses_1bcb71ffeffe12RN8iTKwKNz3O","type":"text","text":"Now let me explore the existing project structure to understand what's already in place.","time":{"start":1779245344928,"end":1779245364601}}}

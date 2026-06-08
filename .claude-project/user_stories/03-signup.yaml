@@ -1,0 +1,46 @@
+id: US-03-SIGNUP
+role: all
+feature: Self-service renter registration
+page: 03-signup.html
+goal: |
+  A visitor creates a new renter account by providing their name, email,
+  password, and optional phone number.
+
+acceptance_criteria:
+  - id: AC-1
+    description: Fill all required fields (name, email, password min 8 chars) and submit to register
+    ui_route: /signup
+    endpoint: POST /api/auth/register
+    expected: "201 Created, httpOnly cookies set, redirect to /home"
+  - id: AC-2
+    description: Fill all fields including optional phone number and submit
+    ui_route: /signup
+    endpoint: POST /api/auth/register
+    expected: "201 Created, response includes phone field, redirect to /home"
+  - id: AC-3
+    description: Click "Log in" link to navigate to the login page
+    ui_route: /signup
+    endpoint: none
+    expected: "Navigate to /02-login.html"
+
+boundary_cases:
+  - case: "Password fewer than 8 characters — client-side minlength validation prevents submission, server returns 400 if bypassed"
+  - case: "Name field empty — form validation prevents submission"
+  - case: "Phone field left empty — submission succeeds, phone is null in response"
+  - case: "Name at max 100 characters — accepted; name at 101 characters — 400 validation error"
+
+error_scenarios:
+  - scenario: "Email already registered — server returns 409 Conflict, user sees 'Email already registered' message"
+  - scenario: "Invalid email format — server returns 400, user sees field-level validation error"
+  - scenario: "Network failure — request times out, user sees connection error"
+
+state_transitions:
+  - state: loading
+    expected: "Create Account button shows spinner and is disabled"
+  - state: error
+    expected: "Inline error message below the affected field or form-level banner"
+  - state: success
+    expected: "Redirect to /home (property search page)"
+
+fixture_refs:
+  - users.renter

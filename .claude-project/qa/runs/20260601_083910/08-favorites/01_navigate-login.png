@@ -1,0 +1,17 @@
+### Result
+- [Screenshot of viewport](.playwright-cli/page-2026-06-01T02-43-35-815Z.png)
+### Ran Playwright code
+```js
+// Screenshot viewport and save it as .playwright-cli/page-2026-06-01T02-43-35-815Z.png
+await page.screenshot({
+  path: '.playwright-cli/page-2026-06-01T02-43-35-815Z.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+### Page
+- Page URL: http://localhost:5173/login
+- Page Title: NestFind
+- Console: 1 errors, 3 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-06-01T02-43-30-860Z.log#L6

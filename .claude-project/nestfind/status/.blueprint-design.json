@@ -1,0 +1,60 @@
+{
+  "blueprint": "design",
+  "blueprint_source": "design-2.yaml",
+  "target_dir": "/Users/saifulpotential/Potential/nestfind-sample",
+  "started_at": "2026-05-19T09:48:23.009Z",
+  "completed_nodes": [
+    {
+      "id": "require-prd",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T09:48:23.014Z",
+      "duration_ms": 3,
+      "output": "PRD docs verified\n"
+    },
+    {
+      "id": "domain-research",
+      "type": "agentic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "design-variations",
+      "type": "agentic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "validate-variations-output",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "require-variation-selection",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "design-full-generation",
+      "type": "agentic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "evidence-check",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "design-evaluator",
+      "type": "evaluator",
+      "status": "PENDING",
+      "timestamp": null
+    }
+  ],
+  "current_node": "domain-research",
+  "status": "running"
+}

@@ -1,0 +1,22 @@
+generated_at: "2026-05-20T08:00:00.000Z"
+gen: 1
+total_pages: 22
+wired_pages: 17
+skipped_pages: 0
+missing_endpoints:
+  - resource: profile
+    module_name: auth
+    reason: >
+      The profile page (frontend/app/pages/profile.tsx) calls PATCH /auth/me to update
+      the current user's name and phone. The auth controller has GET /auth/me but no
+      PATCH /auth/me endpoint. Adding this would let renters update their own profile
+      without exposing the admin-only /users/:id route.
+    suggested_routes:
+      - method: PATCH
+        path: /auth/me
+        description: Update the authenticated user's own profile (name, phone)
+        scope: worker
+        request_shape: UpdateProfileDto
+        response_shape: AuthUser
+    consuming_pages:
+      - frontend/app/pages/profile.tsx

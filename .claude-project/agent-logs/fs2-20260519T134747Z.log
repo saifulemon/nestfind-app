@@ -1,0 +1,90 @@
+
+======================================================================
+fullstack-2 orchestrator
+======================================================================
+project:  nestfind
+target:   /Users/saifulpotential/Potential/nestfind-sample
+mode:     single-phase (integrate)
+dry-run:  false
+verbose:  false
+episode:  ep-2026-05-19T13-47-48-039-d78n → .claude-project/episodes/ep-2026-05-19T13-47-48-039-d78n.jsonl
+
+======================================================================
+phase: integrate
+======================================================================
+blueprint: integrate-2.yaml (v2)
+nodes:    11
+v2 contracts: ok (all agentic nodes declare required_output_file)
+
+── [1/11] deterministic: pre-check ─────────────────────────────────────
+  description: Verify backend controllers + frontend pages exist
+  ✅ PASS (14ms, 1 attempt)
+
+── [2/11] deterministic: extract-api-routes ────────────────────────────
+  description: Generate PROJECT_API_ROUTES.md from @Controller decorators
+  ✅ PASS (16ms, 1 attempt)
+
+── [3/11] agentic: integrate ───────────────────────────────────────────
+  description: Wire frontend pages to backend via TanStack Query hooks + API services
+[agent-factory] backend: opencode
+
+[opencode] node: integrate
+[opencode] model: (default)
+[opencode] log:   .claude-project/nestfind/agent-logs/integrate-2026-05-19T13-47-48-210Z.log
+[opencode] launching subprocess...
+  duration: 2171.8s | turns: 137
+  result:   Now let me read existing service files and key pages to understand patterns:
+Let me read all pages in parallel to understand what needs wiring:
+Now let me read types, utils, and remaining files:
+Now I
+  ✅ PASS (artifact verified: /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/INTEGRATION_REPORT.md, 6091 bytes)
+
+── [4/11] deterministic: verify-page-coverage ──────────────────────────
+  description: Enforce >= X% of data-pages use a TanStack Query hook (static pages exempt; progressive gen1 50%, gen2 70%, gen3+ 90%)
+  ✅ PASS (113ms, 1 attempt)
+
+── [5/11] deterministic: verify-missing-endpoints-yaml ─────────────────
+  description: Verify integrate agent produced MISSING_ENDPOINTS.yaml (cross-gen signal for backend self-heal)
+  ✅ PASS (16ms, 1 attempt)
+
+── [6/11] agentic: contract-validation ─────────────────────────────────
+  description: Verify frontend form payloads match backend DTO contracts (RULE-I3)
+[agent-factory] backend: opencode
+
+[opencode] node: contract-validation
+[opencode] model: (default)
+[opencode] log:   .claude-project/nestfind/agent-logs/contract-validation-2026-05-19T14-24-00-170Z.log
+[opencode] launching subprocess...
+  duration: 498.0s | turns: 82
+  result:   Now let me read all the frontend forms and their service files to compare against the API contract. Let me start with the auth-related forms.
+Now let me read the auth hooks, services, validations, and
+  ✅ PASS (artifact verified: /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/CONTRACT_VALIDATION.md, 7048 bytes)
+
+── [7/11] deterministic: fix-contracts ─────────────────────────────────
+  description: Abort if contract mismatches found — route to agent to fix
+  ✅ PASS (7ms, 1 attempt)
+
+── [8/11] deterministic: typecheck ─────────────────────────────────────
+  description: Verify frontend compiles after integration
+  ✅ PASS (1416ms, 1 attempt)
+
+── [9/11] deterministic: evidence-check ────────────────────────────────
+  description: Verify API hook/service files were created
+  ❌ FAIL (exit 1, 1 attempts)
+    stdout: FAIL: no API hook/service files in frontend
+
+ABORT: deterministic node failed
+
+updated PIPELINE_STATUS.md: integrate → Failed (score 0)
+
+❌ integrate: 8 pass | 1 fail | 0 skipped | 2671.4s
+   failed at: evidence-check
+
+======================================================================
+EPISODE REWARD
+======================================================================
+  phase rewards:
+    integrate      -0.31  (Δscore: +0.000, cost: $0.626)
+  terminal:   +0.00  (none)
+  ─────────────────────
+  R_episode:  -0.31

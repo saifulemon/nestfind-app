@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Favorites - NestFind</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+background-color: #F9FAFB; /* Gray 50 */
+}
+.line-clamp-1 {
+display: -webkit-box;
+-webkit-line-clamp: 1;
+-webkit-box-orient: vertical;
+overflow: hidden;
+}
+</style></head>
+<body class="text-gray-900 antialiased min-h-screen flex flex-col pt-16">
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50 px-4 lg:px-6 flex items-center justify-between">
+        <!-- Left: Logo -->
+        <a href="./05-home.html" class="flex items-center gap-2.5 flex-shrink-0 group">
+            <div class="w-8 h-8 bg-[#0066CC] rounded-lg flex items-center justify-center text-white shadow-sm group-hover:bg-[#0055aa] transition-colors">
+                <span class="iconify" data-icon="lucide:home" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+            </div>
+            <span class="text-lg font-semibold tracking-tight text-gray-900">NestFind</span>
+        </a>
+
+        <!-- Center: Search -->
+        <div class="hidden md:flex flex-1 justify-center">
+            <div class="relative w-[400px]">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="iconify text-gray-400" data-icon="lucide:search" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                </div>
+                <input type="text" class="block w-full h-10 rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-500 focus:bg-white focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] focus:outline-none transition-all" placeholder="City, neighborhood, or address">
+            </div>
+        </div>
+
+        <!-- Right: Actions -->
+        <div class="flex items-center gap-6 flex-shrink-0">
+            <a href="./08-favorites.html" class="text-sm font-medium text-[#0066CC] flex items-center gap-2">
+                <span class="iconify" data-icon="lucide:heart" data-width="18" data-height="18" style="stroke-width: 1.5; fill: currentColor;"></span>
+                <span class="hidden sm:inline">Favorites</span>
+            </a>
+            <a href="./09-my-inquiries.html" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2">
+                <span class="iconify" data-icon="lucide:message-square" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                <span class="hidden sm:inline">My Inquiries</span>
+            </a>
+            <a href="./10-profile.html" class="flex items-center gap-2 focus:outline-none ml-2">
+                <img id="navAvatar" class="h-8 w-8 rounded-full object-cover ring-2 ring-white shadow-sm border border-gray-200" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80" alt="User avatar">
+            </a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-8">
+        
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Favorites</h1>
+            <p class="text-gray-500 mt-1.5 text-sm">12 saved properties</p>
+        </div>
+
+        <!-- Property Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Card 1 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer block">
+                <!-- Image Container -->
+                <div class="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="Modern Apartment" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+
+                    <!-- Badge -->
+                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full border border-gray-100 shadow-sm z-10">
+                        <span class="text-xs font-medium text-gray-700">Apartment</span>
+                    </div>
+
+                    <!-- Favorite Button -->
+                    <button onclick="event.preventDefault(); event.stopPropagation();" class="absolute top-3 right-3 h-8 w-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10 border border-gray-100">
+                        <span class="iconify text-[#FF6B6B]" data-icon="lucide:heart" data-width="16" data-height="16" style="stroke-width: 1.5; fill: #FF6B6B;"></span>
+                    </button>
+                </div>
+
+                <!-- Content -->
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-xl font-semibold text-[#0066CC] tracking-tight">$3,500<span class="text-xs text-gray-500 font-normal ml-0.5">/mo</span></h3>
+                    </div>
+                    <p class="text-sm text-gray-700 line-clamp-1 mb-3">1024 Market Street, San Francisco, CA 94103</p>
+
+                    <div class="flex items-center gap-3 text-xs text-gray-500 pt-3 border-t border-gray-100">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bed-double" data-width="14" data-height="14"></span>
+                            <span>2 Beds</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bath" data-width="14" data-height="14"></span>
+                            <span>2 Baths</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:ruler" data-width="14" data-height="14"></span>
+                            <span>1,100 sqft</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 2 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer block">
+                <div class="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="Suburban House" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full border border-gray-100 shadow-sm z-10">
+                        <span class="text-xs font-medium text-gray-700">House</span>
+                    </div>
+                    <button onclick="event.preventDefault(); event.stopPropagation();" class="absolute top-3 right-3 h-8 w-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10 border border-gray-100">
+                        <span class="iconify text-[#FF6B6B]" data-icon="lucide:heart" data-width="16" data-height="16" style="stroke-width: 1.5; fill: #FF6B6B;"></span>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-xl font-semibold text-[#0066CC] tracking-tight">$4,200<span class="text-xs text-gray-500 font-normal ml-0.5">/mo</span></h3>
+                    </div>
+                    <p class="text-sm text-gray-700 line-clamp-1 mb-3">8842 Willow Lane, Palo Alto, CA 94301</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-500 pt-3 border-t border-gray-100">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bed-double" data-width="14" data-height="14"></span>
+                            <span>4 Beds</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bath" data-width="14" data-height="14"></span>
+                            <span>3 Baths</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:ruler" data-width="14" data-height="14"></span>
+                            <span>2,400 sqft</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 3 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer block">
+                <div class="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="Modern Loft" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full border border-gray-100 shadow-sm z-10">
+                        <span class="text-xs font-medium text-gray-700">Loft</span>
+                    </div>
+                    <button onclick="event.preventDefault(); event.stopPropagation();" class="absolute top-3 right-3 h-8 w-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10 border border-gray-100">
+                        <span class="iconify text-[#FF6B6B]" data-icon="lucide:heart" data-width="16" data-height="16" style="stroke-width: 1.5; fill: #FF6B6B;"></span>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-xl font-semibold text-[#0066CC] tracking-tight">$1,800<span class="text-xs text-gray-500 font-normal ml-0.5">/mo</span></h3>
+                    </div>
+                    <p class="text-sm text-gray-700 line-clamp-1 mb-3">500 Main St, Apt 4B, Oakland, CA 94607</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-500 pt-3 border-t border-gray-100">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bed-double" data-width="14" data-height="14"></span>
+                            <span>Studio</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bath" data-width="14" data-height="14"></span>
+                            <span>1 Bath</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:ruler" data-width="14" data-height="14"></span>
+                            <span>650 sqft</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 4 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer block">
+                <div class="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="Cozy Condo" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full border border-gray-100 shadow-sm z-10">
+                        <span class="text-xs font-medium text-gray-700">Condo</span>
+                    </div>
+                    <button onclick="event.preventDefault(); event.stopPropagation();" class="absolute top-3 right-3 h-8 w-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10 border border-gray-100">
+                        <span class="iconify text-[#FF6B6B]" data-icon="lucide:heart" data-width="16" data-height="16" style="stroke-width: 1.5; fill: #FF6B6B;"></span>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-xl font-semibold text-[#0066CC] tracking-tight">$2,250<span class="text-xs text-gray-500 font-normal ml-0.5">/mo</span></h3>
+                    </div>
+                    <p class="text-sm text-gray-700 line-clamp-1 mb-3">772 Park Avenue, San Jose, CA 95126</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-500 pt-3 border-t border-gray-100">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bed-double" data-width="14" data-height="14"></span>
+                            <span>1 Bed</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bath" data-width="14" data-height="14"></span>
+                            <span>1 Bath</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:ruler" data-width="14" data-height="14"></span>
+                            <span>820 sqft</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 5 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer block">
+                <div class="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="Townhouse" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full border border-gray-100 shadow-sm z-10">
+                        <span class="text-xs font-medium text-gray-700">Townhouse</span>
+                    </div>
+                    <button onclick="event.preventDefault(); event.stopPropagation();" class="absolute top-3 right-3 h-8 w-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10 border border-gray-100">
+                        <span class="iconify text-[#FF6B6B]" data-icon="lucide:heart" data-width="16" data-height="16" style="stroke-width: 1.5; fill: #FF6B6B;"></span>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-xl font-semibold text-[#0066CC] tracking-tight">$2,950<span class="text-xs text-gray-500 font-normal ml-0.5">/mo</span></h3>
+                    </div>
+                    <p class="text-sm text-gray-700 line-clamp-1 mb-3">123 Creek Drive, Walnut Creek, CA 94596</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-500 pt-3 border-t border-gray-100">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bed-double" data-width="14" data-height="14"></span>
+                            <span>2 Beds</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bath" data-width="14" data-height="14"></span>
+                            <span>2.5 Baths</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:ruler" data-width="14" data-height="14"></span>
+                            <span>1,450 sqft</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 6 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer block">
+                <div class="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="Luxury Apartment" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full border border-gray-100 shadow-sm z-10">
+                        <span class="text-xs font-medium text-gray-700">Luxury</span>
+                    </div>
+                    <button onclick="event.preventDefault(); event.stopPropagation();" class="absolute top-3 right-3 h-8 w-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10 border border-gray-100">
+                        <span class="iconify text-[#FF6B6B]" data-icon="lucide:heart" data-width="16" data-height="16" style="stroke-width: 1.5; fill: #FF6B6B;"></span>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="text-xl font-semibold text-[#0066CC] tracking-tight">$5,200<span class="text-xs text-gray-500 font-normal ml-0.5">/mo</span></h3>
+                    </div>
+                    <p class="text-sm text-gray-700 line-clamp-1 mb-3">800 Mission St, Penthouse, SF, CA 94103</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-500 pt-3 border-t border-gray-100">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bed-double" data-width="14" data-height="14"></span>
+                            <span>3 Beds</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:bath" data-width="14" data-height="14"></span>
+                            <span>3 Baths</span>
+                        </div>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify" data-icon="lucide:ruler" data-width="14" data-height="14"></span>
+                            <span>2,100 sqft</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+
+    <!-- Profile Data Loader -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('nestfind_profile');
+            if (saved) {
+                const profile = JSON.parse(saved);
+                if (profile.avatar) {
+                    const navAvatar = document.getElementById('navAvatar');
+                    if (navAvatar) navAvatar.src = profile.avatar;
+                }
+            }
+        });
+    </script>
+
+</body></html>

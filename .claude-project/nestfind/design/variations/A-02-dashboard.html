@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NestFind — Admin Dashboard (Variant A)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@iconify/iconify@2.2.1/dist/iconify.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',system-ui,sans-serif;background:#0B0F1A;color:#F1F5F9;line-height:1.6}
+    .app{display:flex;max-width:1440px;margin:0 auto;min-height:100vh}
+    .sidebar{width:240px;background:#080B14;padding:24px 0;border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column}
+    .sidebar-logo{font-size:22px;font-weight:700;padding:0 20px;margin-bottom:32px;background:linear-gradient(135deg,#4A90D9,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sidebar-nav{flex:1;display:flex;flex-direction:column;gap:2px}
+    .sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 20px;color:#94A3B8;font-size:14px;font-weight:500;text-decoration:none;transition:all .2s;border-left:3px solid transparent}
+    .sidebar-item:hover{color:#F1F5F9;background:rgba(255,255,255,0.03)}
+    .sidebar-item.active{color:#F1F5F9;background:rgba(74,144,217,0.1);border-left-color:#4A90D9}
+    .sidebar-section{margin-top:16px;padding:0 20px 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#64748B}
+    .main{flex:1;display:flex;flex-direction:column}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid rgba(255,255,255,0.06)}
+    .topbar-search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 14px;width:300px;color:#94A3B8;font-size:14px}
+    .topbar-search input{background:transparent;border:none;outline:none;color:#F1F5F9;font-family:inherit;font-size:14px;flex:1}
+    .topbar-search input::placeholder{color:#64748B}
+    .topbar-right{display:flex;align-items:center;gap:16px}
+    .topbar-icon{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:#94A3B8}
+    .topbar-icon:hover{background:rgba(255,255,255,0.08);color:#F1F5F9}
+    .avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#4A90D9,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer}
+    .content{padding:32px;flex:1}
+    .content h2{font-size:28px;font-weight:700;margin-bottom:24px;letter-spacing:-0.02em}
+    .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:32px}
+    .stat-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:24px;transition:all .3s}
+    .stat-card:hover{box-shadow:0 0 20px rgba(74,144,217,0.1);background:rgba(255,255,255,0.06)}
+    .stat-label{font-size:13px;font-weight:500;color:#64748B;margin-bottom:8px}
+    .stat-value{font-size:32px;font-weight:700;margin-bottom:4px}
+    .stat-change{font-size:12px;color:#4ADE80}
+    .grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .panel{background:rgba(255,255,255,0.04);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:24px}
+    .panel h3{font-size:18px;font-weight:600;margin-bottom:16px}
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;padding:10px 12px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#64748B;border-bottom:1px solid rgba(255,255,255,0.06)}
+    td{padding:12px;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.04);color:#94A3B8}
+    td:first-child,tbody td:first-child{color:#F1F5F9;font-weight:500}
+    .badge{padding:2px 10px;border-radius:9999px;font-size:11px;font-weight:600}
+    .badge-new{color:#4ADE80;box-shadow:0 0 8px rgba(74,222,128,0.3)}
+    .badge-read{color:#94A3B8;background:rgba(255,255,255,0.06)}
+    .badge-responded{color:#94A3B8}
+    .btn-sm{height:32px;padding:0 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+    .btn-sm-primary{background:linear-gradient(135deg,#4A90D9,#7C3AED);color:#fff}
+    .btn-sm-primary:hover{box-shadow:0 0 12px rgba(74,144,217,0.3)}
+    .btn-sm-ghost{background:transparent;color:#94A3B8;border:1px solid rgba(255,255,255,0.08)}
+    .btn-sm-ghost:hover{color:#F1F5F9;border-color:rgba(255,255,255,0.15)}
+    .flex-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .var-nav-bar{position:fixed;top:16px;right:16px;display:flex;gap:8px;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);padding:8px 14px;border-radius:10px;z-index:9999;border:1px solid rgba(255,255,255,0.1)}
+    .var-nav-bar a{color:#94A3B8;text-decoration:none;font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;transition:all .2s}
+    .var-nav-bar a.active{background:linear-gradient(135deg,#4A90D9,#7C3AED);color:#fff}
+    .var-nav-bar a:hover:not(.active){color:#F1F5F9;background:rgba(255,255,255,0.08)}
+    .var-nav-bar .sep{color:rgba(255,255,255,0.2);font-size:12px;line-height:1.8}
+    .quick-actions{display:flex;gap:10px;margin-bottom:24px}
+  </style>
+</head>
+<body>
+<nav class="var-nav-bar">
+  <a href="A-02-dashboard.html" class="active">A</a>
+  <a href="B-02-dashboard.html">B</a>
+  <a href="C-02-dashboard.html">C</a>
+  <span class="sep">|</span><span style="color:#64748B;font-size:11px;padding:4px 4px">Dashboard</span>
+</nav>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">NestFind</div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-item active"><iconify-icon icon="mdi:view-dashboard" width="20"></iconify-icon>Overview</a>
+      <a href="#" class="sidebar-item"><iconify-icon icon="mdi:office-building" width="20"></iconify-icon>Properties</a>
+      <a href="#" class="sidebar-item"><iconify-icon icon="mdi:email-outline" width="20"></iconify-icon>Inquiries</a>
+      <a href="#" class="sidebar-item"><iconify-icon icon="mdi:account-group" width="20"></iconify-icon>Users</a>
+      <div class="sidebar-section">Settings</div>
+      <a href="#" class="sidebar-item"><iconify-icon icon="mdi:cog" width="20"></iconify-icon>Settings</a>
+      <a href="#" class="sidebar-item"><iconify-icon icon="mdi:logout" width="20"></iconify-icon>Logout</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-search"><iconify-icon icon="mdi:magnify" width="16"></iconify-icon><input type="text" placeholder="Search properties, users..."></div>
+      <div class="topbar-right">
+        <div class="topbar-icon"><iconify-icon icon="mdi:bell-outline" width="18"></iconify-icon></div>
+        <div class="avatar">AD</div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="flex-row"><h2>Dashboard</h2></div>
+      <div class="quick-actions"><button class="btn-sm btn-sm-primary">+ Add Property</button><button class="btn-sm btn-sm-ghost">View All Inquiries</button></div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Total Properties</div><div class="stat-value">124</div><div class="stat-change">&#8593; 8 this month</div></div>
+        <div class="stat-card"><div class="stat-label">Active Listings</div><div class="stat-value">98</div><div class="stat-change" style="color:#FBBF24">79% occupancy</div></div>
+        <div class="stat-card"><div class="stat-label">Total Inquiries</div><div class="stat-value">47</div><div class="stat-change">&#8593; 12 new</div></div>
+        <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value">1,203</div><div class="stat-change">&#8593; 34 this week</div></div>
+      </div>
+      <div class="grid-2col">
+        <div class="panel">
+          <div class="flex-row"><h3>Recent Inquiries</h3><button class="btn-sm btn-sm-ghost">View All</button></div>
+          <table>
+            <thead><tr><th>Renter</th><th>Property</th><th>Status</th><th>Date</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Sarah Chen</td><td>Sunset Heights Apt 4B</td><td><span class="badge badge-new">New</span></td><td>Today</td><td><button class="btn-sm btn-sm-ghost">Reply</button></td></tr>
+              <tr><td>Mike Torres</td><td>Downtown Loft Studio</td><td><span class="badge badge-read">Read</span></td><td>Yesterday</td><td><button class="btn-sm btn-sm-ghost">Reply</button></td></tr>
+              <tr><td>Emily Park</td><td>Park View Townhouse</td><td><span class="badge badge-responded">Responded</span></td><td>2 days ago</td><td><button class="btn-sm btn-sm-ghost">View</button></td></tr>
+              <tr><td>James Wilson</td><td>Harbor Point Condos</td><td><span class="badge badge-new">New</span></td><td>2 days ago</td><td><button class="btn-sm btn-sm-ghost">Reply</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="flex-row"><h3>Recent Properties</h3><button class="btn-sm btn-sm-ghost">View All</button></div>
+          <table>
+            <thead><tr><th>Property</th><th>Type</th><th>Price</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Sunset Heights Apt 4B</td><td>Apartment</td><td>$1,850</td><td><span class="badge badge-new">Active</span></td></tr>
+              <tr><td>Downtown Loft Studio</td><td>Studio</td><td>$2,400</td><td><span class="badge badge-new">Active</span></td></tr>
+              <tr><td>Park View Townhouse</td><td>Townhouse</td><td>$3,200</td><td><span class="badge badge-new">Active</span></td></tr>
+              <tr><td>Harbor Point Condos</td><td>Condo</td><td>$2,100</td><td><span class="badge" style="color:#FBBF24">Draft</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

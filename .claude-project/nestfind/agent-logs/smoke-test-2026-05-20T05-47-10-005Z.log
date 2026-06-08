@@ -1,0 +1,195 @@
+=== NODE: smoke-test ===
+timestamp: 2026-05-20T05:47:10.006Z
+backend: opencode
+model: (default)
+command: opencode run --format json "<prompt>"
+
+=== PROMPT (6392 chars) ===
+=== CONTEXT FILES ===
+
+--- .claude/skills/qa/test-smoke/SKILL.md ---
+---
+name: smoke-test
+description: Visits every route in the app via playwright-cli, checks for runtime errors (console errors, network 4xx/5xx, unhandled rejections, white screens). Captures and counts console errors per route. Produces a health report with console error summary.
+---
+
+# Smoke Test Skill
+
+Fast, shallow health check of every route in the application. Opens each page in a headless browser and verifies it loads without runtime errors. This is the "pulse check" before deep E2E testing.
+
+**Purpose**: Catch the class of bugs where pages build successfully but fail at runtime (e.g., 401 on public endpoints, unhandled promise rejections, white screens from missing imports, infinite console error loops).
+
+---
+
+## Prerequisites
+
+1. `playwright-cli` installed: `npm install -g @playwright/cli@latest`
+2. **Servers running**: Load and execute `.claude/skills/dev/ensure-servers/SKILL.md`
+   - This will read ports from `ecosystem.config.js`, kill stale processes, start fresh via PM2, and health-check
+   - It produces `BACKEND_PORT`, `FRONTEND_PORT`, `BACKEND_URL`, `FRONTEND_URL`
+   - Use these values below — do NOT hardcode `localhost:3000` or `localhost:5173`
+3. **Seed data verified** (for auth/admin routes):
+   - Test user: `testuser@test.com` / `TestPassword123!`
+   - Admin user: `admin@test.com` / `AdminPassword123!`
+   - Verify via: `curl -s -X POST ${BACKEND_URL}/auth/login -H 'Content-Type: application/json' -d '{"email":"testuser@test.com","password":"TestPassword123!"}'`
+   - If login returns 401: mark auth routes as BLOCKED (not FAIL)
+   - Record: `TEST_USER_AVAILABLE=true|false`, `ADMIN_USER_AVAILABLE=true|false`
+
+---
+
+## Route Discovery
+
+### Option A: Route Manifest (preferred)
+
+Read `.claude-project/routes.yaml` for explicit route definitions with categories:
+
+```yaml
+routes:
+  public:
+    - path: /
+      name: Home
+  auth_required:
+    - path: /cart
+      name: Cart
+  admin_required:
+    - path: /admin
+      name: Admin Dashboard
+```
+
+### Option B: Auto-discover from Router
+
+If no routes.yaml exists, read the frontend router config:
+
+```bash
+# Find route config files
+cat frontend/app/routes.ts frontend/app/routes/*.routes.ts 2>/dev/null
+```
+
+Extract all `route('path', 'file.tsx')` entries. Classify based on layout wrappers:
+- Inside `layout('pages/auth/layout.tsx', ...)` = auth (guest-only)
+- Inside `layout('components/layouts/ProtectedLayout.tsx', ...)` = protected
+- `<ProtectedRoute>` = auth_required
+- `<ProtectedRoute requiredRole="admin">` = admin_required
+
+---
+
+## Execution Protocol
+
+### Step 0: Clean Console Logs
+
+Archive previous console log files so each run starts fresh:
+
+```bash
+mkdir -p .claude-project/qa/smoke/console-logs-archive/
+mv .claude-project/.playwright-cli/console-*.log \
+   .claude-project/qa/smoke/console-logs-archive/ 2>/dev/null || true
+```
+
+### Step 1: Classify Routes
+
+Group all routes into three categories:
+- **public**: Visit directly, no auth needed
+- **auth_required**: Login as test user first (skip if `TEST_USER_AVAILABLE=false`)
+- **admin_required**: Login as admin user first (skip if `ADMIN_USER_AVAILABLE=false`)
+
+### Step 2: Test Public Routes
+
+For each public route:
+
+```bash
+# 1. Open session
+SESSION="smoke-public-$(echo $ROUTE | tr '/' '-' | sed 's/^-//')-$(openssl rand -hex 2)"
+PLAYWRIGHT_MCP_VIEWPORT_SIZE=1440x900 playwright-cli -s=$SESSION open "${FRONTEND_URL}${ROUTE}" --persistent
+
+# 2. Wait for page load (snapshot triggers wait)
+playwright-cli -s=$SESSION snapshot
+
+# 3. Wait 3 seconds for async errors to fire (API calls, auth checks)
+sleep 3
+
+# 4. Take second snapshot to capture post-load state
+playwright-cli -s=$SESSION snapshot
+
+# 5. Screenshot for evidence
+playwright-cli -s=$SESSION screenshot
+# Save to: .claude-project/qa/smoke/{route-kebab}.png
+
+# 6. Capture console errors (see Console Error Capture Protocol below)
+
+# 7. Close session
+playwright-cli -s=$SESSION close
+```
+
+**Evaluate each route:**
+
+| Check | How | PASS | FAIL |
+|-------|-----|------|------|
+| Page loads | Snapshot returns content | Elements visible in accessibility tree | Timeout or empty tree |
+| No white screen | Snapshot has > 3 meaningful elements | Content nodes present | Only root div, no children |
+| No error overlay | Check snapshot for error boundary text | No error boundary triggered | React error boundary or "Something went wrong" |
+| Content renders | Snapshot shows expected page elements | Page-specific content visible | Generic fallback or loading stuck |
+| Console errors within budget | Read console log, count errors | Total <= budget for category | Total exceeds budget OR infinite loop |
+| No P0 error patterns | Check console log for crash/loop patterns | No P0 patterns found | ErrorBoundary caught, infinite auth loop |
+
+### Step 3: Test Auth-Required Routes
+
+**Pre-check**: If `TEST_USER_AVAILABLE=false`:
+- Mark ALL auth-required routes as **BLOCKED** (not FAIL)
+- Reason: "No test user in database — run seed script"
+- Skip login attempt entirely (avoids triggering 
+
+
+=== END CONTEXT ===
+
+
+Smoke test every route listed in .claude-project/nestfind/status/routes.yaml via playwright-cli.
+
+FOR EACH ROUTE:
+1. Navigate to the route
+2. Take a snapshot
+3. Check console for TypeError, ReferenceError, uncaught exceptions
+4. Verify root element has visible children (not a blank page)
+5. Check for unexpected network errors (401 on public, 500 anywhere)
+
+This smoke test is BLOCKING — all routes must pass before backend tests run.
+
+REPORT FILE: .claude-project/nestfind/status/SMOKE_TEST_STATUS.md
+Required fields (regex-verifiable):
+  phase: test-api-smoke
+  routes_probed: <int>
+  routes_passed: <int>
+  console_errors: <int>
+  network_errors: <int>
+  crashes: <int>
+  failed_routes: [list]
+
+If any route crashes, mark it in failed_routes. Fix before running backend tests.
+
+
+
+=== MANDATORY ARTIFACT CONTRACT ===
+You MUST produce a file at this exact path:
+  /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/SMOKE_TEST_STATUS.md
+
+The orchestrator will verify this file exists after your run.
+If the file is missing, your work is REJECTED regardless of what you say.
+
+The file MUST contain content matching this regex:
+  routes_probed:\s*[0-9]+
+This pattern is verified by code, not interpretation.
+
+Do not claim the task is complete without writing this file.
+
+=== STDOUT ===
+[stderr] Performing one time database migration, may take a few minutes...
+[stderr] sqlite-migration:done
+Database migration complete.
+[stderr] [cc-analytics] loaded — server=http://211.188.49.111:8080 dir=/Users/saifulpotential/Potential/nestfind-sample
+{"type":"step_start","timestamp":1779256034045,"sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","part":{"id":"prt_e43ec82fa0017O3TS6h7FCIlBk","messageID":"msg_e43ec7a82001SS5t6wkyWKSZZC","sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","snapshot":"fb0548214a15b6294f61d565690e63e6ff0e90f9","type":"step-start"}}
+{"type":"tool_use","timestamp":1779256040686,"sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","part":{"type":"tool","tool":"read","callID":"call_00_wpKkBnKJDDmjJErWsKdD8747","state":{"status":"error","input":{"filePath":"/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/routes.yaml"},"error":"File not found: /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/routes.yaml","time":{"start":1779256040680,"end":1779256040685}},"id":"prt_e43ec9763001HYWRIvSWnrU36k","sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","messageID":"msg_e43ec7a82001SS5t6wkyWKSZZC"}}
+{"type":"tool_use","timestamp":1779256042068,"sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","part":{"type":"tool","tool":"glob","callID":"call_01_QZQQLDqt0rs7j5GVVOi25800","state":{"status":"completed","input":{"pattern":"ecosystem.config.*"},"output":"No files found","metadata":{"count":0,"truncated":false},"title":"","time":{"start":1779256041781,"end":1779256042067}},"id":"prt_e43ec9e24001DA7p108oecB8ZC","sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","messageID":"msg_e43ec7a82001SS5t6wkyWKSZZC"}}
+{"type":"tool_use","timestamp":1779256043478,"sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","part":{"type":"tool","tool":"glob","callID":"call_02_Ehge0wQiF5swYhLKRodx3132","state":{"status":"completed","input":{"pattern":".claude-project/nestfind/status/SMOKE_TEST_STATUS.md"},"output":"No files found","metadata":{"count":0,"truncated":false},"title":"","time":{"start":1779256043191,"end":1779256043476}},"id":"prt_e43eca2b1001F03283CrC1dX7j","sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","messageID":"msg_e43ec7a82001SS5t6wkyWKSZZC"}}
+{"type":"tool_use","timestamp":1779256045005,"sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","part":{"type":"tool","tool":"read","callID":"call_03_HOl3HBqeuOLbqfBxqYin5809","state":{"status":"completed","input":{"filePath":"/Users/saifulpotential/Potential/nestfind-sample/.claude-project"},"output":"<path>/Users/saifulpotential/Potential/nestfind-sample/.claude-project</path>\n<type>directory</type>\n<entries>\nagent-logs/\ncontext/\ndocs/\nepisodes/\nnestfind/\nprd/\nstatus/\nuser_stories/\n\n(8 entries)\n</entries>","metadata":{"preview":"agent-logs/\ncontext/\ndocs/\nepisodes/\nnestfind/\nprd/\nstatus/\nuser_stories/","truncated":false,"loaded":[]},"title":".claude-project","time":{"start":1779256044728,"end":1779256045004}},"id":"prt_e43eca8300013xPovA7sH3m4k5","sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","messageID":"msg_e43ec7a82001SS5t6wkyWKSZZC"}}
+{"type":"step_finish","timestamp":1779256045575,"sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","part":{"id":"prt_e43ecb005001yrVJ4khBUSiWJF","reason":"tool-calls","snapshot":"9fa22aa73dab2535ee47d5b108a13e156f327cb0","messageID":"msg_e43ec7a82001SS5t6wkyWKSZZC","sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","type":"step-finish","tokens":{"total":16381,"input":16097,"output":191,"reasoning":93,"cache":{"write":0,"read":0}},"cost":0.0289971}}
+{"type":"step_start","timestamp":1779256047537,"sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","part":{"id":"prt_e43ecb7ad001Mwi4Cjfq97FglU","messageID":"msg_e43ecb04b0011qA208raUy67Mq","sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","snapshot":"073ac83508fdbe59f420b8e39cfbfc74b4c52b3f","type":"step-start"}}
+{"type":"tool_use","timestamp":1779256050932,"sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","part":{"type":"tool","tool":"read","callID":"call_00_F8OCAD9MYGyi4DYTuAJ25873","state":{"status":"completed","input":{"filePath":"/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind"},"output":"<path>/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind</path>\n<type>directory</type>\n<entries>\nagent-logs/\ncontext/\ndesign/\ndocs/\nmemory/\nstatus/\nuser_stories/\n\n(7 entries)\n</entries>","metadata":{"preview":"agent-logs/\ncontext/\ndesign/\ndocs/\nmemory/\nstatus/\nuser_stories/","truncated":false,"loaded":[]},"title":".claude-project/nestfind","time":{"start":1779256050658,"end":1779256050931}},"id":"prt_e43ecbf8e001NjS64ECvLTBw7k","sessionID":"ses_1bc138858ffedU2AjV1Dumh5RJ","messageID":"msg_e43ecb04b0011qA208raUy67Mq"}}

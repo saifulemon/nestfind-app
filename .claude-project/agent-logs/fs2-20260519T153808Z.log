@@ -1,0 +1,59 @@
+
+======================================================================
+fullstack-2 orchestrator
+======================================================================
+project:  nestfind
+target:   /Users/saifulpotential/Potential/nestfind-sample
+mode:     single-phase (test-api)
+dry-run:  false
+verbose:  false
+episode:  ep-2026-05-19T15-38-09-105-kd8j → .claude-project/episodes/ep-2026-05-19T15-38-09-105-kd8j.jsonl
+
+======================================================================
+phase: test-api
+======================================================================
+blueprint: test-api-2.yaml (v2)
+nodes:    6
+v2 contracts: ok (all agentic nodes declare required_output_file)
+
+── [1/6] deterministic: pre-check ──────────────────────────────────────
+  description: Verify backend compiles
+  ✅ PASS (2206ms, 1 attempt)
+
+── [2/6] deterministic: pm2-restart ────────────────────────────────────
+  description: Restart pm2 servers so they pick up freshly-generated backend/frontend code
+  ✅ PASS (536ms, 1 attempt)
+
+── [3/6] deterministic: ensure-servers ─────────────────────────────────
+  description: Verify backend + frontend servers are reachable
+  ✅ PASS (38ms, 1 attempt)
+
+── [4/6] agentic: smoke-test ───────────────────────────────────────────
+  description: Visit every route via playwright-cli, capture console errors
+[agent-factory] backend: opencode
+
+[opencode] node: smoke-test
+[opencode] model: (default)
+[opencode] log:   .claude-project/nestfind/agent-logs/smoke-test-2026-05-19T15-38-12-082Z.log
+[opencode] launching subprocess...
+  duration: 203.2s | turns: 40
+  result:   Now let me check what's running and discover server configs.
+Both ports are free, no PM2 processes. Let me start the servers. Let me check package.json for available scripts first.
+Starting both serve
+  ❌ FAIL: artifact verification failed
+    reason: file_missing
+    path:   /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/SMOKE_TEST_STATUS.md
+
+updated PIPELINE_STATUS.md: test-api → Failed (score 0)
+
+❌ test-api: 3 pass | 1 fail | 0 skipped | 206.0s
+   failed at: smoke-test
+
+======================================================================
+EPISODE REWARD
+======================================================================
+  phase rewards:
+    test-api       -10.03  (Δscore: +0.000, cost: $0.069)
+  terminal:   +0.00  (none)
+  ─────────────────────
+  R_episode:  -10.03

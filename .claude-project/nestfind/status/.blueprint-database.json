@@ -1,0 +1,60 @@
+{
+  "blueprint": "database",
+  "blueprint_source": "database-2.yaml",
+  "target_dir": "/Users/saifulpotential/Potential/nestfind-sample",
+  "started_at": "2026-05-19T07:09:51.493Z",
+  "completed_nodes": [
+    {
+      "id": "pre-check",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T07:09:51.496Z",
+      "duration_ms": 3,
+      "output": "PRD docs found\n"
+    },
+    {
+      "id": "scaffold-base-classes",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T07:09:51.511Z",
+      "duration_ms": 14,
+      "output": "exists: base.controller.ts — skipping\nexists: base.entity.ts — skipping\nexists: base.repository.ts — skipping\nexists: base.service.ts — skipping\nexists: index.ts — skipping\nscaffold-base-classes: copied=0 skipped=5 src=/Users/saifulpotential/Potential/nestfind-sample/.claude/nestjs/templates/core/base\n"
+    },
+    {
+      "id": "design-schema",
+      "type": "agentic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T07:21:20.031Z",
+      "duration_ms": 688517,
+      "turns": 47,
+      "cost_usd": 0.13756509600000003,
+      "artifact": "/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/DATABASE_SCHEMA_REPORT.md",
+      "agent_log": "/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/agent-logs/design-schema-2026-05-19T07-09-51-513Z.log"
+    },
+    {
+      "id": "typecheck",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T07:21:20.511Z",
+      "duration_ms": 479,
+      "output": ""
+    },
+    {
+      "id": "evidence-check",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-19T07:21:20.518Z",
+      "duration_ms": 6,
+      "output": "PASS: 10 entity files found\n"
+    },
+    {
+      "id": "database-evaluator",
+      "type": "evaluator",
+      "status": "FAIL",
+      "timestamp": "2026-05-19T07:31:57.004Z",
+      "error": "evaluator subprocess exited null: Performing one time database migration, may take a few minutes...\nsqlite-migration:done\nDatabase migration complete.\n[cc-analytics] loaded — server=http://211.188.49.111:8080 dir=/Users/saifulpotential/Potential/nestfind-sample\n"
+    }
+  ],
+  "current_node": null,
+  "status": "failed"
+}

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NestFind — Design Variations Showcase (A/B/C × Landing/Dashboard/Detail)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',system-ui,sans-serif;background:#1a1a2e;color:#e0e0e0;padding:20px}
+    h1{text-align:center;font-size:28px;font-weight:700;margin-bottom:8px;color:#fff}
+    .subtitle{text-align:center;color:#888;font-size:14px;margin-bottom:32px}
+    .showcase-grid{display:flex;flex-direction:column;gap:40px;max-width:1600px;margin:0 auto}
+    .row-label{font-size:18px;font-weight:600;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+    .row-label .dot{width:8px;height:8px;border-radius:50%}
+    .row-label .dot.landing{background:#4A90D9}
+    .row-label .dot.dashboard{background:#7C3AED}
+    .row-label .dot.detail{background:#F97068}
+    .card-row{display:flex;gap:20px;overflow-x:auto;padding-bottom:12px}
+    .card{flex:0 0 480px;background:#0B0F1A;border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;transition:all .2s}
+    .card:hover{border-color:rgba(74,144,217,0.3);box-shadow:0 0 24px rgba(74,144,217,0.1)}
+    .card iframe{width:100%;height:380px;border:none;transform:scale(0.33);transform-origin:0 0;width:303%;height:303%}
+    .card-label-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06)}
+    .card-label-bar .variant{font-size:14px;font-weight:700;padding:2px 10px;border-radius:6px;font-size:12px}
+    .card-label-bar .variant.A{background:linear-gradient(135deg,#4A90D9,#7C3AED);color:#fff}
+    .card-label-bar .variant.B{background:#4A90D9;color:#fff}
+    .card-label-bar .variant.C{background:#fff;color:#111827}
+    .card-label-bar .page-name{font-size:13px;color:#94A3B8;font-weight:500}
+    .card-body{height:340px;overflow:hidden;position:relative}
+    .card-body iframe{width:1440px;height:1100px;border:none;transform:scale(0.236);transform-origin:0 0;pointer-events:none}
+    .tabs{display:flex;justify-content:center;gap:12px;margin-bottom:32px;flex-wrap:wrap}
+    .tab{padding:8px 20px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#94A3B8;transition:all .2s}
+    .tab:hover{color:#fff;border-color:rgba(255,255,255,0.2)}
+    .tab.active{background:rgba(74,144,217,0.15);color:#4A90D9;border-color:rgba(74,144,217,0.3)}
+    .legend{display:flex;justify-content:center;gap:24px;margin-bottom:24px;flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:8px;font-size:13px;color:#94A3B8}
+    .legend-dot{width:10px;height:10px;border-radius:50%}
+  </style>
+</head>
+<body>
+  <h1>NestFind Design Variations</h1>
+  <p class="subtitle">3 archetypes × 3 pages = 9 HTML previews. Click any card to open full page.</p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:linear-gradient(135deg,#4A90D9,#7C3AED)"></span> Variant A — Dark Vibrant (Linear)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#4A90D9"></span> Variant B — Warm Friendly (Notion)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#fff;border:1px solid rgba(255,255,255,0.2)"></span> Variant C — Editorial Minimal (Apple)</div>
+  </div>
+
+  <div class="showcase-grid">
+    <!-- Landing Row -->
+    <div>
+      <div class="row-label"><span class="dot landing"></span> Landing Page</div>
+      <div class="card-row">
+        <div class="card">
+          <div class="card-label-bar"><span class="variant A">Variant A</span><span class="page-name">Landing</span></div>
+          <div class="card-body"><iframe src="A-01-landing.html" scrolling="no"></iframe></div>
+          <div style="padding:12px 16px;display:flex;gap:8px">
+            <a href="A-01-landing.html" target="_blank" style="font-size:12px;color:#4A90D9;text-decoration:none">Open full page &rarr;</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label-bar"><span class="variant B">Variant B</span><span class="page-name">Landing</span></div>
+          <div class="card-body"><iframe src="B-01-landing.html" scrolling="no"></iframe></div>
+          <div style="padding:12px 16px;display:flex;gap:8px">
+            <a href="B-01-landing.html" target="_blank" style="font-size:12px;color:#4A90D9;text-decoration:none">Open full page &rarr;</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label-bar"><span class="variant C">Variant C</span><span class="page-name">Landing</span></div>
+          <div class="card-body"><iframe src="C-01-landing.html" scrolling="no"></iframe></div>
+          <div style="padding:12px 16px;display:flex;gap:8px">
+            <a href="C-01-landing.html" target="_blank" style="font-size:12px;color:#4A90D9;text-decoration:none">Open full page &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Row -->
+    <div>
+      <div class="row-label"><span class="dot dashboard"></span> Admin Dashboard</div>
+      <div class="card-row">
+        <div class="card">
+          <div class="card-label-bar"><span class="variant A">Variant A</span><span class="page-name">Dashboard</span></div>
+          <div class="card-body"><iframe src="A-02-dashboard.html" scrolling="no"></iframe></div>
+          <div style="padding:12px 16px;display:flex;gap:8px">
+            <a href="A-02-dashboard.html" target="_blank" style="font-size:12px;color:#4A90D9;text-decoration:none">Open full page &rarr;</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label-bar"><span class="variant B">Variant B</span><span class="page-name">Dashboard</span></div>
+          <div class="card-body"><iframe src="B-02-dashboard.html" scrolling="no"></iframe></div>
+          <div style="padding:12px 16px;display:flex;gap:8px">
+            <a href="B-02-dashboard.html" target="_blank" style="font-size:12px;color:#4A90D9;text-decoration:none">Open full page &rarr;</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label-bar"><span class="variant C">Variant C</span><span class="page-name">Dashboard</span></div>
+          <div class="card-body"><iframe src="C-02-dashboard.html" scrolling="no"></iframe></div>
+          <div style="padding:12px 16px;display:flex;gap:8px">
+            <a href="C-02-dashboard.html" target="_blank" style="font-size:12px;color:#4A90D9;text-decoration:none">Open full page &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Row -->
+    <div>
+      <div class="row-label"><span class="dot detail"></span> Property Detail</div>
+      <div class="card-row">
+        <div class="card">
+          <div class="card-label-bar"><span class="variant A">Variant A</span><span class="page-name">Detail</span></div>
+          <div class="card-body"><iframe src="A-03-detail.html" scrolling="no"></iframe></div>
+          <div style="padding:12px 16px;display:flex;gap:8px">
+            <a href="A-03-detail.html" target="_blank" style="font-size:12px;color:#4A90D9;text-decoration:none">Open full page &rarr;</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label-bar"><span class="variant B">Variant B</span><span class="page-name">Detail</span></div>
+          <div class="card-body"><iframe src="B-03-detail.html" scrolling="no"></iframe></div>
+          <div style="padding:12px 16px;display:flex;gap:8px">
+            <a href="B-03-detail.html" target="_blank" style="font-size:12px;color:#4A90D9;text-decoration:none">Open full page &rarr;</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label-bar"><span class="variant C">Variant C</span><span class="page-name">Detail</span></div>
+          <div class="card-body"><iframe src="C-03-detail.html" scrolling="no"></iframe></div>
+          <div style="padding:12px 16px;display:flex;gap:8px">
+            <a href="C-03-detail.html" target="_blank" style="font-size:12px;color:#4A90D9;text-decoration:none">Open full page &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

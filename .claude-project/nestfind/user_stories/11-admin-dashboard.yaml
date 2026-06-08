@@ -1,0 +1,56 @@
+id: US-11-ADMIN-DASHBOARD
+role: admin
+feature: View admin dashboard with aggregate statistics, charts, and recent activity
+page: 11-admin-dashboard.html
+goal: |
+  An administrator views the dashboard overview showing key metrics (total
+  listings, renters, inquiries, pending), inquiry trend chart, listings-by-type
+  chart, and tables of recent listings and recent inquiries.
+
+acceptance_criteria:
+  - id: AC-1
+    description: View dashboard with four stat cards (Total Listings, Total Renters, Monthly Inquiries, Pending Inquiries) and trend indicators
+    ui_route: /admin/dashboard
+    endpoint: GET /api/admin/dashboard
+    expected: "200 OK, all four stat cards display correct data from API response"
+  - id: AC-2
+    description: View inquiry trends line chart and listings-by-type pie chart
+    ui_route: /admin/dashboard
+    endpoint: GET /api/admin/dashboard
+    expected: "Charts render with data from API; line chart shows inquiry trend, pie chart shows distribution by property type"
+  - id: AC-3
+    description: See "Recent Listings" table with property name, status badge, and time since added
+    ui_route: /admin/dashboard
+    endpoint: GET /api/admin/dashboard
+    expected: "Table rows populated from recentProperties array in API response"
+  - id: AC-4
+    description: See "Recent Inquiries" table with renter name, property interest, and time
+    ui_route: /admin/dashboard
+    endpoint: GET /api/admin/dashboard
+    expected: "Table rows populated from recentInquiries array in API response"
+  - id: AC-5
+    description: Navigate to sub-pages via sidebar: Properties, Renters, Inquiries
+    ui_route: /admin/dashboard
+    endpoint: none
+    expected: "Clicking sidebar links navigates to /12-admin-properties, /13-admin-renters, /14-admin-inquiries"
+
+boundary_cases:
+  - case: "Dashboard with zero data (new install) — all stats show zeros, charts render empty/placeholder state"
+  - case: "Date filter changed to 'Last 30 days' — chart data and stats recalculate for the selected period"
+
+error_scenarios:
+  - scenario: "Unauthenticated (401) — redirect to admin login page"
+  - scenario: "Insufficient permissions (403) — non-admin user sees forbidden page or redirect"
+  - scenario: "Dashboard API returns 500 — stat cards and charts show error state with retry"
+  - scenario: "Network failure — page shows error banner with retry CTA"
+
+state_transitions:
+  - state: loading
+    expected: "Skeleton placeholders for stat cards, charts, and table rows"
+  - state: error
+    expected: "Error banner at top of content area with retry button"
+  - state: empty (no data)
+    expected: "Stats show 0, charts show empty state with 'No data available'"
+
+fixture_refs:
+  - users.admin

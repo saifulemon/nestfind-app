@@ -1,0 +1,51 @@
+id: US-16-ADMIN-LOGIN
+role: all
+feature: Admin-only login page with security notice
+page: 16-admin-login.html
+goal: |
+  An administrator logs into the admin panel with their admin credentials.
+  The page includes a security notice that access is restricted to authorized
+  administrators only.
+
+acceptance_criteria:
+  - id: AC-1
+    description: Enter valid admin email and password, submit to authenticate
+    ui_route: /admin/login
+    endpoint: POST /api/auth/login
+    expected: "200 OK, httpOnly cookies set, redirect to /11-admin-dashboard.html"
+  - id: AC-2
+    description: Click "Back to main site" link to return to the public property search
+    ui_route: /admin/login
+    endpoint: none
+    expected: "Navigate to /05-home.html"
+  - id: AC-3
+    description: Click "Forgot Password?" link to navigate to forgot password flow
+    ui_route: /admin/login
+    endpoint: none
+    expected: "Navigate to /04-forgot-password.html"
+  - id: AC-4
+    description: Toggle "Remember me" checkbox (client-side preference)
+    ui_route: /admin/login
+    endpoint: none
+    expected: "Checkbox toggles between checked and unchecked"
+
+boundary_cases:
+  - case: "Email field empty — form validation prevents submission"
+  - case: "Password field empty — form validation prevents submission"
+  - case: "Renter credentials used on admin login — login succeeds (same endpoint) but redirects to /home instead of /admin/dashboard based on role"
+
+error_scenarios:
+  - scenario: "Invalid admin credentials — server returns 401 Unauthorized, inline error message"
+  - scenario: "Admin account suspended — server returns 403 Forbidden with suspension notice"
+  - scenario: "Network failure — request times out, user sees connection error"
+
+state_transitions:
+  - state: loading
+    expected: "Sign In button shows spinner and is disabled"
+  - state: error
+    expected: "Inline error message below form header"
+  - state: success
+    expected: "Redirect to admin dashboard"
+
+fixture_refs:
+  - users.admin

@@ -1,0 +1,71 @@
+project: nestfind
+description: |
+  NestFind is a streamlined rental property listing platform that connects
+  renters with available properties. The platform focuses exclusively on rentals,
+  providing a clean and efficient browsing experience with an admin dashboard
+  for property management.
+domain: nestfind.com
+type: web_application
+
+tech_stack:
+  backend: nestjs
+  frontend: react
+  database: postgresql
+  orm: typeorm
+  auth: jwt_http_only_cookies
+
+roles:
+  - name: Renter
+    description: Browse listings, view details, save favorites, submit inquiries
+    permissions:
+      - browse_properties
+      - view_property_details
+      - save_favorites
+      - submit_inquiries
+
+  - name: Admin
+    description: Full system access, manage properties, manage users, respond to inquiries
+    permissions:
+      - manage_properties
+      - manage_users
+      - view_inquiries
+      - respond_to_inquiries
+
+modules:
+  - name: Property Search
+    flow:
+      - Renter enters location or uses current location
+      - System displays matching property listings as cards
+      - Renter applies filters (price, bedrooms, property type)
+      - System updates results in real-time
+      - Renter clicks on a property card to view details
+
+  - name: Property Detail View
+    flow:
+      - Renter clicks on property listing
+      - System displays full property page with photos, amenities, description, map
+      - Renter can add property to favorites or submit inquiry
+
+  - name: Submit Inquiry
+    flow:
+      - Renter clicks Contact button on property detail
+      - System shows inquiry form (name, email, phone, message)
+      - Renter fills out form and submits
+      - System sends confirmation and notifies admin
+
+  - name: Admin Property Management
+    flow:
+      - Admin logs into dashboard
+      - Admin views list of all properties
+      - Admin can add new property with details and photos
+      - Admin can edit existing property information
+      - Admin can delete or archive property listing
+
+apis:
+  - name: Google Maps
+    purpose: Display property locations on map
+
+goals:
+  - Enable renters to quickly discover and browse rental properties
+  - Provide a simple inquiry system for renters to contact property managers
+  - Allow administrators to efficiently manage property listings and respond to inquiries

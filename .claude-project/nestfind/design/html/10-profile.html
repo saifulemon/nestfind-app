@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile Settings - NestFind</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+background-color: #F3F4F6;
+}
+.toast {
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease-out;
+}
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+</style></head>
+<body class="text-gray-900 antialiased min-h-screen flex flex-col pt-16">
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-20 right-4 z-[100] flex flex-col gap-2"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50 px-4 lg:px-6 flex items-center justify-between">
+        <!-- Left: Logo -->
+        <a href="./05-home.html" class="flex items-center gap-2.5 flex-shrink-0 group">
+            <div class="w-8 h-8 bg-[#0066CC] rounded-lg flex items-center justify-center text-white shadow-sm group-hover:bg-[#0055aa] transition-colors">
+                <span class="iconify" data-icon="lucide:home" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+            </div>
+            <span class="text-lg font-semibold tracking-tight text-gray-900">NestFind</span>
+        </a>
+
+        <!-- Right: Actions -->
+        <div class="flex items-center gap-6 flex-shrink-0">
+            <a href="./08-favorites.html" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2">
+                <span class="iconify" data-icon="lucide:heart" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                <span class="hidden sm:inline">Favorites</span>
+            </a>
+            <a href="./09-my-inquiries.html" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2">
+                <span class="iconify" data-icon="lucide:message-square" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                <span class="hidden sm:inline">My Inquiries</span>
+            </a>
+            <a href="./10-profile.html" class="flex items-center gap-2 focus:outline-none ml-2">
+                <img id="navAvatar" class="h-8 w-8 rounded-full object-cover ring-2 ring-[#0066CC] ring-offset-2 shadow-sm" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80" alt="User avatar">
+            </a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <div class="max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-6 flex flex-col md:flex-row gap-6">
+
+        <!-- LEFT SIDEBAR -->
+        <aside class="w-full md:w-[240px] flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-fit">
+            <!-- Profile Snippet -->
+            <div class="p-6 border-b border-gray-100 flex flex-col items-center text-center">
+                <img id="sidebarAvatar" class="h-16 w-16 rounded-full object-cover mb-3" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80" alt="Profile">
+                <h3 id="sidebarName" class="font-semibold text-gray-900 tracking-tight">Jane Doe</h3>
+                <p id="sidebarEmail" class="text-xs text-gray-500 mt-1">jane@example.com</p>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="p-3 space-y-1">
+                <button onclick="switchTab('personal')" id="tab-personal" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md bg-[#0066CC] text-white shadow-sm transition-colors">
+                    <span class="iconify" data-icon="lucide:user" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                    Personal Info
+                </button>
+                <button onclick="switchTab('notifications')" id="tab-notifications" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <span class="iconify" data-icon="lucide:bell" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                    Notifications
+                </button>
+                <button onclick="switchTab('security')" id="tab-security" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <span class="iconify" data-icon="lucide:shield" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                    Security
+                </button>
+                <div class="pt-2 mt-2 border-t border-gray-100">
+                    <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md text-[#FF6B6B] hover:bg-red-50 transition-colors">
+                        <span class="iconify" data-icon="lucide:log-out" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                        Log Out
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 bg-white rounded-lg shadow-sm border border-gray-200">
+
+            <!-- Personal Info Section -->
+            <div id="section-personal" class="p-6 md:p-8">
+                <h2 class="text-xl font-semibold text-gray-900 tracking-tight mb-6">Personal Information</h2>
+
+                <!-- Avatar Upload Section -->
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 pb-8 border-b border-gray-100">
+                    <div class="relative group cursor-pointer" onclick="document.getElementById('avatarInput').click()">
+                        <img id="profileAvatar" class="h-24 w-24 rounded-full object-cover ring-4 ring-white shadow-md" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80" alt="Profile">
+                        <div class="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="iconify text-white" data-icon="lucide:camera" data-width="24" data-height="24" style="stroke-width: 1.5;"></span>
+                        </div>
+                        <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="handleAvatarChange(event)">
+                    </div>
+                    <div class="flex flex-col items-center sm:items-start pt-2">
+                        <h3 class="text-sm font-medium text-gray-900">Profile Picture</h3>
+                        <p class="text-xs text-gray-500 mt-1 mb-3">PNG, JPG up to 5MB</p>
+                        <button onclick="document.getElementById('avatarInput').click()" class="text-sm font-medium text-[#0066CC] hover:text-[#0055aa] transition-colors">
+                            Change Photo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form Fields -->
+                <form id="profileForm" class="space-y-6" onsubmit="handleProfileSave(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Full Name -->
+                        <div class="space-y-1.5">
+                            <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <span class="iconify" data-icon="lucide:user" data-width="16" data-height="16" style="stroke-width: 1.5;"></span>
+                                </span>
+                                <input type="text" id="name" value="Jane Doe" class="block w-full h-10 rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-900 focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] focus:outline-none shadow-sm transition-all" required>
+                            </div>
+                            <p id="nameError" class="text-xs text-red-500 hidden">Please enter your full name</p>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="space-y-1.5">
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <span class="iconify" data-icon="lucide:mail" data-width="16" data-height="16" style="stroke-width: 1.5;"></span>
+                                </span>
+                                <input type="email" id="email" value="jane@example.com" class="block w-full h-10 rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-900 focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] focus:outline-none shadow-sm transition-all" required>
+                            </div>
+                            <p id="emailError" class="text-xs text-red-500 hidden">Please enter a valid email address</p>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="space-y-1.5">
+                            <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <span class="iconify" data-icon="lucide:phone" data-width="16" data-height="16" style="stroke-width: 1.5;"></span>
+                                </span>
+                                <input type="tel" id="phone" value="(555) 123-4567" class="block w-full h-10 rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-900 focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] focus:outline-none shadow-sm transition-all">
+                            </div>
+                            <p id="phoneError" class="text-xs text-red-500 hidden">Please enter a valid phone number</p>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="space-y-1.5">
+                            <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <span class="iconify" data-icon="lucide:map-pin" data-width="16" data-height="16" style="stroke-width: 1.5;"></span>
+                                </span>
+                                <input type="text" id="location" value="New York, NY" class="block w-full h-10 rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-900 focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] focus:outline-none shadow-sm transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bio -->
+                    <div class="space-y-1.5">
+                        <label for="bio" class="block text-sm font-medium text-gray-700">Bio</label>
+                        <textarea id="bio" rows="3" placeholder="Tell us a little about yourself..." class="block w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] focus:outline-none shadow-sm transition-all resize-none"></textarea>
+                        <p class="text-xs text-gray-500">Brief description for your profile.</p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="pt-6 border-t border-gray-100 flex items-center gap-3">
+                        <button type="submit" id="saveBtn" class="px-4 py-2 bg-[#0066CC] text-white text-sm font-medium rounded-md shadow-sm hover:bg-[#0055aa] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0066CC] transition-colors flex items-center gap-2">
+                            Save Changes
+                        </button>
+                        <button type="button" onclick="resetProfileForm()" class="px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm font-medium rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Notifications Section -->
+            <div id="section-notifications" class="p-6 md:p-8 hidden">
+                <h2 class="text-xl font-semibold text-gray-900 tracking-tight mb-6">Notification Preferences</h2>
+                <p class="text-sm text-gray-500 mb-6">Manage how you receive notifications and updates.</p>
+
+                <form id="notificationsForm" onsubmit="handleNotificationsSave(event)" class="space-y-6">
+                    <!-- Email Notifications -->
+                    <div class="border-b border-gray-100 pb-6">
+                        <h3 class="text-sm font-medium text-gray-900 mb-4">Email Notifications</h3>
+                        <div class="space-y-4">
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <div>
+                                    <span class="text-sm text-gray-700">New Property Alerts</span>
+                                    <p class="text-xs text-gray-500">Get notified when new properties match your criteria</p>
+                                </div>
+                                <input type="checkbox" id="notif-newProperty" checked class="h-4 w-4 text-[#0066CC] border-gray-300 rounded focus:ring-[#0066CC]">
+                            </label>
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <div>
+                                    <span class="text-sm text-gray-700">Price Drop Alerts</span>
+                                    <p class="text-xs text-gray-500">Get notified when favorites have price reductions</p>
+                                </div>
+                                <input type="checkbox" id="notif-priceDrops" checked class="h-4 w-4 text-[#0066CC] border-gray-300 rounded focus:ring-[#0066CC]">
+                            </label>
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <div>
+                                    <span class="text-sm text-gray-700">Inquiry Responses</span>
+                                    <p class="text-xs text-gray-500">Get notified when landlords respond to your inquiries</p>
+                                </div>
+                                <input type="checkbox" id="notif-inquiryResponses" checked class="h-4 w-4 text-[#0066CC] border-gray-300 rounded focus:ring-[#0066CC]">
+                            </label>
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <div>
+                                    <span class="text-sm text-gray-700">Marketing & Promotions</span>
+                                    <p class="text-xs text-gray-500">Receive tips, updates, and promotional offers</p>
+                                </div>
+                                <input type="checkbox" id="notif-marketing" class="h-4 w-4 text-[#0066CC] border-gray-300 rounded focus:ring-[#0066CC]">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Notification Frequency -->
+                    <div class="pb-6">
+                        <h3 class="text-sm font-medium text-gray-900 mb-4">Email Digest Frequency</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="radio" name="frequency" value="realtime" class="h-4 w-4 text-[#0066CC] border-gray-300 focus:ring-[#0066CC]">
+                                <span class="text-sm text-gray-700">Real-time (as they happen)</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="radio" name="frequency" value="daily" checked class="h-4 w-4 text-[#0066CC] border-gray-300 focus:ring-[#0066CC]">
+                                <span class="text-sm text-gray-700">Daily digest</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="radio" name="frequency" value="weekly" class="h-4 w-4 text-[#0066CC] border-gray-300 focus:ring-[#0066CC]">
+                                <span class="text-sm text-gray-700">Weekly digest</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="pt-6 border-t border-gray-100 flex items-center gap-3">
+                        <button type="submit" class="px-4 py-2 bg-[#0066CC] text-white text-sm font-medium rounded-md shadow-sm hover:bg-[#0055aa] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0066CC] transition-colors">
+                            Save Preferences
+                        </button>
+                        <button type="button" onclick="resetNotificationsForm()" class="px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm font-medium rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors">
+                            Reset to Default
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Security Section -->
+            <div id="section-security" class="p-6 md:p-8 hidden">
+                <h2 class="text-xl font-semibold text-gray-900 tracking-tight mb-6">Security Settings</h2>
+                <p class="text-sm text-gray-500 mb-6">Manage your password and account security.</p>
+
+                <!-- Change Password -->
+                <div class="border-b border-gray-100 pb-8 mb-8">
+                    <h3 class="text-sm font-medium text-gray-900 mb-4">Change Password</h3>
+                    <form id="passwordForm" onsubmit="handlePasswordChange(event)" class="space-y-4 max-w-md">
+                        <div class="space-y-1.5">
+                            <label for="currentPassword" class="block text-sm font-medium text-gray-700">Current Password</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <span class="iconify" data-icon="lucide:lock" data-width="16" data-height="16" style="stroke-width: 1.5;"></span>
+                                </span>
+                                <input type="password" id="currentPassword" class="block w-full h-10 rounded-md border border-gray-200 bg-white pl-10 pr-10 text-sm text-gray-900 focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] focus:outline-none shadow-sm transition-all" required>
+                                <button type="button" onclick="togglePasswordVisibility('currentPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                    <span class="iconify" data-icon="lucide:eye" data-width="16" data-height="16" style="stroke-width: 1.5;"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label for="newPassword" class="block text-sm font-medium text-gray-700">New Password</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <span class="iconify" data-icon="lucide:lock" data-width="16" data-height="16" style="stroke-width: 1.5;"></span>
+                                </span>
+                                <input type="password" id="newPassword" oninput="checkPasswordStrength()" class="block w-full h-10 rounded-md border border-gray-200 bg-white pl-10 pr-10 text-sm text-gray-900 focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] focus:outline-none shadow-sm transition-all" required>
+                                <button type="button" onclick="togglePasswordVisibility('newPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                    <span class="iconify" data-icon="lucide:eye" data-width="16" data-height="16" style="stroke-width: 1.5;"></span>
+                                </button>
+                            </div>
+                            <!-- Password Strength Indicator -->
+                            <div id="passwordStrength" class="hidden">
+                                <div class="flex gap-1 mt-2">
+                                    <div id="strength-1" class="h-1 flex-1 rounded bg-gray-200"></div>
+                                    <div id="strength-2" class="h-1 flex-1 rounded bg-gray-200"></div>
+                                    <div id="strength-3" class="h-1 flex-1 rounded bg-gray-200"></div>
+                                    <div id="strength-4" class="h-1 flex-1 rounded bg-gray-200"></div>
+                                </div>
+                                <p id="strengthText" class="text-xs mt-1 text-gray-500">Password strength</p>
+                            </div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <span class="iconify" data-icon="lucide:lock" data-width="16" data-height="16" style="stroke-width: 1.5;"></span>
+                                </span>
+                                <input type="password" id="confirmPassword" class="block w-full h-10 rounded-md border border-gray-200 bg-white pl-10 pr-10 text-sm text-gray-900 focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] focus:outline-none shadow-sm transition-all" required>
+                                <button type="button" onclick="togglePasswordVisibility('confirmPassword')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                    <span class="iconify" data-icon="lucide:eye" data-width="16" data-height="16" style="stroke-width: 1.5;"></span>
+                                </button>
+                            </div>
+                            <p id="passwordMatchError" class="text-xs text-red-500 hidden">Passwords do not match</p>
+                        </div>
+                        <button type="submit" class="px-4 py-2 bg-[#0066CC] text-white text-sm font-medium rounded-md shadow-sm hover:bg-[#0055aa] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0066CC] transition-colors">
+                            Update Password
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Delete Account -->
+                <div>
+                    <h3 class="text-sm font-medium text-red-600 mb-2">Danger Zone</h3>
+                    <p class="text-xs text-gray-500 mb-4">Once you delete your account, there is no going back. Please be certain.</p>
+                    <button onclick="showDeleteModal()" class="px-4 py-2 bg-white text-red-600 border border-red-300 text-sm font-medium rounded-md shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-200 transition-colors">
+                        Delete Account
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <span class="iconify text-red-600" data-icon="lucide:alert-triangle" data-width="20" data-height="20" style="stroke-width: 1.5;"></span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Delete Account</h3>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete your account? All of your data will be permanently removed. This action cannot be undone.</p>
+            <div class="space-y-3 mb-6">
+                <label for="deleteConfirm" class="block text-sm font-medium text-gray-700">Type "DELETE" to confirm</label>
+                <input type="text" id="deleteConfirm" class="block w-full h-10 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:border-red-500 focus:ring-1 focus:ring-red-500 focus:outline-none shadow-sm transition-all" placeholder="DELETE">
+            </div>
+            <div class="flex justify-end gap-3">
+                <button onclick="hideDeleteModal()" class="px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm font-medium rounded-md shadow-sm hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button onclick="confirmDeleteAccount()" id="confirmDeleteBtn" disabled class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                    <span class="iconify text-gray-600" data-icon="lucide:log-out" data-width="20" data-height="20" style="stroke-width: 1.5;"></span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Log Out</h3>
+            </div>
+            <p class="text-sm text-gray-600 mb-6">Are you sure you want to log out of your account?</p>
+            <div class="flex justify-end gap-3">
+                <button onclick="hideLogoutModal()" class="px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm font-medium rounded-md shadow-sm hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button onclick="confirmLogout()" class="px-4 py-2 bg-[#0066CC] text-white text-sm font-medium rounded-md shadow-sm hover:bg-[#0055aa] transition-colors">
+                    Log Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ========================================
+// Profile Data Management
+// ========================================
+
+const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
+
+const DEFAULT_PROFILE = {
+    name: 'Jane Doe',
+    email: 'jane@example.com',
+    phone: '(555) 123-4567',
+    location: 'New York, NY',
+    bio: '',
+    avatar: DEFAULT_AVATAR
+};
+
+const DEFAULT_NOTIFICATIONS = {
+    newProperty: true,
+    priceDrops: true,
+    inquiryResponses: true,
+    marketing: false,
+    frequency: 'daily'
+};
+
+// Load data from localStorage
+function loadProfile() {
+    const saved = localStorage.getItem('nestfind_profile');
+    return saved ? JSON.parse(saved) : { ...DEFAULT_PROFILE };
+}
+
+function saveProfile(data) {
+    localStorage.setItem('nestfind_profile', JSON.stringify(data));
+}
+
+function loadNotifications() {
+    const saved = localStorage.getItem('nestfind_notifications');
+    return saved ? JSON.parse(saved) : { ...DEFAULT_NOTIFICATIONS };
+}
+
+function saveNotifications(data) {
+    localStorage.setItem('nestfind_notifications', JSON.stringify(data));
+}
+
+// ========================================
+// Toast Notifications
+// ========================================
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+
+    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+    const icon = type === 'success' ? 'lucide:check-circle' : type === 'error' ? 'lucide:x-circle' : 'lucide:info';
+
+    toast.className = `toast ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[280px]`;
+    toast.innerHTML = `
+        <span class="iconify" data-icon="${icon}" data-width="20" data-height="20" style="stroke-width: 1.5;"></span>
+        <span class="text-sm font-medium">${message}</span>
+    `;
+
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ========================================
+// Tab Navigation
+// ========================================
+
+function switchTab(tab) {
+    const tabs = ['personal', 'notifications', 'security'];
+    tabs.forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        const section = document.getElementById(`section-${t}`);
+
+        if (t === tab) {
+            btn.className = 'w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md bg-[#0066CC] text-white shadow-sm transition-colors';
+            section.classList.remove('hidden');
+        } else {
+            btn.className = 'w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors';
+            section.classList.add('hidden');
+        }
+    });
+}
+
+// ========================================
+// Avatar Upload
+// ========================================
+
+function handleAvatarChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('Image must be less than 5MB', 'error');
+        return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+        showToast('Please select an image file', 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const imageData = e.target.result;
+        document.getElementById('profileAvatar').src = imageData;
+        document.getElementById('sidebarAvatar').src = imageData;
+        document.getElementById('navAvatar').src = imageData;
+
+        const profile = loadProfile();
+        profile.avatar = imageData;
+        saveProfile(profile);
+        showToast('Profile photo updated');
+    };
+    reader.readAsDataURL(file);
+}
+
+// ========================================
+// Profile Form
+// ========================================
+
+function populateProfileForm() {
+    const profile = loadProfile();
+    document.getElementById('name').value = profile.name;
+    document.getElementById('email').value = profile.email;
+    document.getElementById('phone').value = profile.phone;
+    document.getElementById('location').value = profile.location || '';
+    document.getElementById('bio').value = profile.bio || '';
+
+    const avatar = profile.avatar || DEFAULT_AVATAR;
+    document.getElementById('profileAvatar').src = avatar;
+    document.getElementById('sidebarAvatar').src = avatar;
+    document.getElementById('navAvatar').src = avatar;
+    document.getElementById('sidebarName').textContent = profile.name;
+    document.getElementById('sidebarEmail').textContent = profile.email;
+}
+
+function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function handleProfileSave(event) {
+    event.preventDefault();
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const location = document.getElementById('location').value.trim();
+    const bio = document.getElementById('bio').value.trim();
+
+    let isValid = true;
+
+    if (!name) {
+        document.getElementById('nameError').classList.remove('hidden');
+        isValid = false;
+    } else {
+        document.getElementById('nameError').classList.add('hidden');
+    }
+
+    if (!validateEmail(email)) {
+        document.getElementById('emailError').classList.remove('hidden');
+        isValid = false;
+    } else {
+        document.getElementById('emailError').classList.add('hidden');
+    }
+
+    if (!isValid) {
+        showToast('Please fix the errors above', 'error');
+        return;
+    }
+
+    const profile = loadProfile();
+    profile.name = name;
+    profile.email = email;
+    profile.phone = phone;
+    profile.location = location;
+    profile.bio = bio;
+    saveProfile(profile);
+
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('sidebarEmail').textContent = email;
+    showToast('Profile updated successfully');
+}
+
+function resetProfileForm() {
+    populateProfileForm();
+    showToast('Changes discarded', 'info');
+}
+
+// ========================================
+// Notifications Form
+// ========================================
+
+function populateNotificationsForm() {
+    const notifications = loadNotifications();
+    document.getElementById('notif-newProperty').checked = notifications.newProperty;
+    document.getElementById('notif-priceDrops').checked = notifications.priceDrops;
+    document.getElementById('notif-inquiryResponses').checked = notifications.inquiryResponses;
+    document.getElementById('notif-marketing').checked = notifications.marketing;
+    document.querySelector(`input[name="frequency"][value="${notifications.frequency}"]`).checked = true;
+}
+
+function handleNotificationsSave(event) {
+    event.preventDefault();
+    const notifications = {
+        newProperty: document.getElementById('notif-newProperty').checked,
+        priceDrops: document.getElementById('notif-priceDrops').checked,
+        inquiryResponses: document.getElementById('notif-inquiryResponses').checked,
+        marketing: document.getElementById('notif-marketing').checked,
+        frequency: document.querySelector('input[name="frequency"]:checked').value
+    };
+    saveNotifications(notifications);
+    showToast('Notification preferences saved');
+}
+
+function resetNotificationsForm() {
+    saveNotifications({ ...DEFAULT_NOTIFICATIONS });
+    populateNotificationsForm();
+    showToast('Preferences reset to default', 'info');
+}
+
+// ========================================
+// Security Section
+// ========================================
+
+function togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    const button = input.nextElementSibling;
+    const icon = button.querySelector('.iconify');
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-icon', 'lucide:eye-off');
+    } else {
+        input.type = 'password';
+        icon.setAttribute('data-icon', 'lucide:eye');
+    }
+}
+
+function checkPasswordStrength() {
+    const password = document.getElementById('newPassword').value;
+    const strengthDiv = document.getElementById('passwordStrength');
+    const strengthText = document.getElementById('strengthText');
+
+    if (!password) {
+        strengthDiv.classList.add('hidden');
+        return;
+    }
+
+    strengthDiv.classList.remove('hidden');
+
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+    const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
+    const texts = ['Weak', 'Fair', 'Good', 'Strong'];
+
+    for (let i = 1; i <= 4; i++) {
+        const bar = document.getElementById(`strength-${i}`);
+        bar.className = `h-1 flex-1 rounded ${i <= strength ? colors[strength - 1] : 'bg-gray-200'}`;
+    }
+
+    strengthText.textContent = texts[strength - 1] || 'Very weak';
+}
+
+function handlePasswordChange(event) {
+    event.preventDefault();
+
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (newPassword !== confirmPassword) {
+        document.getElementById('passwordMatchError').classList.remove('hidden');
+        showToast('Passwords do not match', 'error');
+        return;
+    }
+
+    document.getElementById('passwordMatchError').classList.add('hidden');
+
+    if (newPassword.length < 8) {
+        showToast('Password must be at least 8 characters', 'error');
+        return;
+    }
+
+    document.getElementById('passwordForm').reset();
+    document.getElementById('passwordStrength').classList.add('hidden');
+    showToast('Password updated successfully');
+}
+
+// ========================================
+// Delete Account
+// ========================================
+
+function showDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('hidden');
+    document.getElementById('deleteConfirm').value = '';
+    document.getElementById('confirmDeleteBtn').disabled = true;
+
+    document.getElementById('deleteConfirm').addEventListener('input', function() {
+        document.getElementById('confirmDeleteBtn').disabled = this.value !== 'DELETE';
+    });
+}
+
+function hideDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+function confirmDeleteAccount() {
+    if (document.getElementById('deleteConfirm').value !== 'DELETE') return;
+
+    localStorage.removeItem('nestfind_profile');
+    localStorage.removeItem('nestfind_notifications');
+    localStorage.removeItem('nestfind_favorites');
+
+    showToast('Account deleted successfully');
+    setTimeout(() => {
+        window.location.href = './02-login.html';
+    }, 1500);
+}
+
+// ========================================
+// Logout
+// ========================================
+
+function handleLogout() {
+    document.getElementById('logoutModal').classList.remove('hidden');
+}
+
+function hideLogoutModal() {
+    document.getElementById('logoutModal').classList.add('hidden');
+}
+
+function confirmLogout() {
+    showToast('Logging out...');
+    setTimeout(() => {
+        window.location.href = './02-login.html';
+    }, 1000);
+}
+
+// ========================================
+// Initialize
+// ========================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    populateProfileForm();
+    populateNotificationsForm();
+
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) hideDeleteModal();
+    });
+
+    document.getElementById('logoutModal').addEventListener('click', function(e) {
+        if (e.target === this) hideLogoutModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideDeleteModal();
+            hideLogoutModal();
+        }
+    });
+});
+</script>
+
+</body></html>

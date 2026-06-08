@@ -1,0 +1,57 @@
+id: US-05-HOME
+role: renter
+feature: Search and browse rental property listings
+page: 05-home.html
+goal: |
+  A renter searches for rental properties by location, filters by price,
+  bedrooms, and property type, and browses paginated property cards.
+
+acceptance_criteria:
+  - id: AC-1
+    description: View property listings grid showing cards with thumbnail, price, beds, baths, sqft, and property type badge
+    ui_route: /home
+    endpoint: GET /api/properties
+    expected: "200 OK, grid displays property cards with correct data, count header shows 'N properties found'"
+  - id: AC-2
+    description: Enter a location in the search input and click Search to filter results
+    ui_route: /home
+    endpoint: GET /api/properties?search=San+Francisco
+    expected: "200 OK, results filtered to properties matching the search term"
+  - id: AC-3
+    description: Select a price range filter to narrow results by budget
+    ui_route: /home
+    endpoint: GET /api/properties?minPrice=2000&maxPrice=3000
+    expected: "200 OK, only properties within the selected price range are shown"
+  - id: AC-4
+    description: Click "Load more properties" to fetch the next page of results
+    ui_route: /home
+    endpoint: GET /api/properties?page=2
+    expected: "200 OK, new property cards appends to the grid, total count updates"
+  - id: AC-5
+    description: Toggle the heart icon on a property card to save/unsave to favorites
+    ui_route: /home
+    endpoint: POST /api/favorites or DELETE /api/favorites/:propertyId
+    expected: "Heart icon fills/unfills, 201/200 response appropriately"
+
+boundary_cases:
+  - case: "Search returns zero results — grid shows empty state with 'No properties found' message and suggestion to broaden filters"
+  - case: "All filters at extremes (max price $0, no bedrooms filter, all types) — returns all non-archived properties"
+  - case: "Load more on last page — button disappears or shows 'You've seen all N properties'"
+
+error_scenarios:
+  - scenario: "Unauthenticated user tries to toggle favorite — server returns 401, redirect to login or heart icon silently fails"
+  - scenario: "API returns 500 — grid shows error state with retry button"
+  - scenario: "Network failure during search — loading skeleton disappears, inline error toast shown"
+
+state_transitions:
+  - state: loading
+    expected: "Skeleton cards (gray placeholder rectangles) shown in grid while data fetches"
+  - state: empty
+    expected: "Empty state with illustration and 'No properties found. Try adjusting your filters.' message"
+  - state: error
+    expected: "Error message with 'Something went wrong' text and a retry button"
+
+fixture_refs:
+  - users.renter
+  - properties.apt_downtown
+  - properties.house_palo_alto

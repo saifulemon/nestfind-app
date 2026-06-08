@@ -1,0 +1,137 @@
+
+======================================================================
+fullstack-2 orchestrator
+======================================================================
+project:  nestfind
+target:   /Users/saifulpotential/Potential/nestfind-sample
+mode:     single-phase (integrate)
+dry-run:  false
+verbose:  false
+episode:  ep-2026-05-20T04-46-15-068-8va1 → .claude-project/episodes/ep-2026-05-20T04-46-15-068-8va1.jsonl
+
+======================================================================
+phase: integrate
+======================================================================
+blueprint: integrate-2.yaml (v2)
+nodes:    11
+v2 contracts: ok (all agentic nodes declare required_output_file)
+
+── [1/11] deterministic: pre-check ─────────────────────────────────────
+  description: Verify backend controllers + frontend pages exist
+  ✅ PASS (17ms, 1 attempt)
+
+── [2/11] deterministic: extract-api-routes ────────────────────────────
+  description: Generate PROJECT_API_ROUTES.md from @Controller decorators
+  ✅ PASS (270ms, 1 attempt)
+
+── [3/11] agentic: integrate ───────────────────────────────────────────
+  description: Wire frontend pages to backend via TanStack Query hooks + API services
+[agent-factory] backend: opencode
+
+[opencode] node: integrate
+[opencode] model: (default)
+[opencode] log:   .claude-project/nestfind/agent-logs/integrate-2026-05-20T04-46-15-513Z.log
+[opencode] launching subprocess...
+  duration: 761.9s | turns: 65
+  result:   Let me read the existing service files, hook files, and key pages to understand what's already wired.
+Now let me read all the page files to understand which ones use mock data vs real hooks.
+Auth page
+  ✅ PASS (artifact verified: /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/INTEGRATION_REPORT.md, 7620 bytes)
+
+── [4/11] deterministic: verify-page-coverage ──────────────────────────
+  description: Enforce >= X% of data-pages use a TanStack Query hook (static pages exempt; progressive gen1 50%, gen2 70%, gen3+ 90%)
+  ✅ PASS (105ms, 1 attempt)
+
+── [5/11] deterministic: verify-missing-endpoints-yaml ─────────────────
+  description: Verify integrate agent produced MISSING_ENDPOINTS.yaml (cross-gen signal for backend self-heal)
+  ✅ PASS (10ms, 1 attempt)
+
+── [6/11] agentic: contract-validation ─────────────────────────────────
+  description: Verify frontend form payloads match backend DTO contracts (RULE-I3)
+[agent-factory] backend: opencode
+
+[opencode] node: contract-validation
+[opencode] model: (default)
+[opencode] log:   .claude-project/nestfind/agent-logs/contract-validation-2026-05-20T04-58-57-578Z.log
+[opencode] launching subprocess...
+  duration: 498.7s | turns: 68
+  result:   Now let me read all the DTOs and their corresponding frontend services/pages in parallel:
+Now let me read the frontend services, auth pages, and enums:
+Let me now read the frontend type definitions an
+  ✅ PASS (artifact verified: /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/CONTRACT_VALIDATION.md, 4553 bytes)
+
+── [7/11] deterministic: fix-contracts ─────────────────────────────────
+  description: Abort if contract mismatches found — route to agent to fix
+  ❌ FAIL (exit 1, 1 attempts)
+    stdout:  |
+| `RespondInquiryDto` | `response` — `admin/inquiries.tsx:27` sends `{response}`. | MATCH |
+| `UpdateUserStatusDto` | `status: 'active' \| 'suspended'` — `admin/users.tsx:18` sends correct values matching `UserStatusEnum`. | MATCH |
+| `CreateFavoriteDto` | `propertyId` — `search.tsx:97`, `detail.tsx:35` send `{propertyId}`. | MATCH |
+| `CreateAmenityDto` | `name`, `icon` — `frontend/app/services/api/amenityService.ts:4-7` matches backend `create-amenity.dto.ts`. | MATCH |
+| `UpdateAmenityDto` | `name?`, `icon?` — `frontend/app/services/api/amenityService.ts:9-12` PartialType matches backend. | MATCH |
+| `ReorderPhotosDto` | `photoIds: string[]` — `frontend/app/services/api/propertyService.ts:41` sends `{photoIds}`. | MATCH |
+| `UpdateProfileDto` (subset of `UpdateUserDto`) | `name?`, `phone?` — `profile.tsx:33-34` sends correct subset. Backend accepts `email?`, `role?`, `status?` too, but omitting them is fine (all optional). | MATCH |
+
+## Audit Notes
+
+- **PropertyTypeEnum values** match: frontend `PROPERTY_TYPES = ['apartment', 'house', 'condo', 'townhouse', 'studio']` (`frontend/app/types/api/property.d.ts:1`) vs backend `PropertyTypeEnum` (`backend/src/common/enums/property-type.enum.ts`).
+- **UserStatusEnum values** match: frontend `'active' | 'suspended'` vs backend `UserStatusEnum.ACTIVE = 'active'`, `UserStatusEnum.SUSPENDED = 'suspended'`.
+- **RoleEnum values** match: frontend `'renter' | 'admin'` vs backend `RoleEnum.RENTER = 'renter'`, `RoleEnum.ADMIN = 'admin'`.
+
+  on_failure=route_to_agent — spawning fix agent...
+
+── ROUTE-TO-AGENT: attempt 1/2 for 'fix-contracts' ─────────────────────
+[agent-factory] backend: opencode
+
+[opencode] node: fix-fix-contracts-attempt-1
+[opencode] model: (default)
+[opencode] log:   .claude-project/nestfind/agent-logs/fix-fix-contracts-attempt-1-2026-05-20T05-07-16-287Z.log
+[opencode] launching subprocess...
+  fix-agent duration: 293.8s | turns: 20
+
+── POST-FIX VALIDATION after fix attempt 1 ─────────────────────────────
+  ✅ post-fix validation passed (no type regressions)
+
+── RETRY: re-running 'fix-contracts' after fix attempt 1 ───────────────
+  ❌ still failing (exit 1)
+
+── ROUTE-TO-AGENT: attempt 2/2 for 'fix-contracts' ─────────────────────
+[agent-factory] backend: opencode
+
+[opencode] node: fix-fix-contracts-attempt-2
+[opencode] model: (default)
+[opencode] log:   .claude-project/nestfind/agent-logs/fix-fix-contracts-attempt-2-2026-05-20T05-12-12-233Z.log
+[opencode] launching subprocess...
+  fix-agent duration: 589.9s | turns: 27
+
+── POST-FIX VALIDATION after fix attempt 2 ─────────────────────────────
+  ✅ post-fix validation passed (no type regressions)
+
+── RETRY: re-running 'fix-contracts' after fix attempt 2 ───────────────
+  ✅ PASS after fix attempt 2
+  ✅ route_to_agent succeeded after 2 attempt(s)
+
+── [8/11] deterministic: typecheck ─────────────────────────────────────
+  description: Verify frontend compiles after integration
+  ✅ PASS (1239ms, 1 attempt)
+
+── [9/11] deterministic: evidence-check ────────────────────────────────
+  description: Verify API hook/service files were created
+  ❌ FAIL (exit 1, 1 attempts)
+    stdout: FAIL: no API hook/service files in frontend
+
+ABORT: deterministic node failed
+
+updated PIPELINE_STATUS.md: integrate → Failed (score 0)
+
+❌ integrate: 8 pass | 1 fail | 0 skipped | 2150.4s
+   failed at: evidence-check
+
+======================================================================
+EPISODE REWARD
+======================================================================
+  phase rewards:
+    integrate      -0.21  (Δscore: +0.000, cost: $0.416)
+  terminal:   +0.00  (none)
+  ─────────────────────
+  R_episode:  -0.21

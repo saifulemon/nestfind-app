@@ -1,0 +1,36 @@
+id: US-INDEX
+role: all
+feature: Splash screen with automatic redirect to property search
+page: index.html
+goal: |
+  A visitor landing on the NestFind splash screen sees the brand logo and tagline
+  before being automatically redirected to the property search page.
+
+acceptance_criteria:
+  - id: AC-1
+    description: Splash screen displays the NestFind logo, tagline "Finding your way home", and a loading indicator
+    ui_route: /
+    endpoint: none
+    expected: "NestFind logo visible, tagline text visible, loading bar animation runs, 200 OK"
+  - id: AC-2
+    description: After ~2 seconds, the browser auto-redirects to the property search home page
+    ui_route: /
+    endpoint: none
+    expected: "URL changes to /05-home.html (or equivalent /home route) after splash timeout"
+
+boundary_cases:
+  - case: "Slow network — splash screen remains visible beyond 2 seconds; loading indicator animates continuously until redirect fires"
+  - case: "JavaScript disabled — splash screen stays static; no redirect occurs; essential for graceful fallback"
+
+error_scenarios:
+  - scenario: "Redirect target (/05-home.html) returns 404 — browser shows 404 page after timeout instead of property search"
+  - scenario: "Network failure during splash — splash page stays visible until timeout then navigates to unreachable target"
+
+state_transitions:
+  - state: loading
+    expected: "Animated loading bar at bottom of splash screen"
+  - state: ready
+    expected: "Auto-redirect fires; browser navigates to property search page"
+
+fixture_refs:
+  - none

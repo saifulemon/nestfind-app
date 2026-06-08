@@ -1,0 +1,319 @@
+=== NODE: domain-research ===
+timestamp: 2026-05-19T09:48:23.020Z
+backend: opencode
+model: (default)
+command: opencode run --format json "<prompt>"
+
+=== PROMPT (11357 chars) ===
+=== CONTEXT FILES ===
+
+--- /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/docs/PROJECT_KNOWLEDGE.md ---
+# PROJECT_KNOWLEDGE
+
+## Overview
+
+### Application Purpose
+
+NestFind is a streamlined rental property listing platform that connects renters with available properties. The platform focuses exclusively on rentals, providing a clean and efficient browsing experience where renters can search, filter, view details, save favorites, and submit inquiries to property managers. An accompanying admin dashboard enables administrators to manage property listings, respond to inquiries, and oversee user accounts.
+
+The platform targets two primary user groups: Renters who browse and discover rental properties, and Administrators who manage the listings and respond to renter inquiries. NestFind integrates with Google Maps for property location display.
+
+### Technology Stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | NestJS 11, TypeScript 5.7+ |
+| Frontend | React 19 with React Router 7 (framework mode) |
+| Database | PostgreSQL 16 |
+| ORM | TypeORM 0.3.x |
+| Authentication | JWT via httpOnly cookies (Access: 1h, Refresh: 7d) |
+| API Documentation | Swagger/OpenAPI |
+| Validation | class-validator (backend), Zod (frontend) |
+| Frontend State | Redux Toolkit with createAsyncThunk |
+| Styling | Tailwind CSS 4, Shadcn/UI |
+| Maps | Google Maps API |
+| Deployment | Docker |
+
+### Domain
+
+`nestfind.com` — web application
+
+---
+
+## User Roles
+
+| Role | Description | Permissions |
+|------|-------------|-------------|
+| **Renter** | Browses rental property listings, views detailed property information, saves properties to favorites, and submits inquiries to property managers. | `browse_properties`, `view_property_details`, `save_favorites`, `submit_inquiries` |
+| **Admin** | Has full system access to manage property listings (CRUD), manage user accounts, view and respond to inquiries from renters. | `manage_properties`, `manage_users`, `view_inquiries`, `respond_to_inquiries` |
+| **Guest** | Unauthenticated visitor who can browse public property listings and view property details. Must register/login to save favorites or submit inquiries. | `browse_properties`, `view_property_details` |
+
+### Authentication & Authorization
+
+- **JWT via httpOnly cookies**: Access token (1 hour) + Refresh token (7 days). Cookies configured with `httpOnly: true, secure: true, sameSite: 'strict'`. Tokens are never stored in localStorage.
+- **Role-based access control (RBAC)**: Guards at the route/endpoint level enforce role-specific permissions via `JwtAuthGuard` + `RolesGuard`.
+- **Guest access**: Public endpoints for browsing and viewing properties are marked with `@Public()` decorator; all other endpoints require authentication.
+- **Admin assignment**: Admin accounts are created by existing admins or via database seeding. Self-registration defaults to Renter role.
+
+---
+
+## Core Features
+
+### Common (All Users)
+
+- **Authentication**
+  - User login with email + password
+  - JWT access token (1h) and refresh token (7d) via httpOnly cookies
+  - Token refresh mechanism with rotation
+  - Logout clears cookies
+
+- **Registration**
+  - Self-service sign-up with name, email, password, phone (optional)
+  - Default role assignment: Renter
+  - Email verification (optional, configurable)
+
+- **Password Reset**
+  - Forgot password flow via email
+  - Secure reset token with expiration
+
+### Renter Features
+
+1. **Property Search**
+   - Search by location (text input or current geolocation)
+   - Real-time filtering by price range, number of bedrooms, property type
+   - Results displayed as property cards with thumbnail, price, and key details
+   - Pagination or infinite scroll for large result sets
+
+2. **Property Detail View**
+   - Full property page with photo gallery, amenities list, description, and floor plan
+   - Embedded Google Map showing property location
+   - Save to favorites (toggle)
+   - Contact / Submit Inquiry button
+
+3. **Favorites Management**
+   - View all saved/favorited properties
+   - Remove properties from favorites
+   - Quick access from navigation
+
+4. **Submit Inquiry**
+   - Contact form on property detail page (name, email, phone, message)
+   - Form validation before submission
+   - Confirmation message shown to renter
+   - Admin notified of new inquiry
+
+### Admin Features
+
+1. **Admin Dashboard**
+   - Overview statistics: total properties, total inquiries, recent activity
+   - Quick links to property management and inquiry management
+
+2. **Property Management (CRUD)**
+   - List all properties with search, filter, and pagination
+   - Add new property with details: title, description, price, bedrooms, bathrooms, property type, address, amenities, photos (multi-upload)
+   - Edit existing property information
+   - Delete or archive property listings (soft delete)
+
+3. **Inquiry Management**
+   - View all inquiries with status (new, read, responded)
+   - Mark inquiries as read
+   - Respond to inquiries directly from the dashboard
+   - Filter by property or renter
+
+4. **User Management**
+   - View list of registered renters
+   - View renter
+
+--- .claude/skills/design/prd-to-design-guide/SKILL.md ---
+---
+name: prd-to-design-guide
+description: Convert PRD to Design Guide (used in both Path A automated and Path B external designer)
+---
+
+# PRD to Design Guide - Generic Template for All Projects
+
+This is a **comprehensive reusable template** for converting any Product Requirements Document (PRD) into a Design Guide. Used in the fullstack pipeline Phase 3 (Design) as the first sub-phase for both Path A (Full AI Generation) and Path B (External Designer). The Design Guide serves as a human-readable review checkpoint before HTML generation.
+
+---
+
+## HOW TO USE THIS TEMPLATE
+
+1. **Read your PRD thoroughly**
+2. **Extract information using the tables below**
+3. **Fill in the Design Guide template** with extracted data
+4. **Follow the conversion patterns** for each section
+5. **Output a complete Design Guide** ready for your designer
+
+---
+
+## EXTRACTION WORKFLOW
+
+### Phase 1: Extract Basic Information
+### Phase 2: Define Design Philosophy
+### Phase 3: Create Design System
+### Phase 4: Convert Pages to Design Briefs
+### Phase 5: Create Component Patterns
+### Phase 6: Add Design Rules & Tips
+### Phase 7: Create Deliverables Plan
+
+---
+
+## PHASE 1: EXTRACT BASIC INFORMATION
+
+### From PRD, Extract:
+
+| Information | Where to Find in PRD | Example | Variable |
+|-------------|---------------------|---------|----------|
+| Project Name | Title/Header | "Crowd Builder", "MediCare+", "ShopEase" | `[PROJECT_NAME]` |
+| Project Version | Version number | "v3.1", "1.0", "MVP" | `[VERSION]` |
+| Designer Name | Team section | "Habib", "Sarah", "TBD" | `[DESIGNER_NAME]` |
+| Timeline | Timeline/Deadline section | "4 weeks", "2 months", "6 weeks" | `[TIMELINE]` |
+| Project Type | App Type section | "Web Application", "Mobile App", "Dashboard" | `[TYPE]` |
+| Target Platform | Platform section | "Desktop-first", "Mobile-first", "Cross-platform" | `[PLATFORM]` |
+| User Types | User Roles section | "Guest, User, Admin", "Patient, Doctor, Admin" | `[USER_TYPES]` |
+| Total Pages | Count from Page Breakdown section | "28 pages", "15 pages", "42 pages" | `[TOTAL_PAGES]` |
+
+### Page Count Breakdown:
+
+Count pages from PRD's "Page Breakdown" or "Feature Specifications" section:
+
+| User Type | PRD Section to Count | Example Count |
+|-----------|---------------------|---------------|
+| Guest/Public Pages | Common section, Public features | 6 pages |
+| Logged In User Pages | User features section | 13 pages |
+| Admin Pages | Admin Dashboard section | 9 pages |
+
+**Total Pages** = Guest + User + Admin
+
+---
+
+## PHASE 2: DEFINE DESIGN PHILOSOPHY
+
+### 2.1 Find Reference Applications
+
+**From PRD, look for:**
+- "Design Reference" section
+- "Reference apps" mentioned
+- "What makes your app special" section
+- Feature descriptions that imply UI patterns
+
+### 2.2 Derive Design Inspiration
+
+**Pattern Recognition:**
+
+| PRD Feature | Design Inspiration | Reference App |
+|-------------|-------------------|---------------|
+| "Upvoting system" | Voting UI, ranking | **Product Hunt** |
+| "Threaded comments", "Nested replies" | Comment threading | **Reddit** |
+| "Feed of items", "Professional network" | Card-based feed | **LinkedIn** |
+| "Dashboard", "Analytics", "Admin panel" | Clean minimal dashboard | **Stripe**, **Linear** |
+| "Stories", "Timeline", "Posts" | Social feed | **Instagram**, **Twitter** |
+| "Drag and drop", "Kanban board" | Task management | **Trello**, **Asana** |
+| "Chat", "Messaging" | Messaging UI | **Slack**, **Discord** |
+| "Calendar", "Scheduling" | Calendar UI | **Google Calendar**, **Calendly** |
+| "E-commerce", "Products", "Cart" | Shopping UI | **Amazon**, **Shopify** |
+
+### 2.3 Create Design Pillars
+
+**Based on key features, create 3-4 design pillars:**
+
+**Template:**
+```
+**Design Philosophy:**
+
+**Core Inspiration (Must Study):**
+1. **[Reference App 1]** - [Key feature to study]
+2. **[Reference App 2]** - [Key feature to study]
+3. **[Reference App 3]** - [Key feature to study]
+4. **[Reference App 4]** - [Key feature to study]
+
+**The [Number] Pillars:**
+- [Feature Area 1] = [Reference App] ([specific pattern])
+- [Feature Area 2] = [Reference App] ([specific pattern])
+- [Feature Area 3] = [Reference App] ([specific pattern])
+```
+
+**Example:**
+```
+**Core Inspiration (Must Study):**
+1. **Product Hunt** - Upvote buttons, card layout, ranking
+2. **Reddit** - Comment threading, nested replies
+3. **LinkedIn** - Professional feed, achievement feel
+4. **Stripe** - Clean dashboard, minimal design
+
+**The Three Pillars:**
+- Feed = LinkedIn (professional cards, achievement vibes)
+- Comments = Reddit (threaded, vertical lines, indentation)
+- Dashboard = Stripe (clean, content-first, one action per page)
+```
+
+---
+
+## PHASE 2.5: DOMAIN & REFERENCE RESEARCH (MANDATORY)
+
+> **This step MUST be performed before generating the Design Guide.**
+> **Purpose:** Research the top products in the relevant domain to automatically identify standard UI patterns and essential sections.
+> **Instead of hardcoding a checklist**, discover "what should naturally exist in this
+
+
+=== END CONTEXT ===
+
+
+Run Phase 2.5 only — Domain & Reference Research.
+
+TASKS:
+1. Extract industry/domain from PROJECT_KNOWLEDGE.md and PRD chunks
+2. Identify 3-5 competitors and their UI patterns (WebSearch + WebFetch)
+3. Derive standard sections/elements per page type (Landing, Dashboard, Detail)
+4. Deep-dive the PRD-specified references
+
+OUTPUT: .claude-project/nestfind/design/DOMAIN_RESEARCH.md
+Required sections:
+  # Domain Research
+  ## Industry
+  ## Competitors
+  ## Reference UI Patterns
+  ## Page-type Conventions (Landing / Dashboard / Detail)
+
+DO NOT generate Design Guide or DESIGN_SYSTEM yet — that's the next step.
+
+
+
+=== MANDATORY ARTIFACT CONTRACT ===
+You MUST produce a file at this exact path:
+  /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/design/DOMAIN_RESEARCH.md
+
+The orchestrator will verify this file exists after your run.
+If the file is missing, your work is REJECTED regardless of what you say.
+
+The file MUST contain content matching this regex:
+  ^(#\s+Domain|##\s+Industry|industry:)
+This pattern is verified by code, not interpretation.
+
+Do not claim the task is complete without writing this file.
+
+=== STDOUT ===
+[stderr] Performing one time database migration, may take a few minutes...
+sqlite-migration:done
+Database migration complete.
+[cc-analytics] loaded — server=http://211.188.49.111:8080 dir=/Users/saifulpotential/Potential/nestfind-sample
+{"type":"step_start","timestamp":1779184107045,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"id":"prt_e3fa2fe230019menxSuDTFHCiC","messageID":"msg_e3fa2f5f5001x32aNwZ8jVy0yH","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","snapshot":"d4ba09d98395c7898a08da87112a242b7985ce10","type":"step-start"}}
+{"type":"tool_use","timestamp":1779184120742,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"todowrite","callID":"call_00_I5sxVX9VPqsCpJZP0pm06582","state":{"status":"completed","input":{"todos":[{"content":"Research rental property listing competitors (Zillow Rentals, Apartments.com, Realtor.com, Redfin, HotPads) via WebFetch","status":"in_progress","priority":"high"},{"content":"Derive standard UI patterns and page-type conventions from research","status":"pending","priority":"high"},{"content":"Write DOMAIN_RESEARCH.md to .claude-project/nestfind/design/","status":"pending","priority":"high"}]},"output":"[\n  {\n    \"content\": \"Research rental property listing competitors (Zillow Rentals, Apartments.com, Realtor.com, Redfin, HotPads) via WebFetch\",\n    \"status\": \"in_progress\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Derive standard UI patterns and page-type conventions from research\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  },\n  {\n    \"content\": \"Write DOMAIN_RESEARCH.md to .claude-project/nestfind/design/\",\n    \"status\": \"pending\",\n    \"priority\": \"high\"\n  }\n]","metadata":{"todos":[{"content":"Research rental property listing competitors (Zillow Rentals, Apartments.com, Realtor.com, Redfin, HotPads) via WebFetch","status":"in_progress","priority":"high"},{"content":"Derive standard UI patterns and page-type conventions from research","status":"pending","priority":"high"},{"content":"Write DOMAIN_RESEARCH.md to .claude-project/nestfind/design/","status":"pending","priority":"high"}],"truncated":false},"title":"3 todos","time":{"start":1779184120438,"end":1779184120740}},"id":"prt_e3fa322d1001267C8NMgX1cLtl","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa2f5f5001x32aNwZ8jVy0yH"}}
+{"type":"step_finish","timestamp":1779184120879,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"id":"prt_e3fa3342d001cB1Eais2VVyIbe","reason":"tool-calls","snapshot":"29c834f41df360c3fc54c3814923c19f2ef5698d","messageID":"msg_e3fa2f5f5001x32aNwZ8jVy0yH","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","type":"step-finish","tokens":{"total":17576,"input":17178,"output":160,"reasoning":238,"cache":{"write":0,"read":0}},"cost":0.03127476}}
+{"type":"step_start","timestamp":1779184121998,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"id":"prt_e3fa3388c001z5xwlTZ7Xh3l3o","messageID":"msg_e3fa33472001hUTvBIpkZdWTgq","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","snapshot":"140109ff848c1068ecd659bfa2fe6fc1b4268fce","type":"step-start"}}
+{"type":"tool_use","timestamp":1779184128759,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"webfetch","callID":"call_01_Lu5I8h5DEIwSCoPVrWqE8359","state":{"status":"error","input":{"url":"https://www.apartments.com/","format":"text","timeout":30},"error":"StatusCode: non 2xx status code (403 GET https://www.apartments.com/)","time":{"start":1779184128608,"end":1779184128758}},"id":"prt_e3fa34af1001li9eSocfrPFgu5","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa33472001hUTvBIpkZdWTgq"}}
+{"type":"tool_use","timestamp":1779184128859,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"webfetch","callID":"call_00_D2GT1WYL6rBDGevIL2cT0907","state":{"status":"completed","input":{"url":"https://www.zillow.com/rentals/","format":"text","timeout":30},"output":"Apartments, rental homes and more | Apply online | Zillow Rentals\n    \n    \n    Skip main navigationSign inJoin HomepageBuy Open Buy sub-menuRent Open Rent sub-menuSell Open Sell sub-menuGet a mortgage Open Get a mortgage sub-menuFind an agent Open Find an agent sub-menuManage rentals Open Manage rentals sub-menuAdvertise Get help Sign inJoin \n    \n    \n  Open menuRental ToolsBuild credit with rent reportingPay rent onlineApply for rentalsGet renters insuranceTour rentalsApp downloadRent affordability calculatorDiscover rentalsAll rental listingsRooms for rentVouchersYour searchSaved searchesMessagesContacted rentalsApplicationsYour rentalOverviewMake a paymentYour leaseRent guideRental ToolsDiscover rentalsYour searchYour rentalRent guideZillions of apartments. Ready when you are.Find a rental that checks all your boxes.clear search text buttonSubmit SearchMake your rental search a breeze with these toolsA variety of filters and a large network of rentalsA central Renter Hub to manage the details of your search1 fee, 1 form for 30 days of applicationsLooking for something specific?Browse homes and apartments with your must-have features.Pet-friendly rentalsSearch nowApartments for rentSearch nowRentals with parkingSearch nowGet renters insurance in just a few clicksZillow makes it quick and easy to protect your things, and coverage costs less than you might think.Get a free quoteApply without all the paperwork1 fee 1 form, 30 days of unlimited applications*One and donePay $35, complete 1 form, and get 30 days of online applications to any participating rental.Track in your HubSee at a glance where every application stands. It’s all in your Renter Hub!How to applySearch rentals with the Accepts Zillow Applications filter or share with any participating rental listing off Zillow.Paying rent online with Zillow is easyWhether or not you found your rental with Zillow, you can pay rent seamlessly with our digital payment portal.Automatic rent payments for peace of mindBoost your credit when you pay rent on timeBank-grade security for your payment informationGet startedLearn more about paying rent onlineLet's find what you're looking forRenters guideHow to stand out from other applicants, find a place in a new city and more.See the guideBudget calculatorOur simple tool helps you estimate a comfortable monthly payment.Try it nowEasier rent paymentsSet up auto payments so your rent’s always on time — with no checks to sign.Get started*Opt-in for rentals applications required.Find rental homes on Zillowclear search text buttonSubmit SearchDownload the Zillow Rentals appDownload nowDownload nowAboutZestimatesNewsResearchCareersApplicant Privacy NoticeHelpAdvertiseFair Housing GuideAdvocacyTerms of usePrivacy NoticeAd ChoicesCookie PreferenceLearnAIMobile AppsTruliaStreetEasyHotPadsOut EastDo Not Sell or Share My Personal Information →Zillow Group is committed to ensuring digital accessibility for individuals with disabilities. We are continuously working to improve the accessibility of our web experience for everyone, and we welcome feedback and accommodation requests. If you wish to report an issue or seek an accommodation, please let us know.Affiliated Business Arrangement DisclosureZillow, Inc. holds real estate brokerage licenses in multiple states. Zillow (Canada), Inc. holds real estate brokerage licenses in multiple provinces.All mortgage lending products and information provided by Zillow Home Loans, LLC, NMLS #10287. NMLS Consumer AccessLicensed Mortgage Banker, N.Y.S. Department of Financial Services2600 Michelson Drive, Suite 1201, Irvine, CA 92612 | Equal Housing Lender | Licensing Information§ 442-H New York Standard Operating Procedures§ New York Fair Housing NoticeTREC: Information about brokerage services, Consumer protection noticeCalifornia DRE #1522444Contact Zillow, Inc. BrokerageFor listings in Canada, the trademarks REALTOR®, REALTORS®, and the REALTOR® logo are controlled by The Canadian Real Estate Association (CREA) and identify real estate professionals who are members of CREA. The trademarks MLS®, Multiple Listing Service® and the associated logos are owned by CREA and identify the quality of services provided by real estate professionals who are members of CREA. Used under license.Follow us:Visit us on facebookVisit us on instagramVisit us on tiktok© 2006 to 2026 Zillow© 2006-2026 ZillowEqual Housing Opportunity","metadata":{"truncated":false},"title":"https://www.zillow.com/rentals/ (text/html; charset=utf-8)","time":{"start":1779184126323,"end":1779184128857}},"id":"prt_e3fa3415b001CRAxfqO3YsRzN5","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa33472001hUTvBIpkZdWTgq"}}
+{"type":"tool_use","timestamp":1779184131518,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"webfetch","callID":"call_02_uRucSRumyvZ7p6fLj2Nc8424","state":{"status":"error","input":{"url":"https://www.realtor.com/rentals","format":"text","timeout":30},"error":"StatusCode: non 2xx status code (429 GET https://www.realtor.com/rentals)","time":{"start":1779184131040,"end":1779184131517}},"id":"prt_e3fa35425001WC8mUJvhwIhA1o","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa33472001hUTvBIpkZdWTgq"}}
+{"type":"tool_use","timestamp":1779184134968,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"webfetch","callID":"call_03_4T1o7PRM2bE3WRNPH0N27937","state":{"status":"completed","input":{"url":"https://www.redfin.com/","format":"text","timeout":30},"output":"Redfin | Real Estate & Homes for Sale, Rentals, Mortgages & AgentsOpen appFeedFavorites & commentsSaved searchesMy homesRenter dashboardMy Redfin agentAppointmentsOpen house scheduleSearch for saleSearch rentalsSell my homeList my home for rentRedfin PremierBe a Redfin agentNotification settingsBuy ▾Popular SearchesHomes for saleCondos for saleEarly AccessLand for saleOpen housesBuying OptionsBuy with RedfinRedfin PremierBuying ResourcesAffordability calculatorHome buying guideFree home buying classesUS housing marketRent ▾Rental ResourcesRenter dashboardRental market trackerHow much rent can I afford?Should I rent or buy?Renter guideRedfin Rental ToolsList my home for rentRental Tools dashboardUS rental market trendsShould I sell or rent my home?Sell ▾My HomeWhat's my home worth?My home dashboardRedfin Selling OptionsWhy sell with Redfin?Redfin PremierRedfin Early AccessRedfin Full ServiceFind an agentSelling ResourcesHome selling guideWill selling pay off?Home improvement trendsMortgage ▾Mortgage ratesGet prequalifiedToday's mortgage ratesToday's refinance ratesHome equity loanCalculatorsPayment calculatorHow much can I afford?Home equity calculatorRefinance calculatorRent vs. buyHow to get pre-approvedReal Estate Agents ▾Find an AgentJoin as a Redfin AgentJoin our referral networkAgent Resource CenterFeed Join / Sign inRedfin Early Access.Find it first.BuyMortgageSellRentMy Home ValueBuyRedfin agents are among the most experienced in the industry and can help you win in today’s market.Find an agentMortgageRocket Mortgage delivers award-winning service with competitive rates, fast pre-approvals, and seamless closings.Get prequalifiedSellWe know how to price, market, and sell your home for top dollar. And we do it all for half the listing fee others often charge.Learn moreRentWhether you’re searching for apartments, condos, or rental homes, we make it easy to find a place you’ll love.Explore rentalsGet the Redfin appDownload our top-rated real estate app for iOS or Android to get alerts the moment your dream home hits the market.Talk to a Redfin agentYou’ll be connected with an expert local agent—there’s no pressure or obligation.Ask an AgentWe’re here to help seven days a week.Where are you searching for homes?Browse the newest homes from around the countryChesapeake, VAGrand Rapids, MIJacksonville, FLJackson, MSIndianapolis, INKnoxville, TNNorfolk, VATruckee, CAVirginia Beach, VAKansas City, MOSearch for homes by cityAlbuquerque real estateAlexandria real estateAnchorage real estateArlington real estateAshburn real estateAtlanta real estateAurora real estateAustin real estateBakersfield real estateBaltimore real estateBaton Rouge real estateBeaverton real estateBend real estateBirmingham real estateBoca Raton real estateBoise real estateBoston real estateBoulder real estateBowie real estateBrentwood real estateBuffalo real estateBurlington real estateCape Coral real estateChandler real estateCharleston real estateCharlotte real estateChattanooga real estateChicago real estateCincinnati real estateColorado Springs real estateColumbia real estateColumbus real estateDallas real estateDenver real estateDes Moines real estateDetroit real estateEl Paso real estateElk Grove real estateEugene real estateFairfax real estateFlagstaff real estateFort Collins real estateFort Lauderdale real estateFort Myers real estateFort Worth real estateFrederick real estateFremont real estateFresno real estateFrisco real estateGilbert real estateGlenview real estateHenderson real estateHonolulu real estateHouston real estateIndianapolis real estateIrvine real estateJacksonville real estateJersey City real estateKansas City real estateKnoxville real estateLake Tahoe real estateLas Vegas real estateLittle Rock real estateLong Island real estateLos Angeles real estateLouisville real estateMadison real estateManhattan real estateManteca real estateMemphis real estateMesa real estateMiami real estateMilwaukee real estateMinneapolis real estateModesto real estateMyrtle Beach real estateNaperville real estateNaples real estateNashua real estateNashville real estateNew Orleans real estateNew York real estateNewton real estateOakland real estateOklahoma City real estateOmaha real estateOrland Park real estateOrlando real estatePalm Springs real estatePhiladelphia real estatePhoenix real estatePittsburgh real estatePlainfield real estatePlano real estatePortland real estatePortland real estateProvidence real estateQuincy real estateRaleigh real estateRancho Cucamonga real estateReno real estateRichmond real estateRiverside real estateRochester real estateSacramento real estateSalem real estateSalt Lake City real estateSan Antonio real estateSan Diego real estateSan Francisco real estateSan Jose real estateSan Luis Obispo real estateSanta Clarita real estateSanta Fe real estateSarasota real estateSavannah real estateSchaumburg real estateScottsdale real estateSeattle real estateSilver Spring real estateSioux Falls real estateSt. Louis real estateStamford real estateStockton real estateTacoma real estateTampa real estateTemecula real estateTucson real estateTulsa real estateVirginia Beach real estateWashington, DC real estateWest Palm Beach real estateWilmington real estateWoodbridge real estateWorcester real estateShow moreSearch for homes by stateView full listAlabama • Homes for saleAlaska • Homes for saleArizona • Homes for saleArkansas • Homes for saleCalifornia • Homes for saleColorado • Homes for saleConnecticut • Homes for saleDelaware • Homes for saleFlorida • Homes for saleGeorgia • Homes for saleHawaii • Homes for saleIdaho • Homes for saleIllinois • Homes for saleIndiana • Homes for saleIowa • Homes for saleKansas • Homes for saleKentucky • Homes for saleLouisiana • Homes for saleMaine • Homes for saleMaryland • Homes for saleMassachusetts • Homes for saleMichigan • Homes for saleMinnesota • Homes for saleMississippi • Homes for saleMissouri • Homes for saleMontana • Homes for saleNebraska • Homes for saleNevada • Homes for saleNew Hampshire • Homes for saleNew Jersey • Homes for saleNew Mexico • Homes for saleNew York • Homes for saleNorth Carolina • Homes for saleNorth Dakota • Homes for saleOhio • Homes for saleOklahoma • Homes for saleOregon • Homes for salePennsylvania • Homes for saleRhode Island • Homes for saleSouth Carolina • Homes for saleSouth Dakota • Homes for saleTennessee • Homes for saleTexas • Homes for saleUtah • Homes for saleVermont • Homes for saleVirginia • Homes for saleWashington • Homes for saleWest Virginia • Homes for saleWisconsin • Homes for saleWyoming • Homes for saleShow moreSearch for apartments by cityView full listAlbuquerque apartments for rentAlexandria apartments for rentArlington apartments for rentAtlanta apartments for rentAugusta apartments for rentAustin apartments for rentBakersfield apartments for rentBaltimore apartments for rentBarnegat apartments for rentBaton Rouge apartments for rentBirmingham apartments for rentBoston apartments for rentCharlotte apartments for rentChattanooga apartments for rentChicago apartments for rentCincinnati apartments for rentCleveland apartments for rentColumbia apartments for rentColumbus apartments for rentColumbus apartments for rentDallas apartments for rentDayton apartments for rentDenver apartments for rentDetroit apartments for rentDurham apartments for rentFayetteville apartments for rentFort Worth apartments for rentFresno apartments for rentGreensboro apartments for rentHouston apartments for rentHuntsville apartments for rentIndianapolis apartments for rentIrving apartments for rentJacksonville apartments for rentKansas City apartments for rentKnoxville apartments for rentLas Vegas apartments for rentLos Angeles apartments for rentLouisville apartments for rentMacon apartments for rentMarietta apartments for rentMelbourne apartments for rentMemphis apartments for rentMesa apartments for rentMiami apartments for rentMilwaukee apartments for rentMinneapolis apartments for rentMobile apartments for rentMurfreesboro apartments for rentNashville apartments for rentNew York apartments for rentNorfolk apartments for rentOklahoma City apartments for rentOmaha apartments for rentOrlando apartments for rentPensacola apartments for rentPhiladelphia apartments for rentPhoenix apartments for rentPittsburgh apartments for rentPlano apartments for rentPortland apartments for rentRaleigh apartments for rentReno apartments for rentRichmond apartments for rentRiverside apartments for rentRochester apartments for rentSacramento apartments for rentSaint Louis apartments for rentSaint Petersburg apartments for rentSan Antonio apartments for rentSan Diego apartments for rentSavannah apartments for rentSeattle apartments for rentSpringfield apartments for rentTampa apartments for rentTempe apartments for rentTucson apartments for rentTulsa apartments for rentVirginia Beach apartments for rentWashington apartments for rentShow moreSearch for houses for rent by cityView full listAbilene houses for rentAlbany houses for rentAmarillo houses for rentArlington houses for rentAtlanta houses for rentAugusta houses for rentAustin houses for rentBakersfield houses for rentBirmingham houses for rentCharlotte houses for rentChesapeake houses for rentChicago houses for rentClarksville houses for rentColumbia houses for rentColumbus houses for rentColumbus houses for rentConcord houses for rentDallas houses for rentDayton houses for rentDenver houses for rentDestin houses for rentDothan houses for rentEl Paso houses for rentEugene houses for rentFayetteville houses for rentFort Wayne houses for rentFresno houses for rentGreensboro houses for rentGreenville houses for rentGriffin houses for rentHampton houses for rentHenderson houses for rentHouston houses for rentHuntsville houses for rentIndianapolis houses for rentJackson houses for rentJacksonville houses for rentKissimmee houses for rentKnoxville houses for rentLafayette houses for rentLakeland houses for rentLancaster houses for rentLansing houses for rentLawton houses for rentMacon houses for rentMarietta houses for rentMemphis houses for rentMesa houses for rentMobile houses for rentMontgomery houses for rentMurfreesboro houses for rentNashville houses for rentOrlando houses for rentPensacola houses for rentPhoenix houses for rentPort Saint Lucie houses for rentPortland houses for rentRaleigh houses for rentReno houses for rentRichmond houses for rentRiverside houses for rentRoanoke houses for rentSacramento houses for rentSaint Petersburg houses for rentSalem houses for rentSan Antonio houses for rentSavannah houses for rentSpokane houses for rentSpringfield houses for rentStockton houses for rentTampa houses for rentToledo houses for rentTucson houses for rentTyler houses for rentValdosta houses for rentVancouver houses for rentWaco houses for rentWarner Robins houses for rentWichita houses for rentWilmington houses for rentShow moreRedfin Listing Fee: Qualify for a 1% listing fee if you select Redfin's standard listing product and also buy with Redfin within 365 days of closing on your Redfin listing. Terms apply. Redfin's listing fees range from 2.0%-3.0%, depending on services selected. Fees subject to minimums. Learn more about Redfin’s fees at redfin.com/disclaimer.Rocket Preferred Pricing: Clients who finance with Rocket Mortgage and either (a) purchase a home using a Redfin agent or Redfin partner agent or (b) buy a property where Redfin is the listing brokerage, are eligible for one of two offers from Rocket Mortgage: (1) A 1% interest rate reduction for the first year of the loan, or (2) A lender-paid credit of 0.75% of the loan amount, up to $6,000. Offer valid only on retail loans with conforming loan limits, and cannot be combined with any other discounts. Rocket Mortgage may cancel/modify this offer at any time. Additional restrictions/conditions apply. This is not a commitment to lend.Join usBecome an AgentGet referralsCareersFind homes fasterAbout usWhy Redfin?Community ImpactInclusionCulturePressInvestorsBlogReal Estate NewsFind usContact UsHelp CenterAdvertiseSubsidiariesRent.ApartmentGuideAffiliated BusinessRocket CloseRocket MortgageCountriesUnited StatesCanadaCopyright: © 2026 Redfin. All rights reserved.Updated September 2025: By searching, you agree to the Terms of Use, and Privacy Policy.Do not sell or share my personal information.REDFIN and all REDFIN variants, WALK SCORE, and the R logos, are trademarks of Redfin Corporation, registered or pending in the USPTO.California DRE #01521930Redfin is licensed to do business in New York as Redfin Real Estate. NY Standard Operating ProceduresNew Mexico Real Estate LicensesTREC: Info About Brokerage Services, Consumer Protection NoticeAll mortgage lending products and information are provided by Rocket Mortgage, LLC | NMLS #3030; www.NMLSConsumerAccess.org. Licensed in 50 states. This site is not authorized by the New York State Department of Financial Services for mortgage solicitation or loan applications activities related to properties located in the State of New York.Redfin Corporation is an affiliated business of Rocket Limited Partnership. Each company, and their subsidiaries, are separate legal entities operated and managed through its own management and governance structures.If you are using a screen reader, or having trouble reading this website, please call Redfin Customer Support for help at 1-844-759-7732.REDFIN IS COMMITTED TO AND ABIDES BY THE FAIR HOUSING ACT AND EQUAL OPPORTUNITY ACT. READ REDFIN'S FAIR HOUSING POLICY AND THE NEW YORK STATE FAIR HOUSING NOTICE.","metadata":{"truncated":false},"title":"https://www.redfin.com/ (text/html; charset=utf-8)","time":{"start":1779184133340,"end":1779184134967}},"id":"prt_e3fa35db8001DOd3a2LgzpFJMd","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa33472001hUTvBIpkZdWTgq"}}
+{"type":"tool_use","timestamp":1779184136264,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"webfetch","callID":"call_04_puFgCKIGFXszAYpMblfH1175","state":{"status":"error","input":{"url":"https://www.hotpads.com/","format":"text","timeout":30},"error":"StatusCode: non 2xx status code (403 GET https://www.hotpads.com/)","time":{"start":1779184135722,"end":1779184136262}},"id":"prt_e3fa366e8001aarvDQhr0pIfci","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa33472001hUTvBIpkZdWTgq"}}
+{"type":"step_finish","timestamp":1779184136345,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"id":"prt_e3fa37097001xUqeqBMZ9FuLX4","reason":"tool-calls","snapshot":"452dbadd82d647b7d731cefc5ff3998385a23a0b","messageID":"msg_e3fa33472001hUTvBIpkZdWTgq","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","type":"step-finish","tokens":{"total":18096,"input":557,"output":374,"reasoning":13,"cache":{"write":0,"read":17152}},"cost":0.002564644}}
+{"type":"step_start","timestamp":1779184138064,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"id":"prt_e3fa3774e001ow7Ai8q9xqnvOy","messageID":"msg_e3fa370ed001G4uWn50m8Vlz2e","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","snapshot":"c6270573f2c3d453462ee7e0177b10d74dd15e99","type":"step-start"}}
+{"type":"tool_use","timestamp":1779184144657,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"webfetch","callID":"call_00_8TUUF1tLlQYxdA4e5AZd6646","state":{"status":"error","input":{"format":"text","url":"https://www.zillow.com/howto/zillow-app-features.htm","timeout":20},"error":"StatusCode: non 2xx status code (404 GET https://www.zillow.com/howto/zillow-app-features.htm)","time":{"start":1779184144166,"end":1779184144656}},"id":"prt_e3fa386500014YCVUS2ERTu3FS","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa370ed001G4uWn50m8Vlz2e"}}
+{"type":"tool_use","timestamp":1779184148804,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"webfetch","callID":"call_01_XCZkUGGbtMZzlbuihmY08706","state":{"status":"completed","input":{"format":"text","url":"https://www.rent.com/","timeout":20},"output":"Rent. Find your next place | Apartments and Houses for Rent. Skip to Content (Press Enter)0List a PropertyBusiness SolutionsMoving CenterLog InSign UpFind your perfect place. These properties are trending in your area. Find hot deals, tour a property or contact an agent.Renter tips and insightsAdvice from our experts to help you along your rental journey.Visit Rent Blog11 Steps to Follow When Renting an ApartmentApartment hunting can be exciting, yet overwhelming. Simplify the task by getting organized.Rent Calculator: How Much Should You Spend on Rent?Let us know your income, expenses and desired location. We'll help you find the right rent budget.The Best US Cities for Hybrid WorkSee where America's hybrid workers are living and thriving.Our CompanyRedfin.comRent BlogRent ResearchPrivacy PolicyTerms of ServiceDo Not Share or Sell My Personal InformationPopular SearchesApartments for Rent Near MeHouses for Rent Near Me1 Bedroom Apartments Near MeStudio Apartments Near MeCheap Houses Near MeLuxury Apartments Near MePet Friendly Apartments Near MeLet Us HelpDownload AppAvoid ScamsList a PropertyBusiness SolutionsSite MapAccessibilityRental Price EstimatorDownload the Rent. app for Android and iOS.© 2026 Rent Group Inc. All rights reserved. Terms of Service, Privacy Policy and MLS Disclosures. If you are using a screen reader, or are having difficulty reading this website, please call 1-844-759-7732.Rent Group, operator of Rent., is committed to and abides by the Fair Housing Act and Equal Opportunity Act. Read our Fair Housing Policy and The New York State Fair Housing Notice.Find your perfect place.Search for homes by locationSearchThe fastest way to rent a home is with the app.With the Rent app finding your perfect home has never been easier. Available now in the Apple App Store and Google Play App Store.Now with the app saving your favorite properties is easier than ever. Available now in the Apple App Store and Google Play App Store.Get The AppScan to get the appPopular SearchesRentals Near MeApartments Near MeCondos For Rent Near MeHouses For Rent Near MeTownhomes For Rent Near MeStudio Apartments Near Me1 Bedroom Apartments Near Me2 Bedroom Apartments Near Me3 Bedroom Apartments Near MeCheap Apartments Near MeCheap Houses Near MeLuxury Apartments Near MePet Friendly Apartments Near MeNew Apartments Near MeView More +Apartments For Rent By CityAlbuquerque ApartmentsAlexandria ApartmentsAtlanta ApartmentsAustin ApartmentsBaltimore ApartmentsBuffalo ApartmentsCharlotte ApartmentsChicago ApartmentsCincinnati ApartmentsCleveland ApartmentsColorado Springs ApartmentsColumbus ApartmentsDenver ApartmentsEl Paso ApartmentsFort Lauderdale ApartmentsHouston ApartmentsJacksonville ApartmentsJersey City ApartmentsKnoxville ApartmentsLas Vegas ApartmentsLong Beach ApartmentsLos Angeles ApartmentsLouisville ApartmentsMadison ApartmentsMiami ApartmentsMilwaukee ApartmentsMinneapolis ApartmentsNashville ApartmentsNew York City ApartmentsOrlando ApartmentsPhiladelphia ApartmentsPhoenix ApartmentsPittsburgh ApartmentsPortland ApartmentsRaleigh ApartmentsSacramento ApartmentsSaint Petersburg ApartmentsSalt Lake City ApartmentsSan Antonio ApartmentsSan Diego ApartmentsSan Francisco ApartmentsSan Jose ApartmentsSeattle ApartmentsTallahassee ApartmentsTampa ApartmentsTucson ApartmentsVirginia Beach ApartmentsWest Palm Beach ApartmentsView More +Houses For Rent By CityAlbuquerque HousesAlexandria HousesAtlanta HousesAustin HousesBaltimore HousesBuffalo HousesCharlotte HousesChicago HousesCincinnati HousesCleveland HousesColorado Springs HousesColumbus HousesDenver HousesEl Paso HousesFort Lauderdale HousesHouston HousesJacksonville HousesJersey City HousesKnoxville HousesLas Vegas HousesLong Beach HousesLos Angeles HousesLouisville HousesMadison HousesMiami HousesMilwaukee HousesMinneapolis HousesNashville HousesNew York City HousesOrlando HousesPhiladelphia HousesPhoenix HousesPittsburgh HousesPortland HousesRaleigh HousesSacramento HousesSaint Petersburg HousesSalt Lake City HousesSan Antonio HousesSan Diego HousesSan Francisco HousesSan Jose HousesSeattle HousesTallahassee HousesTampa HousesTucson HousesVirginia Beach HousesWest Palm Beach HousesView More +Rentals By StateAlabama RentalsAlaska RentalsArizona RentalsArkansas RentalsCalifornia RentalsColorado RentalsConnecticut RentalsDelaware RentalsFlorida RentalsGeorgia RentalsHawaii RentalsIdaho RentalsIllinois RentalsIndiana RentalsIowa RentalsKansas RentalsKentucky RentalsLouisiana RentalsMaine RentalsMaryland RentalsMassachusetts RentalsMichigan RentalsMinnesota RentalsMississippi RentalsMissouri RentalsMontana RentalsNebraska RentalsNevada RentalsNew Hampshire RentalsNew Jersey RentalsNew Mexico RentalsNew York RentalsNorth Carolina RentalsNorth Dakota RentalsOhio RentalsOklahoma RentalsOregon RentalsPennsylvania RentalsRhode Island RentalsSouth Carolina RentalsSouth Dakota RentalsTennessee RentalsTexas RentalsUtah RentalsVermont RentalsVirginia RentalsWashington RentalsWest Virginia RentalsWisconsin RentalsWyoming RentalsView More +Properties for youThese properties are trending. Find the perfect place, book a tour, or contact to learn more.$55 Price Drop$990+Villas at Bailey Ranch Apartment Homes8751 N 97th East Ave, Owasso, OK 740551–2 Beds • 1–2 Baths1 Month Free$965+Metropolis1011 Colorado Blvd, Denver, CO 802061–2 Beds • 1 Bath$249 Price Drop$1,254+Alloy Midtown3010 N 2nd St, Phoenix, AZ 85012Studio–1 Beds • 1 BathPopular$2,500Bellagio Villas1129 Montebello Dr, Gilroy, CA 950202 Beds • 1 Bath$85 Price Drop$1,450+The Legends4422 Nicklaus Dr, Champaign, IL 618221–3 Beds • 1–2 Baths$125 Price Drop$825+Green Street Aparments by Royse + Brinkmeyer507 W Green St, Champaign, IL 618201–2 Beds • 1 Bath","metadata":{"truncated":false},"title":"https://www.rent.com/ (text/html; charset=utf-8)","time":{"start":1779184146463,"end":1779184148802}},"id":"prt_e3fa390ec001XRuiz1L5wJNd1L","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa370ed001G4uWn50m8Vlz2e"}}
+{"type":"tool_use","timestamp":1779184149640,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"webfetch","callID":"call_02_iFfan3Py0ooOu2pZnD4X3360","state":{"status":"error","input":{"format":"markdown","url":"https://www.trulia.com/rent/","timeout":20},"error":"StatusCode: non 2xx status code (403 GET https://www.trulia.com/rent/)","time":{"start":1779184148905,"end":1779184149638}},"id":"prt_e3fa399ab0014wiqypPsuCgjF6","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa370ed001G4uWn50m8Vlz2e"}}
+{"type":"step_finish","timestamp":1779184149727,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"id":"prt_e3fa3a4de001zogsMwPJQAMBjM","reason":"tool-calls","snapshot":"8f68cad149fa80ff0493a8a78f94d31b3e1e2e62","messageID":"msg_e3fa370ed001G4uWn50m8Vlz2e","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","type":"step-finish","tokens":{"total":22364,"input":4020,"output":236,"reasoning":60,"cache":{"write":0,"read":18048}},"cost":0.008286576}}
+{"type":"step_start","timestamp":1779184150996,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"id":"prt_e3fa3a9d1001Iig3cIdmpqMVQ4","messageID":"msg_e3fa3a521001f1Xt6BprkjimBs","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","snapshot":"58b7a9e235a652dc7800c22260315c374d37971d","type":"step-start"}}
+{"type":"tool_use","timestamp":1779184158002,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"webfetch","callID":"call_00_zhKEGClWeh2AzXeDYdBC7541","state":{"status":"error","input":{"format":"markdown","url":"https://www.nngroup.com/articles/real-estate-ux/","timeout":20},"error":"StatusCode: non 2xx status code (404 GET https://www.nngroup.com/articles/real-estate-ux/)","time":{"start":1779184156217,"end":1779184158000}},"id":"prt_e3fa3b5de0019FiM6OQX2osoao","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa3a521001f1Xt6BprkjimBs"}}
+{"type":"tool_use","timestamp":1779184159674,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"webfetch","callID":"call_01_8umVOokkNnJ0YtXnQDqF7742","state":{"status":"completed","input":{"format":"markdown","url":"https://medium.com/@uxdesign/real-estate-app-design","timeout":15},"output":"Medium \n\n[Sitemap](/sitemap/sitemap.xml)\n\n[Open in app](https://play.google.com/store/apps/details?id=com.medium.reader&referrer=utm_source%3DmobileNavBar&source=post_page---top_nav_layout_nav-----------------------------------------)\n\nSign up\n\n[Sign in](/m/signin?operation=login&redirect=https%3A%2F%2Fmedium.com%2F%40uxdesign%2Freal-estate-app-design&source=post_page---top_nav_layout_nav-----------------------global_nav------------------)\n\n[Medium Logo](/?source=post_page---top_nav_layout_nav-----------------------------------------)\n\nGet app\n\n[\n\nWrite\n\n](/m/signin?operation=register&redirect=https%3A%2F%2Fmedium.com%2Fnew-story&source=---top_nav_layout_nav-----------------------new_post_topnav------------------)\n\n[\n\nSearch\n\n](/search?source=post_page---top_nav_layout_nav-----------------------------------------)\n\nSign up\n\n[Sign in](/m/signin?operation=login&redirect=https%3A%2F%2Fmedium.com%2F%40uxdesign%2Freal-estate-app-design&source=post_page---top_nav_layout_nav-----------------------global_nav------------------)\n\n![Unknown user](https://miro.medium.com/v2/resize:fill:64:64/1*dmbNkD5D-u45r44go_cf0g.png)\n\nPAGE NOT FOUND\n\n## 404\n\n## Out of nothing, something.\n\nYou can find (just about) anything on Medium — apparently even a page that doesn’t exist. Maybe these stories will take you somewhere new?\n\n[Home](/?source=post_page--------------------------------------------)\n\n[](https://fayeseidlers.medium.com/i-never-thought-id-get-old-enough-to-wipe-the-dust-off-a-ps2-1efdc06bc2e9?source=post_page--------------------------------------------)\n\n[\n\n#### I Never Thought I’d Get Old Enough to Wipe the Dust Off a PS2\n\n](https://fayeseidlers.medium.com/i-never-thought-id-get-old-enough-to-wipe-the-dust-off-a-ps2-1efdc06bc2e9?source=post_page--------------------------------------------)\n\n[\n\n![Faye Seidler](https://miro.medium.com/v2/resize:fill:80:80/1*X7HP9L6PiuJjTithU2VXXg.jpeg)\n\n\n\n](/@fayeseidlers?source=post_page--------------------------------------------)\n\n[Faye Seidler](https://fayeseidlers.medium.com/?source=post_page--------------------------------------------)\n\nMay 6, 2026\n\n·\n\n10 min read\n\n[](https://fayeseidlers.medium.com/i-never-thought-id-get-old-enough-to-wipe-the-dust-off-a-ps2-1efdc06bc2e9?source=post_page--------------------------------------------)\n\n[\n\n#### I Never Thought I’d Get Old Enough to Wipe the Dust Off a PS2\n\n](https://fayeseidlers.medium.com/i-never-thought-id-get-old-enough-to-wipe-the-dust-off-a-ps2-1efdc06bc2e9?source=post_page--------------------------------------------)\n\n[\n\n![Faye Seidler](https://miro.medium.com/v2/resize:fill:80:80/1*X7HP9L6PiuJjTithU2VXXg.jpeg)\n\n\n\n](/@fayeseidlers?source=post_page--------------------------------------------)\n\n[Faye Seidler](https://fayeseidlers.medium.com/?source=post_page--------------------------------------------)\n\nMay 6, 2026\n\n·\n\n10 min read\n\n[](/@easonjordan_63207/my-time-with-ted-b8df92eeedc3?source=post_page--------------------------------------------)\n\n[\n\n#### My escapades with Ted Turner\n\n](/@easonjordan_63207/my-time-with-ted-b8df92eeedc3?source=post_page--------------------------------------------)\n\n[\n\n![Eason Jordan](https://miro.medium.com/v2/resize:fill:80:80/0*leWQodZlgFq66dMG)\n\n\n\n](/@easonjordan_63207?source=post_page--------------------------------------------)\n\n[Eason Jordan](/@easonjordan_63207?source=post_page--------------------------------------------)\n\nMay 18, 2026\n\n·\n\n8 min read\n\n[](/@easonjordan_63207/my-time-with-ted-b8df92eeedc3?source=post_page--------------------------------------------)\n\n[\n\n#### My escapades with Ted Turner\n\n](/@easonjordan_63207/my-time-with-ted-b8df92eeedc3?source=post_page--------------------------------------------)\n\n[\n\n![Eason Jordan](https://miro.medium.com/v2/resize:fill:80:80/0*leWQodZlgFq66dMG)\n\n\n\n](/@easonjordan_63207?source=post_page--------------------------------------------)\n\n[Eason Jordan](/@easonjordan_63207?source=post_page--------------------------------------------)\n\nMay 18, 2026\n\n·\n\n8 min read\n\n[](/full-frame/what-50-years-of-photography-has-taught-me-about-seeing-b1cff7fcdcdb?source=post_page--------------------------------------------)\n\n[\n\n#### What 50 Years of Photography Has Taught Me About Seeing\n\n](/full-frame/what-50-years-of-photography-has-taught-me-about-seeing-b1cff7fcdcdb?source=post_page--------------------------------------------)\n\n[\n\n![Pete Cripps](https://miro.medium.com/v2/resize:fill:80:80/0*Cu-L-2EAHv_7kqx_.jpeg)\n\n\n\n](/@Pete_Cripps?source=post_page--------------------------------------------)\n\n[Pete Cripps](/@Pete_Cripps?source=post_page--------------------------------------------) [in Full Frame](/full-frame?source=post_page--------------------------------------------)\n\nApr 9, 2026\n\n·\n\n10 min read\n\nMember-only\n\n[](/full-frame/what-50-years-of-photography-has-taught-me-about-seeing-b1cff7fcdcdb?source=post_page--------------------------------------------)\n\n[\n\n#### What 50 Years of Photography Has Taught Me About Seeing\n\n](/full-frame/what-50-years-of-photography-has-taught-me-about-seeing-b1cff7fcdcdb?source=post_page--------------------------------------------)\n\n[\n\n![Pete Cripps](https://miro.medium.com/v2/resize:fill:80:80/0*Cu-L-2EAHv_7kqx_.jpeg)\n\n\n\n](/@Pete_Cripps?source=post_page--------------------------------------------)\n\n[Pete Cripps](/@Pete_Cripps?source=post_page--------------------------------------------) [in Full Frame](/full-frame?source=post_page--------------------------------------------)\n\nApr 9, 2026\n\n·\n\n10 min read\n\nMember-only\n\n[](https://ltvgjoe.medium.com/let-your-backlog-grow-and-grow-and-grow-d32840a26655?source=post_page--------------------------------------------)\n\n[\n\n#### Why You Should Stop Trying to Complete Your Backlog\n\n](https://ltvgjoe.medium.com/let-your-backlog-grow-and-grow-and-grow-d32840a26655?source=post_page--------------------------------------------)\n\n[\n\n![LTVG Joe](https://miro.medium.com/v2/resize:fill:80:80/1*FsC-xG_W2VbDepGC_pPZ7g.jpeg)\n\n\n\n](/@ltvgjoe?source=post_page--------------------------------------------)\n\n[LTVG Joe](https://ltvgjoe.medium.com/?source=post_page--------------------------------------------)\n\nMar 30, 2026\n\n·\n\n9 min read\n\n[](https://ltvgjoe.medium.com/let-your-backlog-grow-and-grow-and-grow-d32840a26655?source=post_page--------------------------------------------)\n\n[\n\n#### Why You Should Stop Trying to Complete Your Backlog\n\n](https://ltvgjoe.medium.com/let-your-backlog-grow-and-grow-and-grow-d32840a26655?source=post_page--------------------------------------------)\n\n[\n\n![LTVG Joe](https://miro.medium.com/v2/resize:fill:80:80/1*FsC-xG_W2VbDepGC_pPZ7g.jpeg)\n\n\n\n](/@ltvgjoe?source=post_page--------------------------------------------)\n\n[LTVG Joe](https://ltvgjoe.medium.com/?source=post_page--------------------------------------------)\n\nMar 30, 2026\n\n·\n\n9 min read","metadata":{"truncated":false},"title":"https://medium.com/@uxdesign/real-estate-app-design (text/html; charset=utf-8)","time":{"start":1779184158754,"end":1779184159673}},"id":"prt_e3fa3bfbb001joo0T0XvbSkVqu","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa3a521001f1Xt6BprkjimBs"}}
+{"type":"step_finish","timestamp":1779184159749,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"id":"prt_e3fa3cc030016waV4RbMzfUXvL","reason":"tool-calls","snapshot":"3bb8a5ff9b82890e1bec10af58d31377250e8901","messageID":"msg_e3fa3a521001f1Xt6BprkjimBs","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","type":"step-finish","tokens":{"total":23972,"input":1485,"output":170,"reasoning":45,"cache":{"write":0,"read":22272}},"cost":0.003655044}}
+{"type":"step_start","timestamp":1779184161149,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"id":"prt_e3fa3d17c0016oLcT3ClbWoLii","messageID":"msg_e3fa3cc490018zWDLOTd1DRO4Q","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","snapshot":"33b658bebbe66483ba02280c224f9924af05a680","type":"step-start"}}
+{"type":"tool_use","timestamp":1779184167325,"sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","part":{"type":"tool","tool":"bash","callID":"call_00_SqMcraxaZMY7LyFtPAiN1774","state":{"status":"completed","input":{"command":"ls -la /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/design/ 2>/dev/null || echo \"Directory does not exist yet\"","description":"Check if design directory exists"},"output":"total 128\ndrwxr-xr-x@ 10 saifulpotential  staff    320 May 19 15:49 .\ndrwxr-xr-x@  9 saifulpotential  staff    288 May 19 10:58 ..\n-rw-r--r--@  1 saifulpotential  staff   5617 May 19 15:49 DESIGN_SYSTEM.md\n-rw-r--r--@  1 saifulpotential  staff   5617 May 19 14:12 DESIGN_SYSTEM_A.md\n-rw-r--r--@  1 saifulpotential  staff   5724 May 19 14:13 DESIGN_SYSTEM_B.md\n-rw-r--r--@  1 saifulpotential  staff   5699 May 19 14:14 DESIGN_SYSTEM_C.md\n-rw-r--r--@  1 saifulpotential  staff  27631 May 19 15:15 DOMAIN_RESEARCH.md\n-rw-r--r--@  1 saifulpotential  staff   3674 May 19 15:02 VARIATIONS_INDEX.md\ndrwxr-xr-x@  3 saifulpotential  staff     96 May 19 14:54 html\ndrwxr-xr-x@ 12 saifulpotential  staff    384 May 19 13:59 variations\n","metadata":{"output":"total 128\ndrwxr-xr-x@ 10 saifulpotential  staff    320 May 19 15:49 .\ndrwxr-xr-x@  9 saifulpotential  staff    288 May 19 10:58 ..\n-rw-r--r--@  1 saifulpotential  staff   5617 May 19 15:49 DESIGN_SYSTEM.md\n-rw-r--r--@  1 saifulpotential  staff   5617 May 19 14:12 DESIGN_SYSTEM_A.md\n-rw-r--r--@  1 saifulpotential  staff   5724 May 19 14:13 DESIGN_SYSTEM_B.md\n-rw-r--r--@  1 saifulpotential  staff   5699 May 19 14:14 DESIGN_SYSTEM_C.md\n-rw-r--r--@  1 saifulpotential  staff  27631 May 19 15:15 DOMAIN_RESEARCH.md\n-rw-r--r--@  1 saifulpotential  staff   3674 May 19 15:02 VARIATIONS_INDEX.md\ndrwxr-xr-x@  3 saifulpotential  staff     96 May 19 14:54 html\ndrwxr-xr-x@ 12 saifulpotential  staff    384 May 19 13:59 variations\n","exit":0,"description":"Check if design directory exists","truncated":false},"title":"Check if design directory exists","time":{"start":1779184167022,"end":1779184167323}},"id":"prt_e3fa3debc0018QUWiPaSEMk9KY","sessionID":"ses_1c05d0ce7ffeD4ys7iuSiY4nr5","messageID":"msg_e3fa3cc490018zWDLOTd1DRO4Q"}}

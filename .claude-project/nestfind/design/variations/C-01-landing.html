@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NestFind — Find Your Next Home (Variant C)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@iconify/iconify@2.2.1/dist/iconify.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: #FFFFFF; color: #111827; line-height: 1.65; }
+    .root { max-width: 1440px; margin: 0 auto; }
+    nav.navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 64px; border-bottom: 0.5px solid #F3F4F6; }
+    .nav-logo { font-size: 22px; font-weight: 500; color: #111827; letter-spacing: -0.02em; }
+    .nav-links { display: flex; gap: 36px; align-items: center; }
+    .nav-links a { color: #6B7280; text-decoration: none; font-size: 14px; font-weight: 400; transition: color 0.2s; }
+    .nav-links a:hover { color: #111827; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; text-decoration: none; }
+    .btn-primary { background: #4A90D9; color: #fff; height: 44px; padding: 0 28px; border-radius: 6px; font-size: 14px; }
+    .btn-primary:hover { background: #3A7BC9; }
+    .btn-ghost { background: transparent; color: #4A90D9; height: 40px; padding: 0 16px; border-radius: 6px; font-size: 14px; }
+    .btn-ghost:hover { background: #F9FAFB; }
+    .hero { padding: 120px 64px 80px; text-align: center; }
+    .hero h1 { font-size: 64px; font-weight: 300; line-height: 1.1; margin-bottom: 20px; letter-spacing: -0.03em; color: #111827; }
+    .hero h1 span { color: #4A90D9; font-weight: 400; }
+    .hero p { color: #6B7280; font-size: 18px; font-weight: 400; max-width: 540px; margin: 0 auto 40px; }
+    .search-bar { display: flex; max-width: 620px; margin: 0 auto; gap: 0; }
+    .search-bar input { flex: 1; height: 48px; background: #FFFFFF; border: 0.5px solid #D1D5DB; border-right: none; border-radius: 6px 0 0 6px; padding: 0 20px; color: #111827; font-size: 16px; font-family: inherit; outline: none; }
+    .search-bar input:focus { border-color: #4A90D9; box-shadow: 0 0 0 2px rgba(74,144,217,0.15); }
+    .search-bar input::placeholder { color: #9CA3AF; }
+    .search-bar .btn-primary { border-radius: 0 6px 6px 0; height: 48px; padding: 0 32px; font-size: 14px; }
+    .chip-row { display: flex; gap: 8px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+    .chip { padding: 6px 16px; background: #F9FAFB; border: 0.5px solid #F3F4F6; border-radius: 4px; font-size: 13px; color: #6B7280; cursor: pointer; transition: all 0.15s; }
+    .chip:hover { background: #F3F4F6; color: #111827; }
+    .section { padding: 80px 64px; }
+    .section-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #9CA3AF; margin-bottom: 12px; }
+    .section h2 { font-size: 40px; font-weight: 300; margin-bottom: 12px; letter-spacing: -0.02em; color: #111827; }
+    .section p.sub { color: #6B7280; font-size: 17px; font-weight: 400; max-width: 560px; margin-bottom: 56px; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .step-card { padding: 36px 32px; text-align: left; border-left: 0.5px solid #F3F4F6; }
+    .step-card:first-child { border-left: none; }
+    .step-num { font-size: 48px; font-weight: 300; color: #E5E7EB; margin-bottom: 12px; line-height: 1; }
+    .step-card h4 { font-size: 20px; font-weight: 500; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .step-card p { color: #6B7280; font-size: 15px; line-height: 1.7; }
+    .property-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .prop-card { background: #FFFFFF; border: 0.5px solid #F3F4F6; border-radius: 4px; overflow: hidden; transition: all 0.2s; }
+    .prop-card:hover { border-color: #D1D5DB; }
+    .prop-img { width: 100%; height: 220px; object-fit: cover; background: #F9FAFB; display:flex;align-items:center;justify-content:center;font-size:48px;color:#E5E7EB; }
+    .prop-body { padding: 28px 32px; }
+    .prop-price { font-size: 28px; font-weight: 300; color: #111827; }
+    .prop-addr { color: #6B7280; font-size: 14px; margin: 6px 0 12px; }
+    .prop-meta { display: flex; gap: 20px; font-size: 13px; color: #9CA3AF; }
+    .prop-dot { width: 6px; height: 6px; border-radius: 2px; background: #22C55E; display: inline-block; margin-right: 6px; vertical-align: middle; }
+    .prop-badge-text { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: #9CA3AF; margin-bottom: 8px; display: block; }
+    .features { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+    .feat-card { padding: 32px; border-top: 0.5px solid #F3F4F6; }
+    .feat-icon { color: #4A90D9; margin-bottom: 16px; }
+    .feat-card h4 { font-size: 17px; font-weight: 500; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .feat-card p { color: #6B7280; font-size: 14px; line-height: 1.7; }
+    footer { border-top: 0.5px solid #F3F4F6; padding: 56px 64px; display: flex; justify-content: space-between; }
+    .footer-col h5 { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 20px; color: #9CA3AF; }
+    .footer-col a { display: block; color: #6B7280; text-decoration: none; font-size: 14px; margin-bottom: 10px; transition: color 0.15s; }
+    .footer-col a:hover { color: #111827; }
+    .var-nav-bar { position: fixed; top: 16px; right: 16px; display: flex; gap: 8px; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); padding: 8px 14px; border-radius: 6px; z-index: 9999; }
+    .var-nav-bar a { color: #9CA3AF; text-decoration: none; font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: 4px; transition: all 0.15s; }
+    .var-nav-bar a.active { background: #4A90D9; color: #fff; }
+    .var-nav-bar a:hover:not(.active) { color: #fff; background: rgba(255,255,255,0.1); }
+    .var-nav-bar .sep { color: rgba(255,255,255,0.2); font-size: 12px; line-height: 1.8; }
+  </style>
+</head>
+<body>
+<nav class="var-nav-bar">
+  <a href="A-01-landing.html">A</a>
+  <a href="B-01-landing.html">B</a>
+  <a href="C-01-landing.html" class="active">C</a>
+  <span class="sep">|</span>
+  <span style="color:#9CA3AF;font-size:11px;padding:4px 4px;">Landing</span>
+</nav>
+
+<div class="root">
+  <nav class="navbar">
+    <div class="nav-logo">NestFind</div>
+    <div class="nav-links">
+      <a href="#">Browse</a>
+      <a href="#">How It Works</a>
+      <a href="#">For Owners</a>
+      <button class="btn btn-ghost">Sign In</button>
+      <button class="btn btn-primary">Join Now</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Find Your <span>Perfect Nest</span>,<br>Without the Noise</h1>
+    <p>Browse thousands of verified rental properties. Clean, ad-free, and focused on what matters.</p>
+    <div class="search-bar">
+      <input type="text" placeholder="Enter city, neighborhood, or ZIP code...">
+      <button class="btn btn-primary">Search Properties</button>
+    </div>
+    <div class="chip-row">
+      <span class="chip">Apartments</span>
+      <span class="chip">Houses</span>
+      <span class="chip">Condos</span>
+      <span class="chip">Pet-Friendly</span>
+      <span class="chip">Under $2,000</span>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">How It Works</div>
+    <h2>Three steps to your next home</h2>
+    <p class="sub">NestFind makes rental hunting simple. No ads, no clutter, just homes you'll love.</p>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <h4>Search & Filter</h4>
+        <p>Enter your preferred location and refine by price, beds, and property type. Results update instantly.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <h4>Explore & Save</h4>
+        <p>Browse photos, check amenities, and view locations on the map. Save favorites with one click.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <h4>Inquire & Move</h4>
+        <p>Send an inquiry directly to the property manager. Simple form, no lengthy applications.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Featured Properties</div>
+    <h2>Homes you might love</h2>
+    <p class="sub">Hand-picked listings from our curated collection.</p>
+    <div class="property-grid">
+      <div class="prop-card">
+        <div class="prop-img">🏠</div>
+        <div class="prop-body">
+          <span class="prop-badge-text"><span class="prop-dot"></span>Available Now</span>
+          <div class="prop-price">$1,850<span style="font-size:16px;font-weight:400;color:#9CA3AF">/mo</span></div>
+          <div class="prop-addr">1420 Pine Street, San Francisco, CA</div>
+          <div class="prop-meta"><span>2 bd</span><span>1 ba</span><span>850 sqft</span><span>Apartment</span></div>
+        </div>
+      </div>
+      <div class="prop-card">
+        <div class="prop-img">🏡</div>
+        <div class="prop-body">
+          <span class="prop-badge-text"><span class="prop-dot"></span>Available Now</span>
+          <div class="prop-price">$2,950<span style="font-size:16px;font-weight:400;color:#9CA3AF">/mo</span></div>
+          <div class="prop-addr">381 Oak Avenue, Austin, TX</div>
+          <div class="prop-meta"><span>3 bd</span><span>2 ba</span><span>1,200 sqft</span><span>House</span></div>
+        </div>
+      </div>
+      <div class="prop-card">
+        <div class="prop-img">🏢</div>
+        <div class="prop-body">
+          <span class="prop-badge-text"><span class="prop-dot"></span>Available Now</span>
+          <div class="prop-price">$2,200<span style="font-size:16px;font-weight:400;color:#9CA3AF">/mo</span></div>
+          <div class="prop-addr">750 Market Street, Portland, OR</div>
+          <div class="prop-meta"><span>1 bd</span><span>1 ba</span><span>720 sqft</span><span>Condo</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Why NestFind</div>
+    <h2>Built for renters, not advertisers</h2>
+    <p class="sub">We focused on what actually matters when finding a rental.</p>
+    <div class="features">
+      <div class="feat-card"><div class="feat-icon"><iconify-icon icon="mdi:eye-off-outline" width="28" height="28"></iconify-icon></div><h4>Ad-Free Browsing</h4><p>No sponsored listings cluttering your search. Every result is organic.</p></div>
+      <div class="feat-card"><div class="feat-icon"><iconify-icon icon="mdi:lightning-bolt" width="28" height="28"></iconify-icon></div><h4>Instant Filters</h4><p>Real-time filtering by price, beds, and type. No page reloads.</p></div>
+      <div class="feat-card"><div class="feat-icon"><iconify-icon icon="mdi:heart-outline" width="28" height="28"></iconify-icon></div><h4>Quick Favorites</h4><p>Save properties with one click. Access your favorites from anywhere.</p></div>
+      <div class="feat-card"><div class="feat-icon"><iconify-icon icon="mdi:map-marker-outline" width="28" height="28"></iconify-icon></div><h4>Map View</h4><p>See exactly where each property is. Integrated Google Maps on every listing.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-col"><h5>NestFind</h5><a href="#">About</a><a href="#">Careers</a><a href="#">Press</a><a href="#">Blog</a></div>
+    <div class="footer-col"><h5>Renters</h5><a href="#">Browse Properties</a><a href="#">How It Works</a><a href="#">Renter Guide</a><a href="#">Safety Tips</a></div>
+    <div class="footer-col"><h5>Owners</h5><a href="#">List a Property</a><a href="#">Owner Dashboard</a><a href="#">Pricing</a><a href="#">Resources</a></div>
+    <div class="footer-col"><h5>Support</h5><a href="#">Help Center</a><a href="#">Contact Us</a><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+  </footer>
+</div>
+</body>
+</html>

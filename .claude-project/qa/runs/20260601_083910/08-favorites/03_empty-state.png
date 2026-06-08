@@ -1,0 +1,14 @@
+/usr/local/lib/node_modules/@playwright/cli/node_modules/playwright-core/lib/tools/cli-client/session.js:60
+      throw new Error(`Browser '${this.name}' is not open. Run
+            ^
+
+Error: Browser 'ftest1' is not open. Run
+
+  playwright-cli -s=ftest1 open
+
+to start the browser session.
+    at Session.run (/usr/local/lib/node_modules/@playwright/cli/node_modules/playwright-core/lib/tools/cli-client/session.js:60:13)
+    at async runInSession (/usr/local/lib/node_modules/@playwright/cli/node_modules/playwright-core/lib/tools/cli-client/program.js:238:18)
+    at async program (/usr/local/lib/node_modules/@playwright/cli/node_modules/playwright-core/lib/tools/cli-client/program.js:222:20)
+
+Node.js v24.15.0

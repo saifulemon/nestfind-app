@@ -1,0 +1,181 @@
+{
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "favorites": "Favorites",
+    "inquiries": "Inquiries",
+    "profile": "Profile",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "admin": "Admin"
+  },
+  "auth": {
+    "login": "Sign In",
+    "signup": "Create Account",
+    "logout": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "phone": "Phone (optional)",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset Password",
+    "setNewPassword": "Set new password",
+    "chooseStrongPassword": "Choose a strong password for your account",
+    "newPassword": "New Password",
+    "enterNewPassword": "Enter new password",
+    "atLeast8Chars": "At least 8 characters",
+    "confirmNewPassword": "Confirm New Password",
+    "reEnterNewPassword": "Re-enter new password",
+    "passwordResetSuccess": "Password reset successful!",
+    "passwordResetMessage": "Your password has been updated. You can now sign in with your new password.",
+    "backToSignIn": "Back to Sign In",
+    "sendResetLink": "Send Reset Link",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "rememberMe": "Remember me",
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to your account",
+    "emailAddress": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "Enter your password",
+    "orDivider": "or",
+    "signUp": "Sign up",
+    "termsPrefix": "By signing in you agree to our",
+    "terms": "Terms",
+    "privacy": "Privacy Policy"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "loading": "Loading...",
+    "noResults": "No results found",
+    "error": "Something went wrong",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "confirm": "Confirm",
+    "close": "Close",
+    "viewDetails": "View Details",
+    "language": "Language"
+  },
+  "hero": {
+    "title": "Find Your Next",
+    "titleHighlight": "Home",
+    "subtitle": "Browse the best rental properties in your area. Your perfect home is just a search away.",
+    "searchPlaceholder": "Search by city, neighborhood, or address..."
+  },
+  "property": {
+    "price": "Price",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "sqft": "Sq Ft",
+    "type": "Property Type",
+    "address": "Address",
+    "description": "Description",
+    "amenities": "Amenities",
+    "location": "Location",
+    "saveToFavorites": "Save to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "submitInquiry": "Submit Inquiry",
+    "photoGallery": "Photo Gallery"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalProperties": "Total Properties",
+    "totalInquiries": "Total Inquiries",
+    "totalUsers": "Total Users",
+    "recentActivity": "Recent Activity"
+  },
+  "admin": {
+    "properties": "Properties",
+    "inquiries": "Inquiries",
+    "users": "Users",
+    "addProperty": "Add Property",
+    "editProperty": "Edit Property"
+  },
+  "unauthorized": {
+    "title": "Access Denied",
+    "message": "You do not have permission to view this page."
+  },
+  "notFound": {
+    "title": "404",
+    "message": "The page you are looking for does not exist.",
+    "goHome": "Go Home"
+  },
+  "landing": {
+    "nav": {
+      "brand": "NestFind",
+      "browse": "Browse",
+      "howItWorks": "How It Works",
+      "forOwners": "For Owners",
+      "signIn": "Sign In",
+      "joinNow": "Join Now"
+    },
+    "hero": {
+      "line1": "Find Your",
+      "highlight": "Perfect Nest",
+      "line2": "Without the Noise",
+      "subtitle": "Browse thousands of verified rental properties. Clean, ad-free, and focused on what matters \u2014 finding your next home.",
+      "searchPlaceholder": "Enter city, neighborhood, or ZIP code...",
+      "searchButton": "Search Properties"
+    },
+    "chips": {
+      "apartments": "Apartments",
+      "houses": "Houses",
+      "condos": "Condos",
+      "pet-friendly": "Pet-Friendly",
+      "under2000": "Under $2,000"
+    },
+    "howItWorks": {
+      "label": "How It Works",
+      "title": "Three steps to your next home",
+      "subtitle": "NestFind makes rental hunting simple. No ads, no clutter, just homes you\u2019ll love.",
+      "step1Title": "Search & Filter",
+      "step1Desc": "Enter your preferred location and refine by price, beds, and property type. Results update instantly.",
+      "step2Title": "Explore & Save",
+      "step2Desc": "Browse photos, check amenities, and view locations on the map. Save favorites with one click.",
+      "step3Title": "Inquire & Move",
+      "step3Desc": "Send an inquiry directly to the property manager. Simple form, no lengthy applications."
+    },
+    "featured": {
+      "label": "Featured Properties",
+      "title": "Homes you might love",
+      "subtitle": "Hand-picked listings from our curated collection."
+    },
+    "property": {
+      "availableNow": "Available Now",
+      "perMonth": "/mo",
+      "bd": "bd",
+      "ba": "ba",
+      "sqft": "sqft"
+    },
+    "why": {
+      "label": "Why NestFind",
+      "title": "Built for renters, not advertisers",
+      "subtitle": "We focused on what actually matters when finding a rental.",
+      "feat1Title": "Ad-Free Browsing",
+      "feat1Desc": "No sponsored listings cluttering your search. Every result is organic.",
+      "feat2Title": "Instant Filters",
+      "feat2Desc": "Real-time filtering by price, beds, and type. No page reloads.",
+      "feat3Title": "Quick Favorites",
+      "feat3Desc": "Save properties with one click. Access your favorites from anywhere.",
+      "feat4Title": "Map View",
+      "feat4Desc": "See exactly where each property is. Integrated Google Maps on every listing."
+    },
+    "footer": {
+      "col1Title": "NestFind",
+      "col2Title": "Renters",
+      "col3Title": "Owners",
+      "col4Title": "Support"
+    }
+  }
+}

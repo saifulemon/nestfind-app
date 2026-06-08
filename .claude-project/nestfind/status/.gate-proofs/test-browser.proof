@@ -1,0 +1,6 @@
+gate: test-browser
+executed_at: 2026-05-21T02:20:50Z
+score: .25
+passed: 1/4
+checks_hash: 69c637e745c551819c1d0536134e0a05aec8597ca1cfa331f6a0214037d39e35
+runner_pid: 21606

@@ -1,0 +1,61 @@
+id: US-10-PROFILE
+role: renter
+feature: Manage personal profile, notification preferences, and security settings
+page: 10-profile.html
+goal: |
+  A renter manages their account settings across three tabs: Personal Info
+  (edit name, email, phone, location, bio, avatar), Notifications (toggle email
+  alerts and digest frequency), and Security (change password, delete account).
+
+acceptance_criteria:
+  - id: AC-1
+    description: Edit personal information (name, email, phone, location, bio) and save
+    ui_route: /profile
+    endpoint: PATCH /api/profile
+    expected: "200 OK, toast 'Profile updated successfully', sidebar name/email updates"
+  - id: AC-2
+    description: Upload a new profile avatar image (PNG/JPG, under 5MB)
+    ui_route: /profile
+    endpoint: none (client-side for demo, or avatar upload endpoint)
+    expected: "Avatar preview updates instantly, toast 'Profile photo updated'"
+  - id: AC-3
+    description: Switch to Notifications tab and toggle email notification preferences, then save
+    ui_route: /profile
+    endpoint: PATCH /api/profile (notification settings)
+    expected: "200 OK, toast 'Notification preferences saved'"
+  - id: AC-4
+    description: Switch to Security tab, fill current and new password, and submit
+    ui_route: /profile
+    endpoint: PATCH /api/profile (password change)
+    expected: "200 OK, toast 'Password updated successfully', form clears"
+  - id: AC-5
+    description: Click Log Out, confirm in logout modal, and get redirected to login
+    ui_route: /profile
+    endpoint: POST /api/auth/logout
+    expected: "200 OK, cookies cleared, redirect to /02-login.html"
+
+boundary_cases:
+  - case: "Avatar file over 5MB — client-side validation rejects with toast 'Image must be less than 5MB'"
+  - case: "Avatar file not an image — client-side validation rejects with toast 'Please select an image file'"
+  - case: "New password fewer than 8 characters — validation fails, toast 'Password must be at least 8 characters'"
+  - case: "Confirm password does not match new password — inline error 'Passwords do not match' and error toast"
+  - case: "Delete account confirmation requires typing 'DELETE' — button remains disabled until text matches exactly"
+
+error_scenarios:
+  - scenario: "Unauthenticated (401) — redirect to login page"
+  - scenario: "Profile update fails with 400 (invalid name/email) — field-level errors displayed inline"
+  - scenario: "Password change fails with 400 (wrong current password) — error toast shown"
+  - scenario: "Delete account fails with 500 — error toast, account not deleted"
+
+state_transitions:
+  - state: loading (save)
+    expected: "Save button shows spinner and is disabled"
+  - state: success
+    expected: "Green toast notification slides in from top-right, auto-dismisses after 3 seconds"
+  - state: error
+    expected: "Red error toast slides in with error message"
+  - state: tab_switch
+    expected: "Active tab highlighted blue with white text; content area swaps instantly"
+
+fixture_refs:
+  - users.renter

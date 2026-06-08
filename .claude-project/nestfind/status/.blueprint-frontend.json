@@ -1,0 +1,114 @@
+{
+  "blueprint": "frontend",
+  "blueprint_source": "frontend-2.yaml",
+  "target_dir": "/Users/saifulpotential/Potential/nestfind-sample",
+  "started_at": "2026-05-20T04:38:29.229Z",
+  "completed_nodes": [
+    {
+      "id": "design-approval-check",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:38:29.242Z",
+      "duration_ms": 12,
+      "output": "Design approved: variation A\n"
+    },
+    {
+      "id": "html-inventory",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:38:29.250Z",
+      "duration_ms": 8,
+      "output": "HTML_DIR=/Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/design/html\nHTML_COUNT=30\n"
+    },
+    {
+      "id": "extract-prd-roles",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:38:29.267Z",
+      "duration_ms": 16,
+      "output": "Extracted to /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/docs/PROJECT_PRD_ROLES.md\n"
+    },
+    {
+      "id": "scaffold-frontend-shell",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-20T04:38:29.412Z",
+      "duration_ms": 145,
+      "output": "ges: copied=0 skipped=1\n  features: copied=0 skipped=1\n  store: copied=0 skipped=3\n  routes: copied=0 skipped=2\n  httpServices: copied=0 skipped=1\n  services: copied=0 skipped=1\n  styles: copied=0 skipped=2\n  types: copied=0 skipped=3\n  actions: copied=0 skipped=1\n  validations: copied=0 skipped=1\n  utils: copied=0 skipped=1\n  app: copied=0 skipped=2\n/Users/saifulpotential/Potential/nestfind-sample/frontend/node_modules looks current — skip install\nPASS: Frontend shell scaffolded from templates\n"
+    },
+    {
+      "id": "convert-shell",
+      "type": "agentic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "convert-pages",
+      "type": "agentic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "convert-wire-routes",
+      "type": "agentic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "merge-convert-reports",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "design-fidelity-check",
+      "type": "agentic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "fidelity-gate",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "lint-fix",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "typecheck",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "build",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "evidence-check",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "cross-reference-consistency",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "frontend-evaluator",
+      "type": "evaluator",
+      "status": "PENDING",
+      "timestamp": null
+    }
+  ],
+  "current_node": "convert-shell",
+  "status": "running"
+}

@@ -1,0 +1,43 @@
+id: US-02-LOGIN
+role: all
+feature: Renter login with email and password
+page: 02-login.html
+goal: |
+  A visitor on the login page enters their email and password to authenticate
+  and gain access to the property search platform.
+
+acceptance_criteria:
+  - id: AC-1
+    description: Submit valid email and password credentials to log in as a renter
+    ui_route: /login
+    endpoint: POST /api/auth/login
+    expected: "200 OK, httpOnly cookies set for access_token and refresh_token, redirect to /home"
+  - id: AC-2
+    description: Click "Forgot password?" link to navigate to the forgot password page
+    ui_route: /login
+    endpoint: none
+    expected: "Navigate to /04-forgot-password.html"
+  - id: AC-3
+    description: Click "Create one" link to navigate to the signup page
+    ui_route: /login
+    endpoint: none
+    expected: "Navigate to /03-signup.html"
+
+boundary_cases:
+  - case: "Email field empty — form validation prevents submission, browser `required` attribute fires"
+  - case: "Password field empty — form validation prevents submission, browser `required` attribute fires"
+  - case: "Email exceeds max length (e.g. 255+ characters) — server returns 400 validation error"
+
+error_scenarios:
+  - scenario: "Invalid credentials (wrong password) — server returns 401 Unauthorized, inline error message displayed"
+  - scenario: "Account suspended — server returns 403 Forbidden, user sees suspension notice"
+  - scenario: "Network failure — request times out, user sees connection error toast/message"
+
+state_transitions:
+  - state: loading
+    expected: "Sign In button shows spinner and is disabled"
+  - state: error
+    expected: "Inline error text appears below the form header (e.g. 'Invalid email or password')"
+
+fixture_refs:
+  - users.renter

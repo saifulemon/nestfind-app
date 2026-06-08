@@ -1,0 +1,59 @@
+{
+  "blueprint": "test-browser",
+  "blueprint_source": "test-browser-2.yaml",
+  "target_dir": "/Users/saifulpotential/Potential/nestfind-sample",
+  "started_at": "2026-05-21T02:37:02.201Z",
+  "completed_nodes": [
+    {
+      "id": "user-stories-check",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-21T02:37:02.208Z",
+      "duration_ms": 6,
+      "output": "stories=16 in /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/user_stories\n"
+    },
+    {
+      "id": "ensure-servers",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-21T02:37:02.224Z",
+      "duration_ms": 15,
+      "output": "backend=000000 frontend=000000\n"
+    },
+    {
+      "id": "ensure-playwright-cli",
+      "type": "deterministic",
+      "status": "PASS",
+      "timestamp": "2026-05-21T02:37:02.576Z",
+      "duration_ms": 352,
+      "output": "playwright-cli - run playwright mcp commands from terminal\n"
+    },
+    {
+      "id": "story-runner",
+      "type": "agentic",
+      "status": "FAIL",
+      "timestamp": "2026-05-21T03:22:02.721Z",
+      "error": "opencode subprocess timed out after 2700000ms (NODE_TIMEOUT_MS env var). Last stdout tail: {\"id\":\"prt_e4883e3f7001vHT6m5yqcpKe2L\",\"messageID\":\"msg_e4883ce81001way0r29dtTFfzR\",\"sessionID\":\"ses_1b79b3d6dffeHVZBajv0rOolrR\",\"type\":\"text\",\"text\":\"Now dispatching Batch 2 — stories 05-home, 06-property-detail, 07-inquiry-modal, 08-favorites:\",\"time\":{\"start\":1779333063671,\"end\":1779333253433}}}\n"
+    },
+    {
+      "id": "bug-fix-pass",
+      "type": "agentic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "evidence-check",
+      "type": "deterministic",
+      "status": "PENDING",
+      "timestamp": null
+    },
+    {
+      "id": "test-browser-evaluator",
+      "type": "evaluator",
+      "status": "PENDING",
+      "timestamp": null
+    }
+  ],
+  "current_node": null,
+  "status": "failed"
+}

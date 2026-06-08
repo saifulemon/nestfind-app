@@ -1,0 +1,6 @@
+gate: integrate
+executed_at: 2026-05-21T02:47:20Z
+score: 1.00
+passed: 18/18
+checks_hash: a84ba7b0dc7e06cc85d8f652097dc52bdf76ea9b417d43b5d981226253a73ea6
+runner_pid: 29725

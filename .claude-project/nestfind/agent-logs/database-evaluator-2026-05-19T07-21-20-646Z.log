@@ -1,0 +1,1291 @@
+=== EVALUATOR NODE: database-evaluator ===
+timestamp: 2026-05-19T07:21:20.646Z
+backend:   opencode
+rubric:    /Users/saifulpotential/Potential/nestfind-sample/.claude/blueprints/evaluators/database-rubric.yaml
+examples:  /Users/saifulpotential/Potential/nestfind-sample/.claude/blueprints/evaluators/database-examples.yaml
+command:   opencode run --format json
+
+=== PROMPT (52615 chars) ===
+=== EVALUATOR ROLE ===
+You are a design evaluator, not a builder.
+
+You have Read, Grep, Glob, and Bash tools (plus Playwright MCP if available
+for UI inspection). You have Write ONLY to produce your evaluation output
+file at the path declared below. Do not modify any artifact you grade.
+
+CALIBRATION (important — read twice):
+
+- Default score is 0.7. You must earn every tenth above that by pointing at
+  a specific observable reason the artifact exceeds the anchor description.
+  Generic praise like "looks clean" or "nice design" is disqualifying — if
+  you write that, your score is wrong.
+
+- When unsure between two adjacent anchors, pick the LOWER one. Bias
+  downward on uncertainty.
+
+- Blockers are P0 only if they make the artifact unshippable (broken flow,
+  missing declared feature, severe a11y issue). "I'd change it" is P2, not
+  P0. Overusing P0 destroys the signal.
+
+- You are graded on how close your scores track the calibration examples.
+  An evaluator that returns 0.9 for everything is useless and will be
+  replaced.
+
+Your output is machine-parsed. Write exactly one JSON document at the
+declared file path. No markdown fences. No prose before or after.
+
+=== RUBRIC ===
+# GRADING RUBRIC: database-evaluation (v1)
+
+## Scope
+TypeORM entity files under backend/src/modules/*/entities/, migration files under backend/src/database/migrations/, and shared enum files under backend/src/common/enums/, graded against PROJECT_DATABASE.md (schema spec) and PROJECT_KNOWLEDGE.md (domain model). The evaluator does not check whether typecheck passes (deterministic gate handles that). It grades structural fit: do entities + relationships actually represent the domain, are constraints correct, are migrations safe.
+
+## Criteria
+
+### domain_modeling_fit  (weight: 0.3)
+**Question:** Does the schema cover every entity declared in PROJECT_DATABASE.md and every domain object hinted at in PROJECT_KNOWLEDGE.md? Are entity boundaries sensible (one User entity vs three duplicated user-shaped tables, or a generic "Item" entity for what should be three distinct domain objects)? Does field naming and typing match domain vocabulary?
+
+**Score anchors (you must match one of these):**
+- **1.0** — Every declared entity exists with the declared field set. Domain vocabulary preserved in entity + column names. No missing entities (PROJECT_DATABASE.md is fully realized). Boundaries make sense — distinct domain concepts get distinct tables, related concepts use FKs not denormalized columns.
+- **0.7** — Most entities present and correctly modeled. 1-2 entities missing or merged into others (e.g. RefundRecord folded into Application as nullable columns when it should be its own table for audit purposes).
+- **0.4** — Major gaps. Several entities from PROJECT_DATABASE.md absent. Some domain concepts modeled as JSON columns instead of proper tables. Field names drift from domain vocabulary into generic terms ("status" instead of "application_status").
+- **0.1** — Schema is a sketch. Most declared entities missing. Critical domain objects (e.g. Payment, Document) absent entirely. Single User table conflates roles that should be separate.
+
+### relationships_correctness  (weight: 0.25)
+**Question:** Are FK directions, cardinalities, and cascade behaviors correct for the domain? @ManyToOne / @OneToMany / @ManyToMany match the relationships in PRD. onDelete behaviors (CASCADE / SET NULL / RESTRICT) match what should happen when the parent is deleted (e.g. delete User → CASCADE Application; delete Application → RESTRICT if PaymentRequest exists).
+
+**Score anchors (you must match one of these):**
+- **1.0** — Every relationship from PROJECT_DATABASE.md is declared with correct cardinality. CASCADE only where the child is owned by the parent and has no audit value standalone. RESTRICT where child must outlive parent for compliance/audit. @JoinColumn explicit on owning side. No orphan relationships.
+- **0.7** — Relationships mostly correct. 1-2 cardinality choices questionable (M2M used where a join table with metadata would be better, or vice versa). Some onDelete defaults left implicit.
+- **0.4** — Several relationships wrong. Audit-bearing children CASCADE- deleted (data loss when parent removed). M2M without join- table metadata where it's needed (e.g. user-role assignments missing assigned_at, assigned_by).
+- **0.1** — Relationships absent or wildly wrong. Foreign-key columns declared but @ManyToOne missing. CASCADE everywhere (deleting a User vaporizes all audit history). Orphan entities not connected to the rest of the schema.
+
+### constraint_correctness  (weight: 0.25)
+**Question:** Are uniqueness, NOT NULL, and indexes correct for the access patterns? Email unique on User. Reference number unique on Application. Composite uniqueness where business rules require it (e.g., one Active Document per type per User). Indexes on lookup columns the controllers query by. NOT NULL where the domain says required.
+
+**Score anchors (you must match one of these):**
+- **1.0** — Every domain-required uniqueness is enforced via @Unique or @Index({ unique: true }). Composite uniqueness for "one X per Y per Z" rules. Lookup columns indexed (e.g. status, role, deleted_at for partial indexes). NOT NULL on every field PRD calls required.
+- **0.7** — Primary uniqueness present (email, reference number). 1-2 composite-uniqueness rules from PRD missed. Most lookup columns indexed; 1-2 dashboards will scan tables in production.
+- **0.4** — Uniqueness only on PK and email. Reference numbers can collide. No composite uniqueness — duplicate "active documents per user per type" allowed. Indexes missing on status/role columns (table scans on every dashboard query).
+- **0.1** — No uniqueness beyond PK. Reference numbers can collide. Most fields nullable that shouldn't be. No indexes — every query is a sequential scan.
+
+### migration_safety  (weight: 0.2)
+**Question:** Are migrations safe to apply on a non-empty database? Adding NOT NULL columns has a default or a backfill step. New unique constraints don't exist on tables with duplicate data. Renaming columns goes through an additive-deprecate-drop sequence. synchronize:false (production never auto-syncs). Migrations don't drop user data.
+
+**Score anchors (you must match one of these):**
+- **1.0** — Every migration is forward-safe on a populated DB. NOT NULL additions have explicit defaults or backfill steps. Renames go additive-then-drop across 2+ migrations. synchronize:false asserted in production config. No DROP TABLE / DROP COLUMN on tables containing user data without an explicit backup step.
+- **0.7** — Most migrations safe. 1-2 NOT NULL additions without explicit defaults (would fail on populated DB but caught locally). synchronize correctly disabled. No destructive ops.
+- **0.4** — Several migrations would break on populated DB. NOT NULL additions assume empty tables. Column renames done in one step (clients break during deploy). synchronize:true left on for production by default.
+- **0.1** — DROP TABLE on tables that exist in production. ALTER COLUMN changing types without conversion. synchronize:true in production config (data corruption risk). Migrations are essentially a CREATE TABLE script that assumes empty DB.
+
+## Required output fields
+- `overall_score`
+- `weighted_breakdown`
+- `blockers`
+- `rationale`
+
+## Allowed blocker severities
+P0, P1, P2
+
+=== FEW-SHOT CALIBRATION ===
+# CALIBRATION EXAMPLES
+Hand-graded excerpts showing what each score level means in practice.
+Match this calibration. If your scoring drifts higher than these anchors, you are being generous — lower it.
+
+## Example 1 — criterion: domain_modeling_fit, correct score: 0.3
+```
+// PROJECT_DATABASE.md declares: User, Application, Document,
+// PaymentRequest, RefundRecord, Notice, FAQ, Company, CompanyStaff,
+// ServiceType, BankAccount.
+
+// Actual entities:
+//   user.entity.ts (User with role: 'worker' | 'admin')
+//   application.entity.ts
+//   notice.entity.ts
+//   faq.entity.ts
+
+// Missing: Document, PaymentRequest, RefundRecord, Company,
+//          CompanyStaff, ServiceType, BankAccount.
+//
+// Application entity has fields: documents (jsonb), payments (jsonb),
+// refundInfo (jsonb) — all the missing entities folded into JSON
+// columns on Application.
+```
+**Why this score:** Seven of eleven declared entities missing. Folded into JSON columns on Application — kills queryability, breaks audit trails, makes future migrations painful. Domain model not represented.
+
+## Example 2 — criterion: domain_modeling_fit, correct score: 0.9
+```
+// All 11 declared entities exist as proper tables:
+//   user.entity.ts          @Entity('users')
+//   application.entity.ts   @Entity('applications')
+//   document.entity.ts      @Entity('documents')
+//   payment-request.entity.ts @Entity('payment_requests')
+//   refund-record.entity.ts @Entity('refund_records')
+//   notice.entity.ts        @Entity('notices')
+//   faq.entity.ts           @Entity('faqs')
+//   company.entity.ts       @Entity('companies')
+//   company-staff.entity.ts @Entity('company_staff')
+//   service-type.entity.ts  @Entity('service_types')
+//   bank-account.entity.ts  @Entity('bank_accounts')
+//
+// Field names use domain vocabulary: reference_number (not "code"),
+// service_type_id (not "type_id"), application_status (not "status").
+// Status enum values use declared Korean keys + English mapping.
+```
+**Why this score:** Every declared entity present as a proper table. Domain vocabulary preserved in column names. Distinct concepts get distinct tables.
+
+## Example 3 — criterion: relationships_correctness, correct score: 0.2
+```
+@Entity()
+export class Application {
+  @Column() user_id: string;     // FK column but no @ManyToOne
+  @Column() service_type_id: string;
+}
+
+@Entity()
+export class PaymentRequest {
+  @Column() application_id: string;
+  @ManyToOne(() => Application, { onDelete: 'CASCADE' })
+  application: Application;
+}
+// Deleting an Application CASCADE-deletes PaymentRequests.
+// PRD says: "Payment audit trail must be retained 5 years even
+// if application is cancelled."
+```
+**Why this score:** Application has FK columns but no @ManyToOne — TypeORM won't eager-load. PaymentRequest CASCADE-deletes when Application removed, violating the explicit 5-year audit retention rule.
+
+## Example 4 — criterion: relationships_correctness, correct score: 0.9
+```
+@Entity('applications')
+export class Application {
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+  @Column('uuid') user_id: string;
+
+  @ManyToOne(() => ServiceType, { nullable: false })
+  @JoinColumn({ name: 'service_type_id' })
+  serviceType: ServiceType;
+  @Column('uuid') service_type_id: string;
+}
+
+@Entity('payment_requests')
+export class PaymentRequest {
+  @ManyToOne(() => Application, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'application_id' })
+  application: Application;
+  // 5-year retention required — RESTRICT prevents accidental cascade.
+}
+```
+**Why this score:** Both relationship sides explicit. @JoinColumn names match column. RESTRICT on PaymentRequest preserves audit trail per PRD's retention rule. CASCADE used only where children have no standalone audit value.
+
+## Example 5 — criterion: constraint_correctness, correct score: 0.3
+```
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column() email: string;          // not unique
+  @Column() phone: string;          // nullable, no index
+  @Column() role: string;           // no index — every dashboard scans
+}
+
+@Entity('applications')
+export class Application {
+  @Column() reference_number: string;  // not unique — collisions possible
+  @Column() status: string;            // no index — status filters scan
+}
+```
+**Why this score:** Email not unique — duplicate accounts allowed. Reference number can collide. Status / role unindexed — every dashboard does a sequential scan. No NOT NULL on email despite being a required field per PRD.
+
+## Example 6 — criterion: constraint_correctness, correct score: 0.9
+```
+@Entity('users')
+@Index('idx_users_role', ['role'])
+export class User {
+  @Column({ unique: true, nullable: false }) email: string;
+  @Column({ nullable: false }) phone: string;
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.WORKER })
+  role: UserRole;
+}
+
+@Entity('applications')
+@Index('idx_applications_status', ['status'])
+@Index('idx_applications_user_status', ['user_id', 'status'])
+@Unique('uq_applications_reference_number', ['reference_number'])
+export class Application {
+  @Column({ nullable: false }) reference_number: string;
+  @Column({ type: 'enum', enum: ApplicationStatus }) status: ApplicationStatus;
+}
+```
+**Why this score:** Email + reference_number unique. NOT NULL on required fields. Indexes on status (single-column) and (user_id, status) composite for "my applications by status" — the worker home dashboard's most common query.
+
+## Example 7 — criterion: migration_safety, correct score: 0.2
+```
+// ormconfig.ts — production
+synchronize: true,   // production auto-sync — data-corruption risk
+
+// 003-add-fields.ts
+await q.query(`ALTER TABLE applications ADD COLUMN priority varchar NOT NULL`);
+await q.query(`DROP COLUMN applications.legacy_code`);
+// Migration doesn't run successfully on populated DB:
+//   - NOT NULL has no default, no backfill
+//   - Legacy column dropped without grace period
+```
+**Why this score:** synchronize:true in production = silent schema drift / data loss. Migration would fail on any non-empty applications table. Legacy column dropped in same step that adds new — clients still using legacy_code break immediately on deploy.
+
+## Example 8 — criterion: migration_safety, correct score: 0.9
+```
+// ormconfig.ts — production
+synchronize: false,
+migrationsRun: true,
+
+// 003-add-priority-additive.ts
+await q.query(`ALTER TABLE applications ADD COLUMN priority varchar`);  // nullable
+await q.query(`UPDATE applications SET priority = 'normal' WHERE priority IS NULL`);
+await q.query(`ALTER TABLE applications ALTER COLUMN priority SET NOT NULL`);
+await q.query(`ALTER TABLE applications ALTER COLUMN priority SET DEFAULT 'normal'`);
+
+// 004-deprecate-legacy-code.ts (run weeks later, after clients update)
+await q.query(`ALTER TABLE applications DROP COLUMN legacy_code`);
+```
+**Why this score:** Forward-safe NOT NULL addition (additive → backfill → enforce). synchronize:false in production. Legacy column dropped in a separate later migration after clients have updated. Reversible if needed.
+
+=== INPUTS TO EVALUATE ===
+
+## Reference documents (the source of truth for what the artifacts should be)
+
+--- /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/docs/PROJECT_DATABASE.md ---
+# PROJECT_DATABASE
+
+## Schema Overview
+
+All entities extend `BaseEntity` which provides:
+- `id` — UUID primary key
+- `createdAt` — `timestamp` (auto-managed)
+- `updatedAt` — `timestamp` (auto-managed)
+- `deletedAt` — `timestamp | null` (soft delete support)
+
+Column naming convention: `snake_case` in the database (`@CreateDateColumn({ name: 'created_at' })`).
+
+---
+
+## Entities
+
+### User
+
+Represents all registered users (Renters and Admins). Extends `BaseEntity` with soft delete.
+
+**Table:** `users`
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `uuid` | PK, default: `uuid_generate_v4()` | Inherited from BaseEntity |
+| `name` | `varchar(100)` | NOT NULL | User's full name |
+| `email` | `varchar(255)` | UNIQUE, NOT NULL | Login email address |
+| `password` | `varchar(255)` | NOT NULL | bcrypt-hashed password |
+| `phone` | `varchar(20)` | NULLABLE | Optional phone number |
+| `role` | `enum` (`RoleEnum`) | NOT NULL, default: `'renter'` | `renter` \| `admin` |
+| `status` | `enum` (`UserStatusEnum`) | NOT NULL, default: `'active'` | `active` \| `suspended` |
+| `email_verified_at` | `timestamp` | NULLABLE | Null until email verification completes |
+| `created_at` | `timestamp` | NOT NULL, default: `now()` | Inherited from BaseEntity |
+| `updated_at` | `timestamp` | NOT NULL, default: `now()` | Inherited from BaseEntity |
+| `deleted_at` | `timestamp` | NULLABLE | Soft delete timestamp |
+
+**Indexes:**
+- `UNIQUE` on `email`
+- `INDEX` on `role`
+- `INDEX` on `status`
+- `INDEX` on `(role, status)` composite
+
+**Relationships:**
+- `hasMany` → `RefreshToken` (one user has many refresh tokens)
+- `hasMany` → `PasswordResetToken` (one user has many reset tokens)
+- `hasMany` → `Favorite` (one user has many favorites)
+- `hasMany` → `Inquiry` (one user submits many inquiries)
+
+---
+
+### RefreshToken
+
+Stores JWT refresh tokens for rotation and invalidation. Each refresh creates a new row; the old row is marked deleted when rotated. Not extending `BaseEntity` (no need for update timestamps or soft delete — expiries handle lifecycle).
+
+**Table:** `refresh_tokens`
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `uuid` | PK, default: `uuid_generate_v4()` | Primary key |
+| `user_id` | `uuid` | FK → `users.id`, NOT NULL, ON DELETE CASCADE | Owning user |
+| `token` | `varchar(500)` | NOT NULL, UNIQUE | Encoded JWT refresh token string |
+| `expires_at` | `timestamp` | NOT NULL | Token expiration time (7 days from issue) |
+| `revoked_at` | `timestamp` | NULLABLE | Set when token is rotated or user logs out |
+| `created_at` | `timestamp` | NOT NULL, default: `now()` | Token creation time |
+
+**Indexes:**
+- `UNIQUE` on `token`
+- `INDEX` on `user_id`
+- `INDEX` on `expires_at`
+
+**Relationships:**
+- `belongsTo` → `User` via `user_id`
+
+---
+
+### PasswordResetToken
+
+Stores tokens for the forgot-password / reset-password flow. Tokens expire after a configurable window (e.g., 1 hour).
+
+**Table:** `password_reset_tokens`
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `uuid` | PK, default: `uuid_generate_v4()` | Primary key |
+| `user_id` | `uuid` | FK → `users.id`, NOT NULL, ON DELETE CASCADE | Owning user |
+| `token` | `varchar(500)` | NOT NULL, UNIQUE | Secure random reset token |
+| `expires_at` | `timestamp` | NOT NULL | Token expiry (e.g., 1 hour from creation) |
+| `used_at` | `timestamp` | NULLABLE | Set when password is successfully reset |
+| `created_at` | `timestamp` | NOT NULL, default: `now()` | Token creation time |
+
+**Indexes:**
+- `UNIQUE` on `token`
+- `INDEX` on `user_id`
+
+**Relationships:**
+- `belongsTo` → `User` via `user_id`
+
+---
+
+### Property
+
+Represents a rental property listing. Supports soft delete (archiving). Address fields are stored as individual columns for search/indexing; API layer nests them into an `address` object.
+
+**Table:** `properties`
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `uuid` | PK, default: `uuid_generate_v4()` | Inherited from BaseEntity |
+| `title` | `varchar(200)` | NOT NULL | Listing title (5–200 chars) |
+| `description` | `text` | NOT NULL | Full description (20–5000 chars) |
+| `price` | `decimal(10,2)` | NOT NULL | Monthly rent (> 0) |
+| `bedrooms` | `integer` | NOT NULL, CHECK (≥ 0) | Number of bedrooms |
+| `bathrooms` | `integer` | NOT NULL, CHECK (≥ 0) | Number of bathrooms |
+| `square_feet` | `integer` | NULLABLE, CHECK (> 0) | Living area in square feet |
+| `property_type` | `enum` (`PropertyTypeEnum`) | NOT NULL | `apartment` \| `house` \| `condo` \| `townhouse` \| `studio` |
+| `address_street` | `varchar(200)` | NOT NULL | Street address |
+| `address_city` | `varchar(100)` | NOT NULL | City |
+| `address_state` | `varchar(100)` | NOT NULL | State / province |
+| `address_zip_code` | `varchar(10)` | NOT NULL | ZIP / postal code |
+| `address_latitude` | `decimal(10,7)` | NULLABLE | Geocoordinate latitude (-90 to 90) |
+| `address_longitude` | `decimal(10,7)` | NULLABLE | Geocoordinate longitude (-180 to 180) |
+| `available_from` | `date` | NULLABLE | Date property becomes available |
+| `created_at` | `timestamp` | NOT NULL, default: `now()` | Inherited from BaseEntity |
+| `updated_at` | `timestamp` | NOT NULL, default: `now()` | Inherited from BaseEntity |
+| `deleted_at` | `timestamp` | NULLABLE | Soft delete / archive timestamp |
+
+**Indexes:**
+- `INDEX` on `property_type`
+- `INDEX` on `price`
+- `INDEX` on `bedrooms`
+- `INDEX` on `bathrooms`
+- `INDEX` on `address_city`
+- `INDEX` on `address_state`
+- `INDEX` on `(address_latitude, address_longitude)` — geospatial queries
+- `GIN INDEX` or `tsvector` on `title || ' ' || description || ' ' || address_city || ' ' || address_state` for full-text search (optional, for performance at scale)
+
+**Relationships:**
+- `hasMany` → `PropertyPhoto` (one property has many photos)
+- `belongsToMany` → `Amenity` via `property_amenities` junction
+- `hasMany` → `Favorite` (one property is favorited by many users)
+- `hasMany` → `Inquiry` (one property receives many inquiries)
+
+---
+
+### PropertyPhoto
+
+Stores uploaded photos for a property. Multiple photos per property with ordering and a primary photo designation.
+
+**Table:** `property_photos`
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `uuid` | PK, default: `uuid_generate_v4()` | Inherited from BaseEntity |
+| `property_id` | `uuid` | FK → `properties.id`, NOT NULL, ON DELETE CASCADE | Owning property |
+| `url` | `varchar(500)` | NOT NULL | Photo URL (S3 / CDN path) |
+| `is_primary` | `boolean` | NOT NULL, default: `false` | Whether this is the main/thumbnail photo |
+| `sort_order` | `integer` | NOT NULL, default: `0` | Display order in gallery |
+| `created_at` | `timestamp` | NOT NULL, default: `now()` | Inherited from BaseEntity |
+| `updated_at` | `timestamp` | NOT NULL, default: `now()` | Inherited from BaseEntity |
+
+**Indexes:**
+- `INDEX` on `property_id`
+- `INDEX` on `(property_id, sort_order)`
+
+**Business Rule:** Only one photo per property may have `is_primary = true`. Enforced at the application layer.
+
+**Relationships:**
+- `belongsTo` → `Property` via `property_id`
+
+---
+
+### Amenity
+
+Predefined list of amenities that can be associated with properties. Managed by admins.
+
+**Table:** `amenities`
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | `uuid` | PK, default: `uuid_generate_v4()` | Inherited from BaseEntity |
+| `name` | `varchar(50)` | UNIQUE, NOT NULL | Amenity name (e.g., "parking", "gym") |
+| `icon` | `varchar(50)` | NOT NULL | Icon identifier for frontend rendering |
+| `created_at` | `timestamp` | NOT NULL, default: `now()` | Inherited from BaseEntity |
+| `updated_at` | `timestamp` | NOT NULL, default: `now()` | Inherited from BaseEntity |
+| `deleted_at` | `timestamp` | NULLABLE | Soft delete |
+
+**Indexes:**
+- `UNIQUE` on `name`
+
+**Rela
+
+[...truncated, original is 15521 chars]
+
+--- /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/docs/PROJECT_KNOWLEDGE.md ---
+# PROJECT_KNOWLEDGE
+
+## Overview
+
+### Application Purpose
+
+NestFind is a streamlined rental property listing platform that connects renters with available properties. The platform focuses exclusively on rentals, providing a clean and efficient browsing experience where renters can search, filter, view details, save favorites, and submit inquiries to property managers. An accompanying admin dashboard enables administrators to manage property listings, respond to inquiries, and oversee user accounts.
+
+The platform targets two primary user groups: Renters who browse and discover rental properties, and Administrators who manage the listings and respond to renter inquiries. NestFind integrates with Google Maps for property location display.
+
+### Technology Stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | NestJS 11, TypeScript 5.7+ |
+| Frontend | React 19 with React Router 7 (framework mode) |
+| Database | PostgreSQL 16 |
+| ORM | TypeORM 0.3.x |
+| Authentication | JWT via httpOnly cookies (Access: 1h, Refresh: 7d) |
+| API Documentation | Swagger/OpenAPI |
+| Validation | class-validator (backend), Zod (frontend) |
+| Frontend State | Redux Toolkit with createAsyncThunk |
+| Styling | Tailwind CSS 4, Shadcn/UI |
+| Maps | Google Maps API |
+| Deployment | Docker |
+
+### Domain
+
+`nestfind.com` — web application
+
+---
+
+## User Roles
+
+| Role | Description | Permissions |
+|------|-------------|-------------|
+| **Renter** | Browses rental property listings, views detailed property information, saves properties to favorites, and submits inquiries to property managers. | `browse_properties`, `view_property_details`, `save_favorites`, `submit_inquiries` |
+| **Admin** | Has full system access to manage property listings (CRUD), manage user accounts, view and respond to inquiries from renters. | `manage_properties`, `manage_users`, `view_inquiries`, `respond_to_inquiries` |
+| **Guest** | Unauthenticated visitor who can browse public property listings and view property details. Must register/login to save favorites or submit inquiries. | `browse_properties`, `view_property_details` |
+
+### Authentication & Authorization
+
+- **JWT via httpOnly cookies**: Access token (1 hour) + Refresh token (7 days). Cookies configured with `httpOnly: true, secure: true, sameSite: 'strict'`. Tokens are never stored in localStorage.
+- **Role-based access control (RBAC)**: Guards at the route/endpoint level enforce role-specific permissions via `JwtAuthGuard` + `RolesGuard`.
+- **Guest access**: Public endpoints for browsing and viewing properties are marked with `@Public()` decorator; all other endpoints require authentication.
+- **Admin assignment**: Admin accounts are created by existing admins or via database seeding. Self-registration defaults to Renter role.
+
+---
+
+## Core Features
+
+### Common (All Users)
+
+- **Authentication**
+  - User login with email + password
+  - JWT access token (1h) and refresh token (7d) via httpOnly cookies
+  - Token refresh mechanism with rotation
+  - Logout clears cookies
+
+- **Registration**
+  - Self-service sign-up with name, email, password, phone (optional)
+  - Default role assignment: Renter
+  - Email verification (optional, configurable)
+
+- **Password Reset**
+  - Forgot password flow via email
+  - Secure reset token with expiration
+
+### Renter Features
+
+1. **Property Search**
+   - Search by location (text input or current geolocation)
+   - Real-time filtering by price range, number of bedrooms, property type
+   - Results displayed as property cards with thumbnail, price, and key details
+   - Pagination or infinite scroll for large result sets
+
+2. **Property Detail View**
+   - Full property page with photo gallery, amenities list, description, and floor plan
+   - Embedded Google Map showing property location
+   - Save to favorites (toggle)
+   - Contact / Submit Inquiry button
+
+3. **Favorites Management**
+   - View all saved/favorited properties
+   - Remove properties from favorites
+   - Quick access from navigation
+
+4. **Submit Inquiry**
+   - Contact form on property detail page (name, email, phone, message)
+   - Form validation before submission
+   - Confirmation message shown to renter
+   - Admin notified of new inquiry
+
+### Admin Features
+
+1. **Admin Dashboard**
+   - Overview statistics: total properties, total inquiries, recent activity
+   - Quick links to property management and inquiry management
+
+2. **Property Management (CRUD)**
+   - List all properties with search, filter, and pagination
+   - Add new property with details: title, description, price, bedrooms, bathrooms, property type, address, amenities, photos (multi-upload)
+   - Edit existing property information
+   - Delete or archive property listings (soft delete)
+
+3. **Inquiry Management**
+   - View all inquiries with status (new, read, responded)
+   - Mark inquiries as read
+   - Respond to inquiries directly from the dashboard
+   - Filter by property or renter
+
+4. **User Management**
+   - View list of registered renters
+   - View renter details and activity history
+   - Suspend or reactivate user accounts
+
+---
+
+## Functional Requirements
+
+### Authentication
+
+- **FR-AUTH-001**: Users must authenticate with email and password to access protected features.
+- **FR-AUTH-002**: JWT access tokens expire after 1 hour; refresh tokens expire after 7 days.
+- **FR-AUTH-003**: Refresh tokens are rotated on each use (old token invalidated).
+- **FR-AUTH-004**: All authentication tokens are stored in httpOnly, secure, sameSite-strict cookies.
+- **FR-AUTH-005**: Guest users can browse properties without authentication.
+
+### Property Search
+
+- **FR-SEARCH-001**: Renters can search properties by location text (city, neighborhood, zip code).
+- **FR-SEARCH-002**: Renters can use browser geolocation to find properties near their current location.
+- **FR-SEARCH-003**: Results support filtering by price range (min/max), number of bedrooms, and property type.
+- **FR-SEARCH-004**: Filters update results in real-time without full page reload.
+- **FR-SEARCH-005**: Each result card displays thumbnail image, price, address, bedrooms, and bathrooms.
+
+### Property Details
+
+- **FR-DETAIL-001**: Property detail page displays full photo gallery with navigation.
+- **FR-DETAIL-002**: Property page includes description, amenities list, pricing, and property specifications.
+- **FR-DETAIL-003**: An embedded Google Map shows the property location with a pin marker.
+- **FR-DETAIL-004**: Authenticated renters can toggle the property as a favorite.
+- **FR-DETAIL-005**: A Contact/Inquiry button is prominently displayed.
+
+### Inquiries
+
+- **FR-INQ-001**: Inquiry form collects name, email, phone (optional), and message.
+- **FR-INQ-002**: Form fields are validated client-side (Zod) and server-side (class-validator).
+- **FR-INQ-003**: On successful submission, renter sees a confirmation message.
+- **FR-INQ-004**: System notifies admin of new inquiries (in-dashboard notification).
+
+### Admin: Property Management
+
+- **FR-ADM-PROP-001**: Admin can create new property listings with all required fields.
+- **FR-ADM-PROP-002**: Admin can upload multiple photos per property.
+- **FR-ADM-PROP-003**: Admin can edit all fields of an existing property.
+- **FR-ADM-PROP-004**: Admin can soft-delete (archive) a property listing.
+- **FR-ADM-PROP-005**: Property list supports search, sort, and pagination.
+
+### Admin: Inquiry Management
+
+- **FR-ADM-INQ-001**: Admin can view all inquiries with status indicators.
+- **FR-ADM-INQ-002**: Admin can filter inquiries by property or renter.
+- **FR-ADM-INQ-003**: Admin can mark inquiries as read and respond to them.
+
+### Admin: User Management
+
+- **FR-ADM-USER-001**: Admin can view a list of all registered renters.
+- **FR-ADM-USER-002**: Admin can view individual renter details and activity.
+- **FR-ADM-USER-003**: Admin can suspend or reactivate user accounts.
+
+---
+
+## Non-Functional Requirements
+
+### Performance
+
+- **NFR-PERF-001**: Property search results must return within 500ms for typical query load
+
+[...truncated, original is 15813 chars]
+
+## Artifacts to grade (15 files)
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/modules/auth/entities/password-reset-token.entity.ts ---
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+
+@Entity('password_reset_tokens')
+@Index(['userId'])
+export class PasswordResetToken {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ name: 'user_id', type: 'uuid' })
+  userId: string;
+
+  @Column({ type: 'varchar', length: 500, unique: true })
+  token: string;
+
+  @Column({ name: 'expires_at', type: 'timestamp' })
+  expiresAt: Date;
+
+  @Column({ name: 'used_at', type: 'timestamp', nullable: true })
+  usedAt: Date | null;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  createdAt: Date;
+
+  @ManyToOne(() => User, (user) => user.resetTokens, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/modules/auth/entities/refresh-token.entity.ts ---
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+
+@Entity('refresh_tokens')
+@Index(['userId'])
+@Index(['expiresAt'])
+export class RefreshToken {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ name: 'user_id', type: 'uuid' })
+  userId: string;
+
+  @Column({ type: 'varchar', length: 500, unique: true })
+  token: string;
+
+  @Column({ name: 'expires_at', type: 'timestamp' })
+  expiresAt: Date;
+
+  @Column({ name: 'revoked_at', type: 'timestamp', nullable: true })
+  revokedAt: Date | null;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  createdAt: Date;
+
+  @ManyToOne(() => User, (user) => user.refreshTokens, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/modules/favorites/entities/favorite.entity.ts ---
+import {
+  Entity,
+  Column,
+  Index,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { BaseEntity } from '../../../core/base/base.entity';
+import { User } from '../../users/entities/user.entity';
+import { Property } from '../../properties/entities/property.entity';
+
+@Entity('favorites')
+@Index(['userId'])
+@Index(['propertyId'])
+@Index(['userId', 'propertyId'], { unique: true })
+export class Favorite extends BaseEntity {
+  @Column({ name: 'user_id', type: 'uuid' })
+  userId: string;
+
+  @Column({ name: 'property_id', type: 'uuid' })
+  propertyId: string;
+
+  @ManyToOne(() => User, (user) => user.favorites, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @ManyToOne(() => Property, (property) => property.favorites, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'property_id' })
+  property: Property;
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/modules/inquiries/entities/inquiry.entity.ts ---
+import {
+  Entity,
+  Column,
+  Index,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { BaseEntity } from '../../../core/base/base.entity';
+import { InquiryStatusEnum } from '../../../common/enums/inquiry-status.enum';
+import { Property } from '../../properties/entities/property.entity';
+import { User } from '../../users/entities/user.entity';
+
+@Entity('inquiries')
+@Index(['propertyId'])
+@Index(['userId'])
+@Index(['status'])
+@Index(['status', 'createdAt'])
+export class Inquiry extends BaseEntity {
+  @Column({ name: 'property_id', type: 'uuid', nullable: true })
+  propertyId: string | null;
+
+  @Column({ name: 'user_id', type: 'uuid', nullable: true })
+  userId: string | null;
+
+  @Column({ type: 'varchar', length: 100 })
+  name: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  email: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  phone: string | null;
+
+  @Column({ type: 'text' })
+  message: string;
+
+  @Column({
+    type: 'enum',
+    enum: InquiryStatusEnum,
+    default: InquiryStatusEnum.NEW,
+  })
+  status: InquiryStatusEnum;
+
+  @Column({ type: 'text', nullable: true })
+  response: string | null;
+
+  @Column({ name: 'responded_at', type: 'timestamp', nullable: true })
+  respondedAt: Date | null;
+
+  @ManyToOne(() => Property, (property) => property.inquiries, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'property_id' })
+  property: Property;
+
+  @ManyToOne(() => User, (user) => user.inquiries, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/modules/properties/entities/amenity.entity.ts ---
+import {
+  Entity,
+  Column,
+  OneToMany,
+} from 'typeorm';
+import { BaseEntity } from '../../../core/base/base.entity';
+import { PropertyAmenity } from './property-amenity.entity';
+
+@Entity('amenities')
+export class Amenity extends BaseEntity {
+  @Column({ type: 'varchar', length: 50, unique: true })
+  name: string;
+
+  @Column({ type: 'varchar', length: 50 })
+  icon: string;
+
+  @OneToMany(() => PropertyAmenity, (pa) => pa.amenity)
+  propertyAmenities: PropertyAmenity[];
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/modules/properties/entities/property-amenity.entity.ts ---
+import {
+  Entity,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
+import { Property } from './property.entity';
+import { Amenity } from './amenity.entity';
+
+@Entity('property_amenities')
+@Index(['amenityId'])
+export class PropertyAmenity {
+  @PrimaryColumn({ name: 'property_id', type: 'uuid' })
+  propertyId: string;
+
+  @PrimaryColumn({ name: 'amenity_id', type: 'uuid' })
+  amenityId: string;
+
+  @ManyToOne(() => Property, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'property_id' })
+  property: Property;
+
+  @ManyToOne(() => Amenity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'amenity_id' })
+  amenity: Amenity;
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/modules/properties/entities/property-photo.entity.ts ---
+import {
+  Entity,
+  Column,
+  Index,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { BaseEntity } from '../../../core/base/base.entity';
+import { Property } from './property.entity';
+
+@Entity('property_photos')
+@Index(['propertyId'])
+@Index(['propertyId', 'sortOrder'])
+export class PropertyPhoto extends BaseEntity {
+  @Column({ name: 'property_id', type: 'uuid' })
+  propertyId: string;
+
+  @Column({ type: 'varchar', length: 500 })
+  url: string;
+
+  @Column({ name: 'is_primary', type: 'boolean', default: false })
+  isPrimary: boolean;
+
+  @Column({ name: 'sort_order', type: 'integer', default: 0 })
+  sortOrder: number;
+
+  @ManyToOne(() => Property, (property) => property.photos, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'property_id' })
+  property: Property;
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/modules/properties/entities/property.entity.ts ---
+import {
+  Entity,
+  Column,
+  Index,
+  OneToMany,
+} from 'typeorm';
+import { BaseEntity } from '../../../core/base/base.entity';
+import { PropertyTypeEnum } from '../../../common/enums/property-type.enum';
+import { PropertyPhoto } from './property-photo.entity';
+import { PropertyAmenity } from './property-amenity.entity';
+import { Favorite } from '../../favorites/entities/favorite.entity';
+import { Inquiry } from '../../inquiries/entities/inquiry.entity';
+
+@Entity('properties')
+@Index(['propertyType'])
+@Index(['price'])
+@Index(['bedrooms'])
+@Index(['bathrooms'])
+@Index(['addressCity'])
+@Index(['addressState'])
+@Index(['addressLatitude', 'addressLongitude'])
+export class Property extends BaseEntity {
+  @Column({ type: 'varchar', length: 200 })
+  title: string;
+
+  @Column({ type: 'text' })
+  description: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  price: number;
+
+  @Column({ type: 'integer' })
+  bedrooms: number;
+
+  @Column({ type: 'integer' })
+  bathrooms: number;
+
+  @Column({ name: 'square_feet', type: 'integer', nullable: true })
+  squareFeet: number | null;
+
+  @Column({
+    name: 'property_type',
+    type: 'enum',
+    enum: PropertyTypeEnum,
+  })
+  propertyType: PropertyTypeEnum;
+
+  @Column({ name: 'address_street', type: 'varchar', length: 200 })
+  addressStreet: string;
+
+  @Column({ name: 'address_city', type: 'varchar', length: 100 })
+  addressCity: string;
+
+  @Column({ name: 'address_state', type: 'varchar', length: 100 })
+  addressState: string;
+
+  @Column({ name: 'address_zip_code', type: 'varchar', length: 10 })
+  addressZipCode: string;
+
+  @Column({ name: 'address_latitude', type: 'decimal', precision: 10, scale: 7, nullable: true })
+  addressLatitude: number | null;
+
+  @Column({ name: 'address_longitude', type: 'decimal', precision: 10, scale: 7, nullable: true })
+  addressLongitude: number | null;
+
+  @Column({ name: 'available_from', type: 'date', nullable: true })
+  availableFrom: string | null;
+
+  @OneToMany(() => PropertyPhoto, (photo) => photo.property)
+  photos: PropertyPhoto[];
+
+  @OneToMany(() => PropertyAmenity, (pa) => pa.property)
+  propertyAmenities: PropertyAmenity[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.property)
+  favorites: Favorite[];
+
+  @OneToMany(() => Inquiry, (inquiry) => inquiry.property)
+  inquiries: Inquiry[];
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/modules/users/entities/user.entity.ts ---
+import {
+  Entity,
+  Column,
+  Index,
+  OneToMany,
+  Unique,
+} from 'typeorm';
+import { BaseEntity } from '../../../core/base/base.entity';
+import { RoleEnum } from '../../../common/enums/role.enum';
+import { UserStatusEnum } from '../../../common/enums/user-status.enum';
+import { RefreshToken } from '../../auth/entities/refresh-token.entity';
+import { PasswordResetToken } from '../../auth/entities/password-reset-token.entity';
+import { Favorite } from '../../favorites/entities/favorite.entity';
+import { Inquiry } from '../../inquiries/entities/inquiry.entity';
+
+@Entity('users')
+@Unique(['email'])
+@Index(['role', 'status'])
+export class User extends BaseEntity {
+  @Column({ type: 'varchar', length: 100 })
+  name: string;
+
+  @Column({ type: 'varchar', length: 255, unique: true })
+  email: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  password: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  phone: string | null;
+
+  @Column({
+    type: 'enum',
+    enum: RoleEnum,
+    default: RoleEnum.RENTER,
+  })
+  @Index()
+  role: RoleEnum;
+
+  @Column({
+    type: 'enum',
+    enum: UserStatusEnum,
+    default: UserStatusEnum.ACTIVE,
+  })
+  @Index()
+  status: UserStatusEnum;
+
+  @Column({ name: 'email_verified_at', type: 'timestamp', nullable: true })
+  emailVerifiedAt: Date | null;
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens: RefreshToken[];
+
+  @OneToMany(() => PasswordResetToken, (resetToken) => resetToken.user)
+  resetTokens: PasswordResetToken[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.user)
+  favorites: Favorite[];
+
+  @OneToMany(() => Inquiry, (inquiry) => inquiry.user)
+  inquiries: Inquiry[];
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/database/migrations/001-initial-schema.ts ---
+import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
+
+export class InitialSchema0011700000000000 implements MigrationInterface {
+  name = 'InitialSchema0011700000000000';
+
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'users',
+        columns: [
+          { name: 'id', type: 'uuid', isPrimary: true, default: 'uuid_generate_v4()' },
+          { name: 'name', type: 'varchar', length: '100', isNullable: false },
+          { name: 'email', type: 'varchar', length: '255', isNullable: false, isUnique: true },
+          { name: 'password', type: 'varchar', length: '255', isNullable: false },
+          { name: 'phone', type: 'varchar', length: '20', isNullable: true },
+          { name: 'role', type: 'enum', enum: ['renter', 'admin'], default: `'renter'`, isNullable: false },
+          { name: 'status', type: 'enum', enum: ['active', 'suspended'], default: `'active'`, isNullable: false },
+          { name: 'email_verified_at', type: 'timestamp', isNullable: true },
+          { name: 'created_at', type: 'timestamp', default: 'now()', isNullable: false },
+          { name: 'updated_at', type: 'timestamp', default: 'now()', isNullable: false },
+          { name: 'deleted_at', type: 'timestamp', isNullable: true },
+        ],
+      }),
+      true,
+    );
+
+    await queryRunner.createIndex('users', new TableIndex({ columnNames: ['role'] }));
+    await queryRunner.createIndex('users', new TableIndex({ columnNames: ['status'] }));
+    await queryRunner.createIndex('users', new TableIndex({ columnNames: ['role', 'status'] }));
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'refresh_tokens',
+        columns: [
+          { name: 'id', type: 'uuid', isPrimary: true, default: 'uuid_generate_v4()' },
+          { name: 'user_id', type: 'uuid', isNullable: false },
+          { name: 'token', type: 'varchar', length: '500', isNullable: false, isUnique: true },
+          { name: 'expires_at', type: 'timestamp', isNullable: false },
+          { name: 'revoked_at', type: 'timestamp', isNullable: true },
+          { name: 'created_at', type: 'timestamp', default: 'now()', isNullable: false },
+        ],
+      }),
+      true,
+    );
+
+    await queryRunner.createIndex('refresh_tokens', new TableIndex({ columnNames: ['user_id'] }));
+    await queryRunner.createIndex('refresh_tokens', new TableIndex({ columnNames: ['expires_at'] }));
+
+    await queryRunner.createForeignKey(
+      'refresh_tokens',
+      new TableForeignKey({
+        columnNames: ['user_id'],
+        referencedTableName: 'users',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'password_reset_tokens',
+        columns: [
+          { name: 'id', type: 'uuid', isPrimary: true, default: 'uuid_generate_v4()' },
+          { name: 'user_id', type: 'uuid', isNullable: false },
+          { name: 'token', type: 'varchar', length: '500', isNullable: false, isUnique: true },
+          { name: 'expires_at', type: 'timestamp', isNullable: false },
+          { name: 'used_at', type: 'timestamp', isNullable: true },
+          { name: 'created_at', type: 'timestamp', default: 'now()', isNullable: false },
+        ],
+      }),
+      true,
+    );
+
+    await queryRunner.createIndex('password_reset_tokens', new TableIndex({ columnNames: ['user_id'] }));
+
+    await queryRunner.createForeignKey(
+      'password_reset_tokens',
+      new TableForeignKey({
+        columnNames: ['user_id'],
+        referencedTableName: 'users',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'properties',
+        columns: [
+          { name: 'id', type: 'uuid', isPrimary: true, default: 'uuid_generate_v4()' },
+          { name: 'title', type: 'varchar', length: '200', isNullable: false },
+          { name: 'description', type: 'text', isNullable: false },
+          { name: 'price', type: 'decimal', precision: 10, scale: 2, isNullable: false },
+          { name: 'bedrooms', type: 'integer', isNullable: false },
+          { name: 'bathrooms', type: 'integer', isNullable: false },
+          { name: 'square_feet', type: 'integer', isNullable: true },
+          { name: 'property_type', type: 'enum', enum: ['apartment', 'house', 'condo', 'townhouse', 'studio'], isNullable: false },
+          { name: 'address_street', type: 'varchar', length: '200', isNullable: false },
+          { name: 'address_city', type: 'varchar', length: '100', isNullable: false },
+          { name: 'address_state', type: 'varchar', length: '100', isNullable: false },
+          { name: 'address_zip_code', type: 'varchar', length: '10', isNullable: false },
+          { name: 'address_latitude', type: 'decimal', precision: 10, scale: 7, isNullable: true },
+          { name: 'address_longitude', type: 'decimal', precision: 10, scale: 7, isNullable: true },
+          { name: 'available_from', type: 'date', isNullable: true },
+          { name: 'created_at', type: 'timestamp', default: 'now()', isNullable: false },
+          { name: 'updated_at', type: 'timestamp', default: 'now()', isNullable: false },
+          { name: 'deleted_at', type: 'timestamp', isNullable: true },
+        ],
+      }),
+      true,
+    );
+
+    await queryRunner.createIndex('properties', new TableIndex({ columnNames: ['property_type'] }));
+    await queryRunner.createIndex('properties', new TableIndex({ columnNames: ['price'] }));
+    await queryRunner.createIndex('properties', new TableIndex({ columnNames: ['bedrooms'] }));
+    await queryRunner.createIndex('properties', new TableIndex({ columnNames: ['bathrooms'] }));
+    await queryRunner.createIndex('properties', new TableIndex({ columnNames: ['address_city'] }));
+    await queryRunner.createIndex('properties', new TableIndex({ columnNames: ['address_state'] }));
+    await queryRunner.createIndex('properties', new TableIndex({ columnNames: ['address_latitude', 'address_longitude'] }));
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'property_photos',
+        columns: [
+          { name: 'id', type: 'uuid', isPrimary: true, default: 'uuid_generate_v4()' },
+          { name: 'property_id', type: 'uuid', isNullable: false },
+          { name: 'url', type: 'varchar', length: '500', isNullable: false },
+          { name: 'is_primary', type: 'boolean', default: false, isNullable: false },
+          { name: 'sort_order', type: 'integer', default: 0, isNullable: false },
+          { name: 'created_at', type: 'timestamp', default: 'now()', isNullable: false },
+          { name: 'updated_at', type: 'timestamp', default: 'now()', isNullable: false },
+        ],
+      }),
+      true,
+    );
+
+    await queryRunner.createIndex('property_photos', new TableIndex({ columnNames: ['property_id'] }));
+    await queryRunner.createIndex('property_photos', new TableIndex({ columnNames: ['property_id', 'sort_order'] }));
+
+    await queryRunner.createForeignKey(
+      'property_photos',
+      new TableForeignKey({
+        columnNames: ['property_id'],
+        referencedTableName: 'properties',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'amenities',
+        columns: [
+          { name: 'id', type: 'uuid', isPrimary: true, default: 'uuid_generate_v4()' },
+          { name: 'name', type: 'varchar', length: '50', isNullable: false, isUnique: true },
+          { name: 'icon', type: 'varchar', length: '50', isNullable: false },
+          { name: 'created_at', type: 'timestamp', default: 'now()', isNullable: false },
+          { name: 'updated_at', type: 'timestamp', default: 'now()', isNullable: false },
+          { name: 'deleted_at', type: 'times
+
+[...truncated, original is 12787 chars]
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/common/enums/index.ts ---
+export { RoleEnum } from './role.enum';
+export { UserStatusEnum } from './user-status.enum';
+export { PropertyTypeEnum } from './property-type.enum';
+export { InquiryStatusEnum } from './inquiry-status.enum';
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/common/enums/inquiry-status.enum.ts ---
+export enum InquiryStatusEnum {
+  NEW = 'new',
+  READ = 'read',
+  RESPONDED = 'responded',
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/common/enums/property-type.enum.ts ---
+export enum PropertyTypeEnum {
+  APARTMENT = 'apartment',
+  HOUSE = 'house',
+  CONDO = 'condo',
+  TOWNHOUSE = 'townhouse',
+  STUDIO = 'studio',
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/common/enums/role.enum.ts ---
+export enum RoleEnum {
+  RENTER = 'renter',
+  ADMIN = 'admin',
+}
+
+
+--- /Users/saifulpotential/Potential/nestfind-sample/backend/src/common/enums/user-status.enum.ts ---
+export enum UserStatusEnum {
+  ACTIVE = 'active',
+  SUSPENDED = 'suspended',
+}
+
+
+=== OUTPUT CONTRACT ===
+Write your evaluation as a SINGLE JSON document to this exact path:
+  /Users/saifulpotential/Potential/nestfind-sample/.claude-project/nestfind/status/database-evaluation.json
+
+Shape (field order does not matter; types do):
+```json
+{
+  "overall_score": 0,
+  "weighted_breakdown": {
+    "domain_modeling_fit": 0,
+    "relationships_correctness": 0,
+    "constraint_correctness": 0,
+    "migration_safety": 0
+  },
+  "blockers": [
+    {
+      "severity": "P1",
+      "criterion": "domain_modeling_fit",
+      "location": "path/to/file.html:42",
+      "issue": "One concrete observation.",
+      "suggestion": "Concrete fix."
+    }
+  ],
+  "rationale": "Two to four sentences.",
+  "evaluator_metadata": {
+    "rubric_version": 1,
+    "artifacts_examined": 0,
+    "tools_used": []
+  }
+}
+```
+
+Rules:
+- `overall_score` = Σ (criterion_score × criterion_weight), to 3 decimal places.
+  The orchestrator recomputes this and warns if your arithmetic is off.
+- Every criterion in the rubric must appear in `weighted_breakdown`.
+- `blockers[].location` should point at a specific file (and line if you can).
+- `blockers[].issue` must be one concrete observation, not a general opinion.
+- `rationale` is 2-4 sentences tying your scores to specific artifact observations.
+- Do not include any text outside the JSON file. No markdown fences. No commentary.
+
+=== STDOUT ===
+[stderr] Performing one time database migration, may take a few minutes...
+[stderr] sqlite-migration:done
+Database migration complete.
+[stderr] [cc-analytics] loaded — server=http://211.188.49.111:8080 dir=/Users/saifulpotential/Potential/nestfind-sample
+
+=== EXIT CODE: null | DURATION: 636357ms ===

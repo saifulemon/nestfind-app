@@ -1,0 +1,46 @@
+id: US-09-MY-INQUIRIES
+role: renter
+feature: View submitted inquiries and their status/responses
+page: 09-my-inquiries.html
+goal: |
+  A renter views all their submitted property inquiries, each showing status
+  (Sent, Viewed, Responded), property thumbnail, date, and message preview.
+  Clicking an inquiry opens a detail modal with the full message and any admin response.
+
+acceptance_criteria:
+  - id: AC-1
+    description: View list of all submitted inquiries with status badges, property thumbnails, dates, and message previews
+    ui_route: /my-inquiries
+    endpoint: GET /api/properties/:id/inquiries (per-property) or client-side aggregation
+    expected: "200 OK, list displays inquiries sorted by date descending, each with status badge"
+  - id: AC-2
+    description: Click an inquiry card to open the detail modal showing full message, property info, and admin response (if any)
+    ui_route: /my-inquiries
+    endpoint: none (data already loaded)
+    expected: "Modal opens with full inquiry details, admin response section shown/hidden based on status"
+  - id: AC-3
+    description: Close the inquiry detail modal via X button, Close button, or Escape key
+    ui_route: /my-inquiries
+    endpoint: none
+    expected: "Modal closes, user returns to inquiry list"
+
+boundary_cases:
+  - case: "No inquiries submitted — empty state shown with icon, 'No inquiries yet' message, and CTA to browse properties"
+  - case: "Inquiry with very long message (2000 chars) — message preview truncated with ellipsis, full text visible in modal"
+
+error_scenarios:
+  - scenario: "Unauthenticated (401) — redirect to login page"
+  - scenario: "Network failure loading inquiries — error state with retry CTA"
+
+state_transitions:
+  - state: loading
+    expected: "Skeleton list items (gray rectangles) shown"
+  - state: empty
+    expected: "Empty state with message icon, 'No inquiries yet', and 'Browse Properties' CTA button"
+  - state: error
+    expected: "Error banner with retry button"
+
+fixture_refs:
+  - users.renter
+  - inquiries.responded
+  - inquiries.pending

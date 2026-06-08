@@ -1,0 +1,10 @@
+page: A-05-reset-password
+component_name: ResetPasswordPage
+component_path: frontend/app/pages/auth/reset-password.tsx
+suggested_route: /reset-password
+text_elements_matched: 11
+form_fields_matched: 2
+buttons_matched: 2
+css_arbitrary_values_used: 43
+testids_added: 4
+fidelity_estimate: 0.95

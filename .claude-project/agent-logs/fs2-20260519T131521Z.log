@@ -1,0 +1,42 @@
+
+======================================================================
+fullstack-2 orchestrator
+======================================================================
+project:  nestfind
+target:   /Users/saifulpotential/Potential/nestfind-sample
+mode:     single-phase (frontend)
+dry-run:  false
+verbose:  false
+episode:  ep-2026-05-19T13-15-21-069-oawr → .claude-project/episodes/ep-2026-05-19T13-15-21-069-oawr.jsonl
+
+======================================================================
+phase: frontend
+======================================================================
+blueprint: frontend-2.yaml (v2)
+nodes:    16
+v2 contracts: ok (all agentic nodes declare required_output_file)
+
+── [1/16] deterministic: design-approval-check ─────────────────────────
+  description: Block frontend if design not approved + fully complete
+  ✅ PASS (11ms, 1 attempt)
+
+── [2/16] deterministic: html-inventory ────────────────────────────────
+  description: List HTML prototypes to convert
+  ✅ PASS (7ms, 1 attempt)
+
+── [3/16] deterministic: extract-prd-roles ─────────────────────────────
+  description: Extract PRD role/layout references into PROJECT_PRD_ROLES.md
+  ✅ PASS (15ms, 1 attempt)
+
+── [4/16] deterministic: scaffold-frontend-shell ───────────────────────
+  description: Copy canonical React framework templates (app/, configs) from {CLAUDE_DIR}/{FRONTEND}/templates/ — single source of truth, no LLM invention
+  ✅ PASS (140ms, 1 attempt)
+
+── [5/16] agentic: convert-shell ───────────────────────────────────────
+  description: Cross-cutting React scaffolding — i18n, ProtectedRoute, App.tsx, layouts, deps, tsconfig
+[agent-factory] backend: opencode
+
+[opencode] node: convert-shell
+[opencode] model: (default)
+[opencode] log:   .claude-project/nestfind/agent-logs/convert-shell-2026-05-19T13-15-21-339Z.log
+[opencode] launching subprocess...

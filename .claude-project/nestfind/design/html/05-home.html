@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NestFind - Property Search</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+background-color: #F5F5F5;
+}
+/* Custom Scrollbar for dropdowns if needed */
+.custom-select {
+appearance: none;
+background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+background-position: right 0.5rem center;
+background-repeat: no-repeat;
+background-size: 1.5em 1.5em;
+}
+</style></head>
+<body class="text-gray-900 antialiased min-h-screen flex flex-col pt-16">
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50 px-4 lg:px-6 flex items-center justify-between">
+        <!-- Left: Logo -->
+        <a href="./05-home.html" class="flex items-center gap-2.5 flex-shrink-0 group">
+            <div class="w-8 h-8 bg-[#0066CC] rounded-lg flex items-center justify-center text-white shadow-sm group-hover:bg-[#0055aa] transition-colors">
+                <span class="iconify" data-icon="lucide:home" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+            </div>
+            <span class="text-lg font-semibold tracking-tight text-gray-900">NestFind</span>
+        </a>
+
+        <!-- Center: Search -->
+        <div class="hidden md:flex flex-1 justify-center">
+            <div class="relative w-[400px]">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="iconify text-gray-400" data-icon="lucide:search" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                </div>
+                <input type="text" class="block w-full h-10 rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-500 focus:bg-white focus:border-[#0066CC] focus:ring-1 focus:ring-[#0066CC] focus:outline-none transition-all" placeholder="City, neighborhood, or address">
+            </div>
+        </div>
+
+        <!-- Right: Actions -->
+        <div class="flex items-center gap-6 flex-shrink-0">
+            <a href="./08-favorites.html" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2">
+                <span class="iconify" data-icon="lucide:heart" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                <span class="hidden sm:inline">Favorites</span>
+            </a>
+            <a href="./09-my-inquiries.html" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2">
+                <span class="iconify" data-icon="lucide:message-square" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                <span class="hidden sm:inline">My Inquiries</span>
+            </a>
+            <a href="./10-profile.html" class="flex items-center gap-2 focus:outline-none ml-2">
+                <img id="navAvatar" class="h-8 w-8 rounded-full object-cover ring-2 ring-white shadow-sm border border-gray-200" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80" alt="User avatar">
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
+
+        <!-- Search Section Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="flex flex-col gap-4">
+                <!-- Top Row: Location + Search Button -->
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <span class="iconify text-gray-400" data-icon="lucide:map-pin" data-width="20" data-height="20" style="stroke-width: 1.5;"></span>
+                        </div>
+                        <input type="text" class="block w-full h-12 pl-11 rounded-lg border border-gray-200 text-sm focus:border-[#0066CC] focus:ring-4 focus:ring-[#0066CC]/10 focus:outline-none transition-all" placeholder="Enter city, neighborhood, or address">
+                    </div>
+                    <button class="h-12 px-8 bg-[#0066CC] hover:bg-[#0055aa] text-white font-medium rounded-lg shadow-sm transition-all focus:ring-4 focus:ring-[#0066CC]/20 flex items-center justify-center gap-2 text-sm whitespace-nowrap">
+                        <span class="iconify" data-icon="lucide:search" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                        Search
+                    </button>
+                </div>
+
+                <!-- Bottom Row: Filters -->
+                <div class="flex flex-wrap gap-3 pt-2 border-t border-gray-100">
+                    
+                    <!-- Price Range -->
+                    <div class="relative min-w-[140px]">
+                        <select class="custom-select block w-full h-10 pl-3 pr-10 text-sm border-gray-200 rounded-md focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/10 focus:outline-none cursor-pointer text-gray-700 bg-white border hover:border-gray-300 transition-colors">
+                            <option>Price (Any)</option>
+                            <option>$1,000 - $2,000</option>
+                            <option>$2,000 - $3,000</option>
+                            <option>$3,000+</option>
+                        </select>
+                    </div>
+
+                    <!-- Bedrooms -->
+                    <div class="relative min-w-[120px]">
+                        <select class="custom-select block w-full h-10 pl-3 pr-10 text-sm border-gray-200 rounded-md focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/10 focus:outline-none cursor-pointer text-gray-700 bg-white border hover:border-gray-300 transition-colors">
+                            <option>Bedrooms (Any)</option>
+                            <option>Studio</option>
+                            <option>1 Bedroom</option>
+                            <option>2 Bedrooms</option>
+                            <option>3 Bedrooms</option>
+                            <option>4+ Bedrooms</option>
+                        </select>
+                    </div>
+
+                    <!-- Property Type -->
+                    <div class="relative min-w-[140px]">
+                        <select class="custom-select block w-full h-10 pl-3 pr-10 text-sm border-gray-200 rounded-md focus:border-[#0066CC] focus:ring-2 focus:ring-[#0066CC]/10 focus:outline-none cursor-pointer text-gray-700 bg-white border hover:border-gray-300 transition-colors">
+                            <option>Property Type (Any)</option>
+                            <option>Apartment</option>
+                            <option>House</option>
+                            <option>Condo</option>
+                            <option>Townhouse</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h2 class="text-lg font-semibold tracking-tight text-gray-900">12 properties found</h2>
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-500 hidden sm:inline">Sort by:</span>
+                <select class="custom-select h-9 pl-3 pr-8 text-sm border-gray-200 rounded-md focus:border-[#0066CC] focus:ring-0 focus:outline-none cursor-pointer text-gray-900 bg-white border font-medium">
+                    <option>Newest</option>
+                    <option>Price: Low to High</option>
+                    <option>Price: High to Low</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Property Grid -->
+        <div id="propertyGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Card 1 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden relative cursor-pointer">
+                <div class="aspect-[16/10] bg-gray-100 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800" alt="Property" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <button onclick="event.preventDefault(); event.stopPropagation(); this.querySelector('.iconify').classList.toggle('text-[#FF6B6B]');" class="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors group/heart">
+                        <span class="iconify text-gray-400 group-hover/heart:text-[#FF6B6B] transition-colors" data-icon="lucide:heart" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                    </button>
+                    <div class="absolute bottom-3 left-3">
+                        <span class="inline-flex items-center rounded-md bg-white/90 backdrop-blur-md px-2 py-1 text-xs font-medium text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200">
+                            New Listing
+                        </span>
+                    </div>
+                </div>
+                <div class="p-5 flex flex-col gap-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-semibold text-gray-900 tracking-tight">$2,500<span class="text-sm font-normal text-gray-500">/mo</span></h3>
+                        <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-[#0066CC] ring-1 ring-inset ring-[#0066CC]/20">Apartment</span>
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium truncate">1024 Market Street, San Francisco, CA</p>
+                    <div class="mt-3 flex items-center gap-3 text-sm text-gray-600">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bed-double" data-width="16" data-height="16"></span>
+                            3
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bath" data-width="16" data-height="16"></span>
+                            2
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:ruler" data-width="16" data-height="16"></span>
+                            1,200 sqft
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 2 (Active Heart) -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden relative cursor-pointer">
+                <div class="aspect-[16/10] bg-gray-100 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&amp;fit=crop&amp;q=80&amp;w=800" alt="Property" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <button onclick="event.preventDefault(); event.stopPropagation();" class="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors">
+                        <span class="iconify text-[#FF6B6B]" data-icon="lucide:heart" data-width="18" data-height="18" style="stroke-width: 1.5; fill: #FF6B6B"></span>
+                    </button>
+                </div>
+                <div class="p-5 flex flex-col gap-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-semibold text-gray-900 tracking-tight">$3,200<span class="text-sm font-normal text-gray-500">/mo</span></h3>
+                        <span class="inline-flex items-center rounded-full bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-700/20">House</span>
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium truncate">883 Woodland Ave, Palo Alto, CA</p>
+                    <div class="mt-3 flex items-center gap-3 text-sm text-gray-600">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bed-double" data-width="16" data-height="16"></span>
+                            4
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bath" data-width="16" data-height="16"></span>
+                            3
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:ruler" data-width="16" data-height="16"></span>
+                            2,100 sqft
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 3 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden relative cursor-pointer">
+                <div class="aspect-[16/10] bg-gray-100 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&amp;fit=crop&amp;q=80&amp;w=800" alt="Property" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <button onclick="event.preventDefault(); event.stopPropagation(); this.querySelector('.iconify').classList.toggle('text-[#FF6B6B]');" class="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors group/heart">
+                        <span class="iconify text-gray-400 group-hover/heart:text-[#FF6B6B] transition-colors" data-icon="lucide:heart" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                    </button>
+                </div>
+                <div class="p-5 flex flex-col gap-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-semibold text-gray-900 tracking-tight">$1,850<span class="text-sm font-normal text-gray-500">/mo</span></h3>
+                        <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-[#0066CC] ring-1 ring-inset ring-[#0066CC]/20">Condo</span>
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium truncate">500 W 2nd St, Austin, TX</p>
+                    <div class="mt-3 flex items-center gap-3 text-sm text-gray-600">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bed-double" data-width="16" data-height="16"></span>
+                            1
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bath" data-width="16" data-height="16"></span>
+                            1
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:ruler" data-width="16" data-height="16"></span>
+                            750 sqft
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 4 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden relative cursor-pointer">
+                <div class="aspect-[16/10] bg-gray-100 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&amp;fit=crop&amp;q=80&amp;w=800" alt="Property" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <button onclick="event.preventDefault(); event.stopPropagation(); this.querySelector('.iconify').classList.toggle('text-[#FF6B6B]');" class="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors group/heart">
+                        <span class="iconify text-gray-400 group-hover/heart:text-[#FF6B6B] transition-colors" data-icon="lucide:heart" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                    </button>
+                </div>
+                <div class="p-5 flex flex-col gap-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-semibold text-gray-900 tracking-tight">$4,100<span class="text-sm font-normal text-gray-500">/mo</span></h3>
+                        <span class="inline-flex items-center rounded-full bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/20">Loft</span>
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium truncate">101 N 5th St, Brooklyn, NY</p>
+                    <div class="mt-3 flex items-center gap-3 text-sm text-gray-600">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bed-double" data-width="16" data-height="16"></span>
+                            2
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bath" data-width="16" data-height="16"></span>
+                            2
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:ruler" data-width="16" data-height="16"></span>
+                            1,400 sqft
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 5 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden relative cursor-pointer">
+                <div class="aspect-[16/10] bg-gray-100 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&amp;fit=crop&amp;q=80&amp;w=800" alt="Property" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <button onclick="event.preventDefault(); event.stopPropagation(); this.querySelector('.iconify').classList.toggle('text-[#FF6B6B]');" class="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors group/heart">
+                        <span class="iconify text-gray-400 group-hover/heart:text-[#FF6B6B] transition-colors" data-icon="lucide:heart" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                    </button>
+                    <div class="absolute bottom-3 left-3">
+                         <span class="inline-flex items-center rounded-md bg-green-50/90 backdrop-blur-md px-2 py-1 text-xs font-medium text-green-700 shadow-sm ring-1 ring-inset ring-green-600/20">
+                            Price Drop
+                        </span>
+                    </div>
+                </div>
+                <div class="p-5 flex flex-col gap-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-semibold text-gray-900 tracking-tight">$2,800<span class="text-sm font-normal text-gray-500">/mo</span></h3>
+                        <span class="inline-flex items-center rounded-full bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-700/20">House</span>
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium truncate">4420 Oakwood Dr, Seattle, WA</p>
+                    <div class="mt-3 flex items-center gap-3 text-sm text-gray-600">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bed-double" data-width="16" data-height="16"></span>
+                            3
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bath" data-width="16" data-height="16"></span>
+                            2
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:ruler" data-width="16" data-height="16"></span>
+                            1,800 sqft
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 6 -->
+            <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden relative cursor-pointer">
+                <div class="aspect-[16/10] bg-gray-100 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&amp;fit=crop&amp;q=80&amp;w=800" alt="Property" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <button onclick="event.preventDefault(); event.stopPropagation(); this.querySelector('.iconify').classList.toggle('text-[#FF6B6B]');" class="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors group/heart">
+                        <span class="iconify text-gray-400 group-hover/heart:text-[#FF6B6B] transition-colors" data-icon="lucide:heart" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                    </button>
+                </div>
+                <div class="p-5 flex flex-col gap-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-semibold text-gray-900 tracking-tight">$3,500<span class="text-sm font-normal text-gray-500">/mo</span></h3>
+                        <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-[#0066CC] ring-1 ring-inset ring-[#0066CC]/20">Apartment</span>
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium truncate">200 S Biscayne Blvd, Miami, FL</p>
+                    <div class="mt-3 flex items-center gap-3 text-sm text-gray-600">
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bed-double" data-width="16" data-height="16"></span>
+                            2
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:bath" data-width="16" data-height="16"></span>
+                            2.5
+                        </div>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="iconify text-gray-400" data-icon="lucide:ruler" data-width="16" data-height="16"></span>
+                            1,350 sqft
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- Pagination / Load More -->
+        <div id="loadMoreContainer" class="mt-12 flex justify-center">
+            <button id="loadMoreBtn" onclick="loadMoreProperties()" class="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-100 transition-all">
+                <span id="loadMoreText">Load more properties</span>
+                <span id="loadMoreSpinner" class="hidden ml-2">
+                    <svg class="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Load More Properties Script -->
+    <script>
+        // Additional properties data
+        const moreProperties = [
+            {
+                price: "$2,800",
+                type: "Townhouse",
+                typeColor: "green",
+                address: "445 Oak Street, Berkeley, CA",
+                beds: 3,
+                baths: 2,
+                sqft: "1,650",
+                image: "photo-1570129477492-45c003edd2be",
+                badge: null
+            },
+            {
+                price: "$4,500",
+                type: "House",
+                typeColor: "orange",
+                address: "1200 Sunset Blvd, Los Angeles, CA",
+                beds: 4,
+                baths: 3,
+                sqft: "2,800",
+                image: "photo-1564013799919-ab600027ffc6",
+                badge: "Pet Friendly"
+            },
+            {
+                price: "$1,950",
+                type: "Studio",
+                typeColor: "purple",
+                address: "88 Howard St, San Francisco, CA",
+                beds: 0,
+                baths: 1,
+                sqft: "450",
+                image: "photo-1493809842364-78817add7ffb",
+                badge: null
+            },
+            {
+                price: "$3,100",
+                type: "Apartment",
+                typeColor: "blue",
+                address: "555 Marina Blvd, Sausalito, CA",
+                beds: 2,
+                baths: 2,
+                sqft: "1,100",
+                image: "photo-1558036117-15d82a90b9b1",
+                badge: "New Listing"
+            },
+            {
+                price: "$5,500",
+                type: "Luxury",
+                typeColor: "gold",
+                address: "1 Embarcadero Center, SF, CA",
+                beds: 3,
+                baths: 2.5,
+                sqft: "2,200",
+                image: "photo-1600607687939-ce8a6c25118c",
+                badge: null
+            },
+            {
+                price: "$2,100",
+                type: "Condo",
+                typeColor: "blue",
+                address: "300 Spear St, San Francisco, CA",
+                beds: 1,
+                baths: 1,
+                sqft: "720",
+                image: "photo-1600566753190-17f0baa2a6c3",
+                badge: "Price Drop"
+            }
+        ];
+
+        let currentPage = 0;
+        const propertiesPerPage = 6;
+        let totalLoaded = 6; // Initial 6 cards shown
+
+        function getTypeStyles(typeColor) {
+            const styles = {
+                blue: { bg: 'bg-blue-50', text: 'text-[#0066CC]', ring: 'ring-[#0066CC]/20' },
+                orange: { bg: 'bg-orange-50', text: 'text-orange-700', ring: 'ring-orange-700/20' },
+                purple: { bg: 'bg-purple-50', text: 'text-purple-700', ring: 'ring-purple-700/20' },
+                green: { bg: 'bg-green-50', text: 'text-green-700', ring: 'ring-green-600/20' },
+                gold: { bg: 'bg-amber-50', text: 'text-amber-700', ring: 'ring-amber-700/20' }
+            };
+            return styles[typeColor] || styles.blue;
+        }
+
+        function getBadgeStyles(badge) {
+            if (badge === 'New Listing') {
+                return 'bg-white/90 text-gray-900 ring-gray-200';
+            } else if (badge === 'Price Drop') {
+                return 'bg-green-50/90 text-green-700 ring-green-600/20';
+            } else if (badge === 'Pet Friendly') {
+                return 'bg-blue-50/90 text-blue-700 ring-blue-600/20';
+            }
+            return 'bg-white/90 text-gray-900 ring-gray-200';
+        }
+
+        function createPropertyCard(property) {
+            const typeStyles = getTypeStyles(property.typeColor);
+            const badgeHTML = property.badge ? `
+                <div class="absolute bottom-3 left-3">
+                    <span class="inline-flex items-center rounded-md ${getBadgeStyles(property.badge)} backdrop-blur-md px-2 py-1 text-xs font-medium shadow-sm ring-1 ring-inset">
+                        ${property.badge}
+                    </span>
+                </div>
+            ` : '';
+
+            return `
+                <a href="./06-property-detail.html" class="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden relative cursor-pointer opacity-0 animate-fadeIn">
+                    <div class="aspect-[16/10] bg-gray-100 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/${property.image}?auto=format&fit=crop&q=80&w=800" alt="Property" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        <button onclick="event.preventDefault(); event.stopPropagation(); this.querySelector('.iconify').classList.toggle('text-[#FF6B6B]');" class="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors group/heart">
+                            <span class="iconify text-gray-400 group-hover/heart:text-[#FF6B6B] transition-colors" data-icon="lucide:heart" data-width="18" data-height="18" style="stroke-width: 1.5;"></span>
+                        </button>
+                        ${badgeHTML}
+                    </div>
+                    <div class="p-5 flex flex-col gap-1">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-xl font-semibold text-gray-900 tracking-tight">${property.price}<span class="text-sm font-normal text-gray-500">/mo</span></h3>
+                            <span class="inline-flex items-center rounded-full ${typeStyles.bg} px-2 py-1 text-xs font-medium ${typeStyles.text} ring-1 ring-inset ${typeStyles.ring}">${property.type}</span>
+                        </div>
+                        <p class="text-sm text-gray-500 font-medium truncate">${property.address}</p>
+                        <div class="mt-3 flex items-center gap-3 text-sm text-gray-600">
+                            <div class="flex items-center gap-1.5">
+                                <span class="iconify text-gray-400" data-icon="lucide:bed-double" data-width="16" data-height="16"></span>
+                                ${property.beds === 0 ? 'Studio' : property.beds}
+                            </div>
+                            <span class="text-gray-300">•</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="iconify text-gray-400" data-icon="lucide:bath" data-width="16" data-height="16"></span>
+                                ${property.baths}
+                            </div>
+                            <span class="text-gray-300">•</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="iconify text-gray-400" data-icon="lucide:ruler" data-width="16" data-height="16"></span>
+                                ${property.sqft} sqft
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }
+
+        function loadMoreProperties() {
+            const btn = document.getElementById('loadMoreBtn');
+            const spinner = document.getElementById('loadMoreSpinner');
+            const text = document.getElementById('loadMoreText');
+            const grid = document.getElementById('propertyGrid');
+            const container = document.getElementById('loadMoreContainer');
+
+            // Show loading state
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            text.textContent = 'Loading...';
+
+            // Simulate network delay for realistic UX
+            setTimeout(() => {
+                const start = currentPage * propertiesPerPage;
+                const end = Math.min(start + propertiesPerPage, moreProperties.length);
+                const propertiesToAdd = moreProperties.slice(start, end);
+
+                propertiesToAdd.forEach((property, index) => {
+                    const cardHTML = createPropertyCard(property);
+                    grid.insertAdjacentHTML('beforeend', cardHTML);
+                    totalLoaded++;
+                });
+
+                // Update results count
+                const resultsHeader = document.querySelector('h2.text-lg');
+                if (resultsHeader) {
+                    resultsHeader.textContent = `${totalLoaded} properties found`;
+                }
+
+                currentPage++;
+
+                // Reset button state
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                text.textContent = 'Load more properties';
+
+                // Hide button if no more properties
+                if (currentPage * propertiesPerPage >= moreProperties.length) {
+                    container.innerHTML = `
+                        <p class="text-sm text-gray-500">You've seen all ${totalLoaded} properties</p>
+                    `;
+                }
+
+                // Trigger Iconify to render new icons
+                if (window.Iconify) {
+                    window.Iconify.scan();
+                }
+            }, 800);
+        }
+    </script>
+
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+
+    <!-- Profile Data Loader -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('nestfind_profile');
+            if (saved) {
+                const profile = JSON.parse(saved);
+                if (profile.avatar) {
+                    const navAvatar = document.getElementById('navAvatar');
+                    if (navAvatar) navAvatar.src = profile.avatar;
+                }
+            }
+        });
+    </script>
+
+</body></html>

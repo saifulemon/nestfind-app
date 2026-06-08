@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useDocumentTitle } from '~/hooks/useDocumentTitle';
 import { Search, Heart, BedDouble, Bath, Ruler, X, SlidersHorizontal, Loader2, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
 import { useAddFavorite, useRemoveFavorite } from '~/hooks/api/useFavorites';
 import SaveSearchModal from '~/components/modals/SaveSearchModal';
@@ -62,6 +63,7 @@ const selectBase = [
 const caretSvg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`;
 
 export default function SearchPage() {
+  useDocumentTitle('Search Properties - NestFind');
   const [searchParams] = useSearchParams();
   const [searchText, setSearchText] = useState('');
   const [priceRange, setPriceRange] = useState('');

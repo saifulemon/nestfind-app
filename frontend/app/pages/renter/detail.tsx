@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, type FormEvent } from 'react';
+import { useDocumentTitle } from '~/hooks/useDocumentTitle';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, MapPin, Bed, Bath, Ruler, Building2, Wifi, AirVent, WashingMachine, CookingPot, Car, Dumbbell, Waves, PawPrint, Send, MapIcon, Calendar, Clock, Video, UserCheck, Loader2, MessageSquare } from 'lucide-react';
 import { usePropertyDetail } from '~/hooks/api/useProperties';
@@ -24,6 +25,7 @@ const AMENITY_ICON_MAP: Record<string, React.ComponentType<{ className?: string 
 };
 
 export default function DetailPage() {
+  useDocumentTitle('Property Details - NestFind');
   const { id } = useParams<{ id: string }>();
   const [activeThumb, setActiveThumb] = useState(0);
   const [favorited, setFavorited] = useState(false);

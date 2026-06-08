@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://nestfind.vercel.app/sitemap.xml
+
+# Disallow admin routes from indexing
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /profile
+Disallow: /favorites
+Disallow: /my-inquiries
+Disallow: /applications

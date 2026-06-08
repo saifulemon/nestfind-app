@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState } from 'react';
+import { useDocumentTitle } from '~/hooks/useDocumentTitle';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,6 +16,7 @@ const btnPrimaryClass =
   'inline-flex items-center justify-center font-semibold cursor-pointer border-none transition-all duration-200 font-[inherit] w-full h-[48px] px-6 rounded-[12px] text-sm text-white bg-[linear-gradient(135deg,#4A90D9,#7C3AED)] hover:shadow-[0_0_24px_rgba(74,144,217,0.3)] hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed';
 
 export default function Login() {
+  useDocumentTitle('Sign In - NestFind');
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [rememberMe, setRememberMe] = useState(false);

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState } from 'react';
+import { useDocumentTitle } from '~/hooks/useDocumentTitle';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
@@ -28,6 +29,7 @@ const registerFormSchema = z
 type RegisterFormData = z.infer<typeof registerFormSchema>;
 
 export default function Register() {
+  useDocumentTitle('Create Account - NestFind');
   const { register: doRegister, loading: isRegistering, isError: registerError, error: registerErr } = useRegister();
   const navigate = useNavigate();
   const dispatch = useDispatch();

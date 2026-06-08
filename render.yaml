@@ -1,0 +1,42 @@
+# Render Blueprint for NestFind Backend
+# This file lets you deploy with one click using Render's Blueprint feature
+# Or you can manually create services using the DEPLOY.md guide
+
+services:
+  - type: web
+    name: nestfind-api
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - fromDatabase:
+          name: nestfind-db
+          property: connectionString
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: AUTH_JWT_SECRET
+        value: ${JWT_ACCESS_SECRET}
+      - key: AUTH_TOKEN_COOKIE_NAME
+        value: access_token
+      - key: AUTH_REFRESH_COOKIE_NAME
+        value: refresh_token
+      - key: FRONTEND_URL
+        value: https://your-vercel-url.vercel.app
+      - key: APP_URL
+        value: https://nestfind-api.onrender.com
+
+databases:
+  - name: nestfind-db
+    plan: free
+    region: singapore
+    databaseName: nestfind
+    user: nestfind

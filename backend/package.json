@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "ts-node src/main.ts",
+    "start": "node dist/main.js",
     "start:dev": "ts-node src/main.ts",
     "dev": "ts-node src/main.ts",
     "typecheck": "tsc --noEmit",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "test:e2e": "jest --config jest-e2e.json --forceExit --detectOpenHandles",
     "test:e2e:watch": "jest --config jest-e2e.json --watch --forceExit --detectOpenHandles",
     "test:e2e:cov": "jest --config jest-e2e.json --coverage --forceExit --detectOpenHandles",

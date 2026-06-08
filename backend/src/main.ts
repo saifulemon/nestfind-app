@@ -13,8 +13,12 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix('api');
 
+  const allowedOrigins = process.env.FRONTEND_URL
+    ? [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:3000']
+    : ['http://localhost:5173', 'http://localhost:3000'];
+
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: allowedOrigins,
     credentials: true,
   });
 
@@ -37,8 +41,9 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  await app.listen(3000);
-  console.log('NestFind API running on http://localhost:3000/api');
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  await app.listen(port);
+  console.log(`NestFind API running on port ${port}`);
 }
 
 void bootstrap();

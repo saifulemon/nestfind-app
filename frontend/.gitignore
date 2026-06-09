@@ -6,9 +6,21 @@
 /.react-router/
 /build/
 
-
 # Environment variables
 .env.development.local
 .env.test.local
 .env.production.local
 config.bat
+
+# Logs
+*.log
+logs/
+.playwright-cli/
+
+# OS
+Thumbs.db
+
+# IDE
+.vscode/
+*.swp
+*.swo

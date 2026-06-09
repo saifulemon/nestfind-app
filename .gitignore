@@ -1,7 +1,45 @@
 node_modules/
 .env
+.env.*
 dist/
 build/
 .claude/
 .opencode/
 .gitmodules
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploaded files
+backend/uploads/
+uploads/
+
+# Test / temp files
+test-*.js
+test-*.ts
+*.test.log
+
+# Claude reports
+.claude-project/reports/
+
+# Logs
+*.log
+logs/
+.playwright-cli/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temp
+tmp/
+temp/
+*.tmp

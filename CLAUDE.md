@@ -7,9 +7,9 @@
 **Status**: Development
 **Version**: 1.0
 
-TODO
+**Description**: Full-featured rental property platform with real-time chat, rental applications, tour booking, and admin management.
 
-**Key Differentiator**: TODO
+**Key Differentiator**: All-in-one rental platform connecting renters with landlords via real-time messaging, application tracking, and tour scheduling.
 
 ---
 
@@ -247,11 +247,10 @@ nestfind/
 ## User Roles
 
 | Role | Description | Key Permissions |
-|------|-------------|-----------------|
+|------|-------------|----------------|
 | Guest | Unauthenticated visitor | View public pages, Login, Signup |
-| TODO | TODO | TODO |
-| TODO | TODO | TODO |
-| Admin | Platform administrator | TODO |
+| Renter | Authenticated renter | Browse, search, save favorites, submit inquiries, book tours, send messages, submit applications, write reviews |
+| Admin | Property manager / administrator | CRUD properties, manage users, respond to inquiries, moderate reviews, manage tours, review applications, view all messages |
 
 ---
 
@@ -259,8 +258,13 @@ nestfind/
 
 | Enum | Values |
 |------|--------|
-| RoleEnum | TODO |
+| RoleEnum | `admin`, `renter` |
 | UserStatusEnum | `active`, `suspended` |
+| ApplicationStatusEnum | `submitted`, `under_review`, `approved`, `rejected` |
+| TourTypeEnum | `in_person`, `virtual` |
+| TourBookingStatusEnum | `confirmed`, `cancelled` |
+| InquiryStatusEnum | `new`, `read`, `responded` |
+| ReviewStatusEnum | `pending`, `approved`, `rejected` |
 
 ---
 
@@ -375,4 +379,4 @@ nestfind/
 
 ---
 
-*Last Updated: 2026-05-19*
+*Last Updated: 2026-06-09*

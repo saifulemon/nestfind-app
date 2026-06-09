@@ -47,14 +47,14 @@ The platform targets two primary user groups: Renters who browse and discover re
 
 ### Seed Accounts (Development)
 
-Run `npx ts-node seed.ts` from the `backend/` directory to populate the SQLite database. The script is idempotent — safe to run multiple times.
+Run `npx ts-node seed.ts` from the `backend/` directory to populate the database. The script is idempotent.
 
 | Role | Email | Password | Status |
 |------|-------|----------|--------|
 | Admin | `admin@nestfind.com` | `AdminPass123!` | active |
 | Renter | `jane@example.com` | `Password123!` | active |
 
-**Database:** SQLite at `backend/nestfind.sqlite` (auto-created via `synchronize: true` in dev mode). 3 sample properties are also seeded.
+**Database:** SQLite (`backend/nestfind.sqlite`) — auto-created via `synchronize: true` in dev mode. Sample properties seeded.
 
 ---
 
@@ -130,22 +130,27 @@ Run `npx ts-node seed.ts` from the `backend/` directory to populate the SQLite d
    - View and manage booked tours (my tours page)
    - Cancel upcoming tours
 
-10. **Chat/Messaging**
-    - Real-time messaging with property managers via WebSocket
-    - Conversation list and message threads
-    - Send and receive text messages instantly
+10. **Chat/Messaging (Real-time)**
+    - Start conversation from property detail (auto-links property + admin owner)
+    - Real-time messaging via Socket.IO with JWT cookie auth
+    - Conversation list with last preview and unread count badge
+    - URL persistence: `?conv=` param + sessionStorage fallback
+    - Messages persist and load on page refresh
+    - Auto-scroll to bottom on new messages
+    - Admin: search conversations by renter name or property
 
 11. **Rental Applications**
-    - Submit rental applications with personal, employment, and reference information
-    - Upload documents (ID, pay stubs, etc.)
-    - Track application status (draft, submitted, under_review, approved, rejected)
+    - Submit from property detail with: monthly income, employment status, employer info, move-in date, pets, notes
+    - Track status: submitted → under_review → approved / rejected
     - View submitted applications (my applications page)
+    - Admin reviews all applications, updates status with notification to applicant
 
 12. **Property Reviews**
-    - Write reviews for properties after viewing or applying
-    - Star ratings (1-5) for overall, location, condition, and value
-    - Written review text
-    - Read reviews on property detail pages
+    - Write reviews for properties (rating 1-5, title, comment)
+    - Admin moderation: pending → approved/rejected
+    - Mark reviews as helpful
+    - Average rating and review count on property detail pages
+    - Only approved reviews visible publicly
 
 ### Admin Features
 
@@ -171,24 +176,27 @@ Run `npx ts-node seed.ts` from the `backend/` directory to populate the SQLite d
    - Suspend or reactivate user accounts
 
 5. **Review Moderation**
-   - View all property reviews with status (pending, approved, rejected)
-   - Approve or reject pending reviews
-   - Filter reviews by property or status
+    - View all property reviews with status (pending, approved, rejected)
+    - Approve or reject pending reviews
+    - Filter reviews by property or status
 
 6. **Tour Management**
-   - View all booked tours with status (pending, confirmed, cancelled, completed)
-   - Confirm or cancel tour bookings
-   - Filter tours by property or date range
+    - Create/delete tour slots (in-person or virtual)
+    - View all booked tours
+    - Filter tours by property or date range
 
 7. **Application Review**
-   - View all rental applications with status (draft, submitted, under_review, approved, rejected)
-   - Review application details (personal info, employment, references, documents)
-   - Approve or reject applications
-   - Filter applications by property or status
+    - View all rental applications with status filter pills
+    - Search by applicant name or property title
+    - Review full application details (income, employment, move-in, pets, notes)
+    - Update status: submitted → under_review → approved / rejected
+    - Notification auto-sent to applicant on status change
 
-8. **Message Management**
-   - View all chat conversations
-   - View message threads for support or moderation purposes
+8. **Messages**
+    - Real-time chat with renters
+    - Search conversations by renter or property
+    - Unread count badges per conversation
+    - Date separators in message threads
 
 ---
 
@@ -469,6 +477,7 @@ nestfind/
 
 ## Related Documentation
 
+- [PRD](PROJECT_PRD.md) — Full product requirements document
 - [API Documentation](PROJECT_API.md) — Complete API endpoint specifications
 - [Database Schema](PROJECT_DATABASE.md) — Entity definitions and relationships
 - [API Integration](PROJECT_API_INTEGRATION.md) — Frontend-backend integration mapping

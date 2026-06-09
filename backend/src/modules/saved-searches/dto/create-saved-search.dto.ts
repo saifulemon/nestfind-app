@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsBoolean, IsEnum, Length } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean, IsEnum, Length, Min, Max, MaxLength } from 'class-validator';
 import { PropertyTypeEnum } from '../../../common/enums/property-type.enum';
 
 export class CreateSavedSearchDto {
@@ -8,18 +8,25 @@ export class CreateSavedSearchDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(500)
   searchText?: string;
 
   @IsNumber()
   @IsOptional()
+  @Min(0)
+  @Max(1000000)
   minPrice?: number;
 
   @IsNumber()
   @IsOptional()
+  @Min(0)
+  @Max(1000000)
   maxPrice?: number;
 
   @IsNumber()
   @IsOptional()
+  @Min(0)
+  @Max(20)
   bedrooms?: number;
 
   @IsEnum(PropertyTypeEnum)
@@ -28,6 +35,7 @@ export class CreateSavedSearchDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(100)
   city?: string;
 
   @IsBoolean()

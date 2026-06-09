@@ -69,7 +69,7 @@ export class SavedSearchController {
     @User('id') userId: string,
     @Param('id') id: string,
   ) {
-    await this.savedSearchService.remove(id);
+    await this.savedSearchService.removeByUser(userId, id);
     return {
       statusCode: 200,
       message: 'Saved search deleted',

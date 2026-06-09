@@ -4,9 +4,10 @@ import { RentalApplication } from './entities/rental-application.entity';
 import { ApplicationRepository } from './application.repository';
 import { ApplicationService } from './application.service';
 import { ApplicationController } from './application.controller';
+import { NotificationModule } from '../notifications/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RentalApplication])],
+  imports: [TypeOrmModule.forFeature([RentalApplication]), NotificationModule],
   controllers: [ApplicationController],
   providers: [ApplicationRepository, ApplicationService],
   exports: [ApplicationService],

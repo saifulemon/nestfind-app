@@ -14,7 +14,9 @@ import {
   UseInterceptors,
   UploadedFiles,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -33,6 +35,7 @@ import { RoleEnum } from '../../common/enums/role.enum';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { ReorderPhotosDto } from './dto/reorder-photos.dto';
+import { SearchPropertyQueryDto } from './dto/search-property-query.dto';
 
 @ApiTags('Properties')
 @Controller('properties')
@@ -51,7 +54,7 @@ export class PropertyController extends BaseController<
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Search properties with filters (public)' })
   @ApiResponse({ status: 200, description: 'Properties retrieved successfully' })
-  async search(@Query() query: any) {
+  async search(@Query() query: SearchPropertyQueryDto) {
     const result = await this.propertyService.search(query);
     return {
       success: true,
@@ -89,6 +92,7 @@ export class PropertyController extends BaseController<
 
   @UseGuards(RolesGuard)
   @SetRoles(RoleEnum.ADMIN)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiBearerAuth()
@@ -99,6 +103,7 @@ export class PropertyController extends BaseController<
   @ApiResponse({ status: 403, description: 'Not an admin' })
   @UseInterceptors(
     FilesInterceptor('files', 10, {
+      limits: { fileSize: 5 * 1024 * 1024 },
       storage: diskStorage({
         destination: (_req, _file, cb) => {
           const uploadDir = join(process.cwd(), 'uploads/properties');
@@ -123,25 +128,16 @@ export class PropertyController extends BaseController<
     }),
   )
   async create(
-    @Body() rawBody: any,
+    @Body() dto: CreatePropertyDto,
     @UploadedFiles() files?: Express.Multer.File[],
+    @Req() req?: Request,
   ): Promise<any> {
-    const dto = this.normalizeCreateDto(rawBody);
-    const property = await this.propertyService.createProperty(dto);
+    const userId = (req as any)?.user?.id;
+    const property = await this.propertyService.createProperty(dto, userId);
     if (files?.length) {
       await this.propertyService.uploadPhotos(property.id as string, files);
     }
     return { success: true, statusCode: HttpStatus.CREATED, message: 'Property created successfully', data: property };
-  }
-
-  private normalizeCreateDto(body: any): CreatePropertyDto {
-    if (typeof body.price === 'string') body.price = parseFloat(body.price);
-    if (typeof body.bedrooms === 'string') body.bedrooms = parseInt(body.bedrooms, 10);
-    if (typeof body.bathrooms === 'string') body.bathrooms = parseInt(body.bathrooms, 10);
-    if (typeof body.squareFeet === 'string') body.squareFeet = body.squareFeet ? parseInt(body.squareFeet, 10) : undefined;
-    if (typeof body.address === 'string') body.address = JSON.parse(body.address);
-    if (typeof body.amenityIds === 'string') body.amenityIds = JSON.parse(body.amenityIds);
-    return body as CreatePropertyDto;
   }
 
   @UseGuards(RolesGuard)
@@ -159,8 +155,10 @@ export class PropertyController extends BaseController<
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePropertyDto,
+    @Req() req?: Request,
   ): Promise<any> {
-    const property = await this.propertyService.updateProperty(id, dto);
+    const userId = (req as any)?.user?.id;
+    const property = await this.propertyService.updateProperty(id, dto, userId);
     return { success: true, statusCode: HttpStatus.OK, message: 'Property updated successfully', data: property };
   }
 
@@ -194,6 +192,7 @@ export class PropertyController extends BaseController<
   @ApiParam({ name: 'id', type: String, description: 'Property UUID' })
   @UseInterceptors(
     FilesInterceptor('files', 10, {
+      limits: { fileSize: 5 * 1024 * 1024 },
       storage: diskStorage({
         destination: (_req, _file, cb) => {
           const uploadDir = join(process.cwd(), 'uploads/properties');

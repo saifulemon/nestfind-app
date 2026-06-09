@@ -30,12 +30,12 @@ export default function MapSearchPage() {
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [selectedProperty, setSelectedProperty] = useState<MapProperty | null>(null);
 
-  // Default viewport: San Francisco area
+  // Default viewport: Chattogram, Bangladesh
   const [viewport, setViewport] = useState({
-    northLat: 37.81,
-    southLat: 37.70,
-    eastLng: -122.35,
-    westLng: -122.55,
+    northLat: 22.40,
+    southLat: 22.30,
+    eastLng: 91.85,
+    westLng: 91.70,
   });
 
   const fetchPropertiesInViewport = useCallback(async () => {
@@ -101,70 +101,72 @@ export default function MapSearchPage() {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Property List Sidebar */}
-        <div className="w-[360px] flex-shrink-0 bg-[#0B0F1A] border-r border-white/[0.08] overflow-y-auto">
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-[60px] text-[#64748B]">
-              <Loader2 className="w-[24px] h-[24px] animate-spin mb-[8px] text-[#4A90D9]" />
-              <p className="text-[13px]">Loading properties...</p>
-            </div>
-          )}
+        {/* Property List Sidebar — visible only in map mode */}
+        {viewMode === 'map' && (
+          <div className="w-[360px] flex-shrink-0 bg-[#0B0F1A] border-r border-white/[0.08] overflow-y-auto">
+            {loading && (
+              <div className="flex flex-col items-center justify-center py-[60px] text-[#64748B]">
+                <Loader2 className="w-[24px] h-[24px] animate-spin mb-[8px] text-[#4A90D9]" />
+                <p className="text-[13px]">Loading properties...</p>
+              </div>
+            )}
 
-          {error && (
-            <div className="p-[24px] text-center">
-              <p className="text-[14px] text-[#F87171]">{error}</p>
-            </div>
-          )}
+            {error && (
+              <div className="p-[24px] text-center">
+                <p className="text-[14px] text-[#F87171]">{error}</p>
+              </div>
+            )}
 
-          {!loading && !error && properties.length === 0 && (
-            <div className="p-[24px] text-center">
-              <MapPin className="w-[32px] h-[32px] text-[#64748B] mx-auto mb-[8px]" />
-              <p className="text-[14px] text-[#94A3B8]">No properties in this area</p>
-            </div>
-          )}
+            {!loading && !error && properties.length === 0 && (
+              <div className="p-[24px] text-center">
+                <MapPin className="w-[32px] h-[32px] text-[#64748B] mx-auto mb-[8px]" />
+                <p className="text-[14px] text-[#94A3B8]">No properties in this area</p>
+              </div>
+            )}
 
-          <div className="divide-y divide-white/[0.06]">
-            {properties.map((prop) => (
-              <div
-                key={prop.id}
-                onClick={() => setSelectedProperty(prop)}
-                className={`p-[16px] cursor-pointer transition-all hover:bg-white/[0.04] ${
-                  selectedProperty?.id === prop.id ? 'bg-white/[0.06] border-l-[3px] border-[#4A90D9]' : 'border-l-[3px] border-transparent'
-                }`}
-              >
-                <div className="flex gap-[12px]">
-                  <div
-                    className="w-[80px] h-[60px] rounded-[8px] bg-cover bg-center flex-shrink-0"
-                    style={
-                      prop.thumbnailUrl
-                        ? { backgroundImage: `url(${prop.thumbnailUrl.startsWith('http') ? prop.thumbnailUrl : '/' + prop.thumbnailUrl})` }
-                        : { background: 'linear-gradient(135deg, #1e3a5f, #2d1b69)' }
-                    }
-                  />
-                  <div className="min-w-0">
-                    <h3 className="text-[14px] font-semibold text-[#F1F5F9] truncate">{prop.title}</h3>
-                    <p className="text-[16px] font-bold text-[#4A90D9] mt-[2px]">
-                      ${prop.price.toLocaleString()}
-                      <span className="text-[12px] font-normal text-[#64748B]">/mo</span>
-                    </p>
-                    <div className="flex items-center gap-[12px] mt-[4px] text-[12px] text-[#64748B]">
-                      <span className="inline-flex items-center gap-[4px]">
-                        <BedDouble className="w-[12px] h-[12px]" />
-                        {prop.bedrooms} bd
-                      </span>
-                      <span className="inline-flex items-center gap-[4px]">
-                        <Bath className="w-[12px] h-[12px]" />
-                        {prop.bathrooms} ba
-                      </span>
+            <div className="divide-y divide-white/[0.06]">
+              {properties.map((prop) => (
+                <div
+                  key={prop.id}
+                  onClick={() => setSelectedProperty(prop)}
+                  className={`p-[16px] cursor-pointer transition-all hover:bg-white/[0.04] ${
+                    selectedProperty?.id === prop.id ? 'bg-white/[0.06] border-l-[3px] border-[#4A90D9]' : 'border-l-[3px] border-transparent'
+                  }`}
+                >
+                  <div className="flex gap-[12px]">
+                    <div
+                      className="w-[80px] h-[60px] rounded-[8px] bg-cover bg-center flex-shrink-0"
+                      style={
+                        prop.thumbnailUrl
+                          ? { backgroundImage: `url(${prop.thumbnailUrl.startsWith('http') ? prop.thumbnailUrl : '/' + prop.thumbnailUrl})` }
+                          : { background: 'linear-gradient(135deg, #1e3a5f, #2d1b69)' }
+                      }
+                    />
+                    <div className="min-w-0">
+                      <h3 className="text-[14px] font-semibold text-[#F1F5F9] truncate">{prop.title}</h3>
+                      <p className="text-[16px] font-bold text-[#4A90D9] mt-[2px]">
+                        ${prop.price.toLocaleString()}
+                        <span className="text-[12px] font-normal text-[#64748B]">/mo</span>
+                      </p>
+                      <div className="flex items-center gap-[12px] mt-[4px] text-[12px] text-[#64748B]">
+                        <span className="inline-flex items-center gap-[4px]">
+                          <BedDouble className="w-[12px] h-[12px]" />
+                          {prop.bedrooms} bd
+                        </span>
+                        <span className="inline-flex items-center gap-[4px]">
+                          <Bath className="w-[12px] h-[12px]" />
+                          {prop.bathrooms} ba
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Map Area */}
+        {/* Map / List Area */}
         <div className="flex-1 relative bg-[#080C14]">
           {viewMode === 'map' ? (
             <iframe
@@ -177,12 +179,32 @@ export default function MapSearchPage() {
               loading="lazy"
             />
           ) : (
-            <div className="p-[24px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] overflow-y-auto h-full">
+            <div className="absolute inset-0 p-[24px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] overflow-y-auto">
+              {loading && (
+                <div className="col-span-full flex flex-col items-center justify-center text-[#64748B]">
+                  <Loader2 className="w-[24px] h-[24px] animate-spin mb-[8px] text-[#4A90D9]" />
+                  <p className="text-[13px]">Loading properties...</p>
+                </div>
+              )}
+
+              {error && (
+                <div className="col-span-full flex flex-col items-center justify-center text-[#F87171]">
+                  <p className="text-[14px]">{error}</p>
+                </div>
+              )}
+
+              {!loading && !error && properties.length === 0 && (
+                <div className="col-span-full flex flex-col items-center justify-center text-[#94A3B8]">
+                  <MapPin className="w-[32px] h-[32px] text-[#64748B] mb-[8px]" />
+                  <p className="text-[14px]">No properties in this area</p>
+                </div>
+              )}
+
               {properties.map((prop) => (
                 <Link
                   key={prop.id}
                   to={`/property/${prop.id}`}
-                  className="bg-white/[0.04] backdrop-blur-[12px] border border-white/[0.08] rounded-[12px] overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,144,217,0.15)] hover:-translate-y-[2px] no-underline text-inherit"
+                  className="bg-white/[0.04] backdrop-blur-[12px] border border-white/[0.08] rounded-[12px] overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,144,217,0.15)] hover:-translate-y-[2px] no-underline text-inherit self-start"
                 >
                   <div
                     className="h-[160px] bg-cover bg-center"

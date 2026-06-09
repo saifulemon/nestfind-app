@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { BaseService } from '../../core/base/base.service';
 import { ReviewRepository } from './review.repository';
+import { NotificationService } from '../notifications/notification.service';
 import { PropertyReview } from './entities/property-review.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
 
@@ -8,6 +9,7 @@ import { CreateReviewDto } from './dto/create-review.dto';
 export class ReviewService extends BaseService<PropertyReview> {
   constructor(
     private readonly reviewRepository: ReviewRepository,
+    private readonly notificationService: NotificationService,
   ) {
     super(reviewRepository, 'PropertyReview');
   }
@@ -45,10 +47,38 @@ export class ReviewService extends BaseService<PropertyReview> {
   }
 
   async approveReview(reviewId: string): Promise<PropertyReview | null> {
-    return this.reviewRepository.update(reviewId, { status: 'approved' });
+    const review = await this.findByIdOrFail(reviewId);
+    if (review.status !== 'pending') {
+      throw new BadRequestException('Review can only be moderated from pending status');
+    }
+    const updated = await this.reviewRepository.update(reviewId, { status: 'approved' });
+
+    await this.notificationService.createNotification({
+      userId: review.userId,
+      type: 'review_approved',
+      title: 'Review approved',
+      message: 'Your review has been approved and is now visible.',
+      data: { reviewId, propertyId: review.propertyId },
+    });
+
+    return updated;
   }
 
   async rejectReview(reviewId: string): Promise<PropertyReview | null> {
-    return this.reviewRepository.update(reviewId, { status: 'rejected' });
+    const review = await this.findByIdOrFail(reviewId);
+    if (review.status !== 'pending') {
+      throw new BadRequestException('Review can only be moderated from pending status');
+    }
+    const updated = await this.reviewRepository.update(reviewId, { status: 'rejected' });
+
+    await this.notificationService.createNotification({
+      userId: review.userId,
+      type: 'review_rejected',
+      title: 'Review rejected',
+      message: 'Your review did not meet our guidelines and has been rejected.',
+      data: { reviewId, propertyId: review.propertyId },
+    });
+
+    return updated;
   }
 }

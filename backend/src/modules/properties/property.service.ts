@@ -1,10 +1,13 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { BaseService } from '../../core/base/base.service';
 import { PropertyRepository } from './property.repository';
 import { PropertyPhotoRepository } from './property-photo.repository';
 import { AmenityRepository } from '../amenities/amenity.repository';
 import { PropertyAmenityRepository } from './property-amenity.repository';
 import { FavoriteRepository } from '../favorites/favorite.repository';
+import { NotificationService } from '../notifications/notification.service';
 import { Property } from './entities/property.entity';
 import { PropertyPhoto } from './entities/property-photo.entity';
 import { CreatePropertyDto, AddressDto } from './dto/create-property.dto';
@@ -18,6 +21,8 @@ export class PropertyService extends BaseService<Property> {
     private readonly amenityRepo: AmenityRepository,
     private readonly propertyAmenityRepo: PropertyAmenityRepository,
     private readonly favoriteRepo: FavoriteRepository,
+    private readonly notificationService: NotificationService,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {
     super(propertyRepository, 'Property');
   }
@@ -98,7 +103,7 @@ export class PropertyService extends BaseService<Property> {
     return this.transformToDetailResult(property, isFavorited);
   }
 
-  async createProperty(dto: CreatePropertyDto): Promise<Record<string, unknown>> {
+  async createProperty(dto: CreatePropertyDto, adminId?: string): Promise<Record<string, unknown>> {
     const addressData = this.flattenAddress(dto.address);
     const propertyData: any = {
       title: dto.title,
@@ -109,6 +114,7 @@ export class PropertyService extends BaseService<Property> {
       squareFeet: dto.squareFeet,
       propertyType: dto.propertyType,
       availableFrom: dto.availableFrom,
+      ownerId: adminId || null,
       ...addressData,
     };
 
@@ -118,26 +124,57 @@ export class PropertyService extends BaseService<Property> {
       await this.syncAmenities(property.id, dto.amenityIds);
     }
 
+    if (adminId) {
+      await this.notificationService.createNotification({
+        userId: adminId,
+        type: 'property_listed',
+        title: 'Property listed',
+        message: `"${property.title}" has been successfully listed.`,
+        data: { propertyId: property.id },
+      });
+    }
+
     return this.transformToDetailResult(property, false);
   }
 
   async updateProperty(
     id: string,
     dto: UpdatePropertyDto,
+    adminId?: string,
   ): Promise<Record<string, unknown>> {
     await super.findByIdOrFail(id);
-    const updateData: any = { ...dto };
-    if (dto.address) {
-      const addressData = this.flattenAddress(dto.address);
-      Object.assign(updateData, addressData);
-      delete updateData.address;
+    const result = await this.dataSource.transaction(async (manager) => {
+      const updateData: any = { ...dto };
+      if (dto.address) {
+        const addressData = this.flattenAddress(dto.address);
+        Object.assign(updateData, addressData);
+        delete updateData.address;
+      }
+      if (dto.amenityIds) {
+        const propertyAmenityRepo = manager.getRepository('PropertyAmenity');
+        await propertyAmenityRepo.delete({ propertyId: id } as any);
+        if (dto.amenityIds.length > 0) {
+          await propertyAmenityRepo.insert(
+            dto.amenityIds.map((amenityId: string) => ({ propertyId: id, amenityId })),
+          );
+        }
+        delete updateData.amenityIds;
+      }
+      await manager.getRepository(Property).update(id, updateData);
+      return this.getPropertyDetail(id);
+    });
+
+    if (adminId) {
+      await this.notificationService.createNotification({
+        userId: adminId,
+        type: 'property_updated',
+        title: 'Property updated',
+        message: `Property "${(result as any).title || id}" has been updated successfully.`,
+        data: { propertyId: id },
+      });
     }
-    if (dto.amenityIds) {
-      await this.syncAmenities(id, dto.amenityIds);
-      delete updateData.amenityIds;
-    }
-    await this.propertyRepository.update(id, updateData);
-    return this.getPropertyDetail(id);
+
+    return result;
   }
 
   async archive(id: string): Promise<void> {
@@ -291,6 +328,7 @@ export class PropertyService extends BaseService<Property> {
       photos,
       amenities,
       isFavorited,
+      ownerId: property.ownerId,
       updatedAt: property.updatedAt,
     };
   }

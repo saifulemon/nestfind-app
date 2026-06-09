@@ -9,9 +9,10 @@ import { UserRepository } from '../users/user.repository';
 import { InquiryService } from './inquiry.service';
 import { InquiryController } from './inquiry.controller';
 import { InquirySubmitController } from './inquiry-submit.controller';
+import { NotificationModule } from '../notifications/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Inquiry, Property, User])],
+  imports: [TypeOrmModule.forFeature([Inquiry, Property, User]), NotificationModule],
   controllers: [InquiryController, InquirySubmitController],
   providers: [InquiryRepository, PropertyRepository, UserRepository, InquiryService],
   exports: [InquiryService],

@@ -37,7 +37,7 @@ export class NotificationService extends BaseService<Notification> {
   }
 
   async markAsRead(userId: string, notificationId: string): Promise<void> {
-    await this.notificationRepository.update(notificationId, { isRead: true });
+    await this.notificationRepository.update({ id: notificationId, userId } as any, { isRead: true });
   }
 
   async markAllAsRead(userId: string): Promise<void> {

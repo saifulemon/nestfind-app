@@ -42,10 +42,19 @@ export class SetTokenInterceptor implements NestInterceptor {
                         path: '/',
                     });
 
+                    if (value?.refreshToken) {
+                        res.cookie('refresh_token', value.refreshToken, {
+                            httpOnly: true,
+                            secure: process.env.NODE_ENV === 'production',
+                            sameSite: 'strict',
+                            domain: cookieDomain || undefined,
+                            path: '/',
+                        });
+                    }
+
                     return {
                         success: true,
                         message: value.message,
-                        refreshToken: value?.refreshToken,
                         ...(value.result && { result: value.result }),
                     };
                 } else {

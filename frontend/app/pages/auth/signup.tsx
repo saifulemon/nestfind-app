@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
 import { useRegister } from '~/hooks/api/useAuth';
-import { setUser, saveRefreshToken } from '~/redux/features/authSlice';
+import { setUser } from '~/redux/features/authSlice';
 import { Button } from '~/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
@@ -48,7 +48,6 @@ export default function SignupPage() {
         phone: data.phone || undefined,
       });
       if (res?.success) {
-        if (res.refreshToken) saveRefreshToken(res.refreshToken);
         dispatch(setUser(res.result));
         navigate('/');
       }
@@ -61,8 +60,8 @@ export default function SignupPage() {
     'h-[48px] rounded-[10px] bg-white/[0.04] border border-white/[0.08] px-[16px] text-[14px] text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[rgba(74,144,217,0.5)] focus:shadow-[0_0_0_3px_rgba(74,144,217,0.1)]';
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-73px)] p-[24px] bg-[#0B0F1A]">
-      <div className="w-full max-w-[420px] bg-white/[0.04] backdrop-blur-[12px] border border-white/[0.08] rounded-[16px] p-[40px]">
+    <div className="flex-1 flex items-center justify-center p-[24px] text-[#F1F5F9]">
+      <div className="w-full max-w-[420px] bg-white/[0.04] backdrop-blur-[12px] border border-white/[0.08] rounded-[16px] p-[24px] sm:p-[40px]">
         <h2 className="text-[28px] font-bold mb-[8px] tracking-[-0.02em] text-[#F1F5F9]">Create your account</h2>
         <p className="text-[#94A3B8] text-[14px] mb-[32px] leading-[1.5]">Join NestFind to save favorites and submit inquiries</p>
 

@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Body,
   Param,
@@ -10,6 +11,8 @@ import {
   HttpStatus,
   ParseUUIDPipe,
   UseGuards,
+  NotFoundException,
+  MethodNotAllowedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { BaseController } from '../../core/base/base.controller';
@@ -88,6 +91,37 @@ export class FavoriteController extends BaseController<Favorite> {
         createdAt: favorite.createdAt,
       },
     };
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get a favorite by ID' })
+  @ApiResponse({ status: 200, description: 'Favorite retrieved' })
+  @ApiResponse({ status: 404, description: 'Favorite not found' })
+  @SetRoles(RoleEnum.RENTER)
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @User() user?: { id: string; email: string; role: number },
+  ): Promise<any> {
+    const favorite = await this.favoriteService.findByIdOrFail(id);
+    if (favorite.userId !== user!.id) {
+      throw new NotFoundException('Favorite not found');
+    }
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Favorite retrieved',
+      data: favorite,
+    };
+  }
+
+  @Patch(':id')
+  @HttpCode(HttpStatus.METHOD_NOT_ALLOWED)
+  @ApiOperation({ summary: 'Update a favorite' })
+  @ApiResponse({ status: 405, description: 'Method not allowed' })
+  @SetRoles(RoleEnum.RENTER)
+  async update(): Promise<any> {
+    throw new MethodNotAllowedException('Updating favorites is not allowed');
   }
 
   @Delete(':id')

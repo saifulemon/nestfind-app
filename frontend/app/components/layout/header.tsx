@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react';
 import { useAuth } from '~/hooks/useAuth';
 import { Sheet } from '~/components/ui/sheet';
 import NotificationBell from '~/components/shared/NotificationBell';
+import { useChatNotifications } from '~/hooks/useChatNotifications';
 
 function getAvatarUrl(url: string | null | undefined): string | null {
   if (!url) return null;
@@ -13,6 +14,7 @@ function getAvatarUrl(url: string | null | undefined): string | null {
 
 export default function Header() {
   const { isAuthenticated, user } = useAuth();
+  const { chatUnreadCount } = useChatNotifications();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const avatarUrl = getAvatarUrl(user?.avatarUrl);
@@ -29,12 +31,9 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-6">
           <Link to="/search" className="text-sm text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors">
             Browse
-          </Link>
-          <Link to="/#how-it-works" className="text-sm text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors">
-            How It Works
           </Link>
           {isAuthenticated ? (
             <>
@@ -56,8 +55,13 @@ export default function Header() {
               <Link to="/tours" className="text-sm text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors">
                 Tours
               </Link>
-              <Link to="/messages" className="text-sm text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors">
+              <Link to="/messages" className="relative text-sm text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors">
                 Messages
+                {chatUnreadCount > 0 && (
+                  <span className="absolute -top-[6px] -right-[10px] w-[16px] h-[16px] rounded-full bg-[#F87171] text-white text-[10px] font-bold flex items-center justify-center">
+                    {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
+                  </span>
+                )}
               </Link>
               <Link to="/applications" className="text-sm text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors">
                 Applications
@@ -89,7 +93,7 @@ export default function Header() {
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
-          className="sm:hidden w-10 h-10 rounded-lg flex items-center justify-center text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/5 transition-colors"
+          className="lg:hidden w-10 h-10 rounded-lg flex items-center justify-center text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/5 transition-colors"
           aria-label="Open navigation menu"
         >
           <Menu className="w-5 h-5" />
@@ -116,9 +120,6 @@ export default function Header() {
           )}
           <Link to="/search" className={mobileNavLinkClass} onClick={() => setMenuOpen(false)}>
             Browse
-          </Link>
-          <Link to="/#how-it-works" className={mobileNavLinkClass} onClick={() => setMenuOpen(false)}>
-            How It Works
           </Link>
           {isAuthenticated ? (
             <>

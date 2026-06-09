@@ -6,7 +6,6 @@ import type {
   InternalAxiosRequestConfig,
 } from 'axios';
 import type { ApiErrorResponse, ApiResponse } from '~/types/httpService';
-import { getRefreshToken, saveRefreshToken } from '~/redux/features/authSlice';
 
 declare module 'axios' {
   export interface InternalAxiosRequestConfig {
@@ -47,15 +46,11 @@ class HttpService {
 
           originalRequest._isRetry = true;
           try {
-            const refreshToken = getRefreshToken();
-            if (!refreshToken) throw new Error('No refresh token');
-            const refreshRes = await this.api.post('/auth/refresh', { refreshToken });
-            const newRefreshToken = refreshRes.data?.refreshToken;
-            if (newRefreshToken) saveRefreshToken(newRefreshToken);
+            await this.api.post('/auth/refresh');
             return this.api(originalRequest);
           } catch {
             // Only redirect if not already on an auth page
-            if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/admin/login')) {
+            if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
               window.location.href = '/login';
             }
             return Promise.reject(error);

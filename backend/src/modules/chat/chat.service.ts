@@ -15,6 +15,10 @@ export class ChatService {
     return this.conversationRepo.findByUser(userId);
   }
 
+  async getConversation(id: string): Promise<ChatConversation | null> {
+    return this.conversationRepo.findById(id);
+  }
+
   async createConversation(data: {
     renterId: string;
     adminId: string;

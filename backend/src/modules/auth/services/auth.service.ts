@@ -56,10 +56,12 @@ export class AuthService {
   }
 
   async logout(refreshToken: string): Promise<void> {
-    const existing = await this.refreshTokenRepo.findOne({ where: { token: refreshToken } });
-    if (existing && !existing.revokedAt) {
-      existing.revokedAt = new Date();
-      await this.refreshTokenRepo.save(existing);
+    const result = await this.refreshTokenRepo.update(
+      { token: refreshToken, revokedAt: IsNull() },
+      { revokedAt: new Date() },
+    );
+    if (result.affected === 0) {
+      return;
     }
   }
 

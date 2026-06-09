@@ -30,8 +30,8 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-73px)] p-[24px]">
-        <div className="w-full max-w-[420px] bg-white/[0.04] backdrop-blur-[12px] border border-white/[0.08] rounded-[16px] p-[40px] text-center">
+      <div className="flex-1 flex items-center justify-center p-[24px] text-[#F1F5F9]">
+        <div className="w-full max-w-[420px] bg-white/[0.04] backdrop-blur-[12px] border border-white/[0.08] rounded-[16px] p-[24px] sm:p-[40px] text-center">
           <div className="w-[64px] h-[64px] rounded-full bg-[#4ADE80]/10 flex items-center justify-center mx-auto mb-[20px] text-[#4ADE80] shadow-[0_0_24px_rgba(74,222,128,0.2)]">
             <Check size={32} />
           </div>
@@ -46,8 +46,8 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-73px)] p-[24px]">
-      <div className="w-full max-w-[420px] bg-white/[0.04] backdrop-blur-[12px] border border-white/[0.08] rounded-[16px] p-[40px]">
+    <div className="flex-1 flex items-center justify-center p-[24px] text-[#F1F5F9]">
+      <div className="w-full max-w-[420px] bg-white/[0.04] backdrop-blur-[12px] border border-white/[0.08] rounded-[16px] p-[24px] sm:p-[40px]">
         <h2 className="text-[28px] font-bold mb-[8px] tracking-[-0.02em]">Set new password</h2>
         <p className="text-[#94A3B8] text-[14px] mb-[32px] leading-[1.5]">Choose a strong password for your account</p>
 

@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { BaseService } from '../../core/base/base.service';
 import { ApplicationRepository } from './application.repository';
+import { NotificationService } from '../notifications/notification.service';
 import { RentalApplication } from './entities/rental-application.entity';
 
 @Injectable()
 export class ApplicationService extends BaseService<RentalApplication> {
   constructor(
     private readonly applicationRepository: ApplicationRepository,
+    private readonly notificationService: NotificationService,
   ) {
     super(applicationRepository, 'RentalApplication');
   }
@@ -53,6 +55,25 @@ export class ApplicationService extends BaseService<RentalApplication> {
   }
 
   async updateStatus(id: string, status: string): Promise<RentalApplication | null> {
-    return this.applicationRepository.update(id, { status });
+    const allowedStatuses = ['submitted', 'under_review', 'approved', 'rejected'];
+    if (!allowedStatuses.includes(status)) {
+      throw new BadRequestException('Invalid application status');
+    }
+    const application = await this.findByIdOrFail(id);
+    if (application.status === 'approved' || application.status === 'rejected') {
+      throw new BadRequestException('Application has already been finalized');
+    }
+    const updated = await this.applicationRepository.update(id, { status });
+
+    const statusLabel = status.replace(/_/g, ' ');
+    await this.notificationService.createNotification({
+      userId: application.applicantId,
+      type: 'application_update',
+      title: 'Application status updated',
+      message: `Your rental application status has changed to "${statusLabel}".`,
+      data: { applicationId: id, status },
+    });
+
+    return updated;
   }
 }

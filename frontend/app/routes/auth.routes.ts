@@ -6,5 +6,5 @@ export const authRoutes = [
   route('register', 'pages/auth/register.tsx'),
   route('forgot-password', 'pages/auth/forgot-password.tsx'),
   route('reset-password', 'pages/auth/reset-password.tsx'),
-  route('admin/login', 'pages/auth/admin-login.tsx'),
+
 ];

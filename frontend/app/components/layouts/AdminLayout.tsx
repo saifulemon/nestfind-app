@@ -4,6 +4,7 @@ import { Outlet, Navigate, useLocation, useNavigate, Link } from 'react-router-d
 import { useAuth } from '~/hooks/useAuth';
 import { Loader2, LayoutDashboard, Building2, MessageSquare, Users, ArrowLeft, LogOut, Menu, X } from 'lucide-react';
 import { RoleEnum } from '~/enums/role.enum';
+import { useChatNotifications } from '~/hooks/useChatNotifications';
 
 const routeAccess: Record<string, Array<string | number>> = {
   '/admin': [RoleEnum.ADMIN],
@@ -18,19 +19,22 @@ const navItems = [
   { to: '/admin/properties', icon: Building2, label: 'Properties' },
   { to: '/admin/inquiries', icon: MessageSquare, label: 'Inquiries' },
   { to: '/admin/users', icon: Users, label: 'Users' },
+  { to: '/admin/messages', icon: MessageSquare, label: 'Messages' },
 ];
 
 export default function AdminLayout() {
   const { isAuthenticated, authChecked, user, isLoading } = useAuth();
+  const { chatUnreadCount } = useChatNotifications();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (authChecked && !isAuthenticated && !isLoading) {
-      navigate('/admin/login', { replace: true });
+      const returnUrl = location.pathname + location.search + location.hash;
+      navigate(`/login?returnUrl=${encodeURIComponent(returnUrl)}`, { replace: true });
     }
-  }, [authChecked, isAuthenticated, isLoading, navigate]);
+  }, [authChecked, isAuthenticated, isLoading, navigate, location]);
 
   if (!authChecked || isLoading) {
     return (
@@ -78,7 +82,12 @@ export default function AdminLayout() {
               >
                 <item.icon className="h-4 w-4" />
                 {item.label}
-                {isActive && (
+                {item.to === '/admin/messages' && chatUnreadCount > 0 && (
+                  <span className="ml-auto px-[6px] py-[1px] rounded-full bg-[#F87171] text-white text-[10px] font-bold">
+                    {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
+                  </span>
+                )}
+                {isActive && item.to !== '/admin/messages' && (
                   <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-500" />
                 )}
               </Link>
@@ -97,8 +106,7 @@ export default function AdminLayout() {
           <button
             onClick={() => {
               localStorage.removeItem('nestfind_auth');
-              localStorage.removeItem('nestfind_refresh');
-              window.location.href = '/admin/login';
+                  window.location.href = '/login';
             }}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-colors w-full text-left"
           >
@@ -172,7 +180,12 @@ export default function AdminLayout() {
                     >
                       <item.icon className="h-4 w-4" />
                       {item.label}
-                      {isActive && (
+                      {item.to === '/admin/messages' && chatUnreadCount > 0 && (
+                        <span className="ml-auto px-[6px] py-[1px] rounded-full bg-[#F87171] text-white text-[10px] font-bold">
+                          {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
+                        </span>
+                      )}
+                      {isActive && item.to !== '/admin/messages' && (
                         <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-500" />
                       )}
                     </Link>
@@ -192,8 +205,7 @@ export default function AdminLayout() {
                 <button
                   onClick={() => {
                     localStorage.removeItem('nestfind_auth');
-                    localStorage.removeItem('nestfind_refresh');
-                    window.location.href = '/admin/login';
+            window.location.href = '/login';
                   }}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-colors w-full text-left"
                 >
@@ -204,7 +216,7 @@ export default function AdminLayout() {
             </div>
           </div>
         )}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

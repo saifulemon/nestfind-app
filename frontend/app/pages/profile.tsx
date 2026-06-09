@@ -103,7 +103,7 @@ export default function ProfilePage() {
   const handleSwitchToOwner = async () => {
     setShowOwnerModal(false);
     await logout();
-    window.location.href = '/admin/login';
+    window.location.href = '/login';
   };
 
   return (

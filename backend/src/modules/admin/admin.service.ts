@@ -118,7 +118,7 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found!`);
+      throw new NotFoundException('User not found');
     }
 
     const [totalFavorites, totalInquiries] = await Promise.all([
@@ -153,10 +153,16 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found!`);
+      throw new NotFoundException('User not found');
     }
 
-    await this.userRepo.update(id, { status } as any);
+    const result = await (this.userRepo as any).repository.update(
+      { id, status: user.status },
+      { status },
+    );
+    if (result.affected === 0) {
+      throw new BadRequestException('User status changed concurrently');
+    }
 
     return {
       id: user.id,

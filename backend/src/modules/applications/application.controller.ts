@@ -6,6 +6,7 @@ import { User } from '../../core/decorators/current-user.decorator';
 import { ApplicationService } from './application.service';
 import { RoleEnum } from '../../common/enums/role.enum';
 import { ApiResponse } from '@nestjs/swagger';
+import { SubmitApplicationDto } from './dto/submit-application.dto';
 
 @Controller('applications')
 export class ApplicationController {
@@ -16,17 +17,7 @@ export class ApplicationController {
   @ApiResponse({ status: 201, description: 'Application submitted' })
   async submitApplication(
     @User('id') applicantId: string,
-    @Body() body: {
-      propertyId: string;
-      monthlyIncome?: number;
-      employmentStatus?: string;
-      employerName?: string;
-      employerPhone?: string;
-      moveInDate?: string;
-      hasPets?: boolean;
-      petDetails?: string;
-      additionalNotes?: string;
-    },
+    @Body() body: SubmitApplicationDto,
   ) {
     const application = await this.applicationService.submitApplication(applicantId, body);
     return {

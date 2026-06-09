@@ -32,21 +32,25 @@ export default function ReviewSection({ reviews, averageRating, totalCount, onSu
   const [title, setTitle] = useState('');
   const [comment, setComment] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setValidationError(null);
     const result = reviewSchema.safeParse({ rating, title, comment });
     if (!result.success) {
       setValidationError(result.error.errors[0]?.message || 'Invalid input');
       return;
     }
+    setIsSubmitting(true);
     onSubmitReview({ rating, title, comment });
     setShowForm(false);
     setRating(0);
     setTitle('');
     setComment('');
     setValidationError(null);
+    setIsSubmitting(false);
   };
 
   return (
@@ -139,7 +143,7 @@ export default function ReviewSection({ reviews, averageRating, totalCount, onSu
             </button>
             <button
               type="submit"
-              disabled={rating === 0 || !comment.trim()}
+              disabled={rating === 0 || !comment.trim() || isSubmitting}
               className="h-[42px] px-[20px] rounded-[10px] border-none bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] text-white text-[13px] font-semibold hover:shadow-[0_0_20px_rgba(74,144,217,0.3)] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-[6px]"
             >
               <Send className="w-[14px] h-[14px]" />

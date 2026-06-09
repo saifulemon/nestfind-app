@@ -11,7 +11,6 @@ import LoginPage from "./pages/auth/login";
 import SignupPage from "./pages/auth/signup";
 import ForgotPassword from "./pages/auth/forgot-password";
 import ResetPassword from "./pages/auth/reset-password";
-import AdminLogin from "./pages/auth/admin-login";
 import AdminDashboard from "./pages/admin/dashboard";
 import AdminProperties from "./pages/admin/properties";
 import AdminInquiries from "./pages/admin/inquiries";
@@ -51,9 +50,6 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
           </Route>
-
-          {/* Admin login — standalone, no GuestGuard */}
-          <Route path="/admin/login" element={<AdminLogin />} />
 
           {/* Renter protected — wrapped in RenterLayout */}
           <Route element={<RenterLayout />}>

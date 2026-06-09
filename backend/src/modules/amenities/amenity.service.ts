@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, QueryFailedError } from 'typeorm';
 import { BaseService } from '../../core/base/base.service';
@@ -38,12 +38,30 @@ export class AmenityService extends BaseService<Amenity> {
   }
 
   async updateWithUniqueCheck(id: string, dto: UpdateAmenityDto): Promise<Amenity | null> {
-    if (dto.name) {
-      const existing = await this.amenityRepository.findByNameExcludingId(dto.name, id);
-      if (existing) {
-        throw new ConflictException('Amenity with this name already exists!');
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      if (dto.name) {
+        const existing = await queryRunner.manager.findOne(Amenity, {
+          where: { name: dto.name },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (existing && existing.id !== id) {
+          throw new ConflictException('Amenity with this name already exists!');
+        }
       }
+      const result = await queryRunner.manager.update(Amenity, id, dto as any);
+      if (result.affected === 0) {
+        throw new NotFoundException('Amenity not found');
+      }
+      await queryRunner.commitTransaction();
+      return this.findByIdOrFail(id);
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-    return this.update(id, dto as any);
   }
 }

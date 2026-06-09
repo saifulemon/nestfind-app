@@ -22,9 +22,9 @@ export class NestfindGateway implements OnGatewayConnection {
     }
     try {
       const payload = this.jwtService.verify(token);
-      client.userId = payload.sub;
+      client.userId = payload.id;
       client.role = payload.role;
-      client.join(`user:${payload.sub}`);
+      client.join(`user:${payload.id}`);
     } catch {
       client.disconnect();
     }

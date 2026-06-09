@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosError } from 'axios';
+import { resetChatNotifications } from '~/hooks/useChatNotifications';
 import type { ApiErrorResponse, ErrorResponse } from '~/types/httpService';
 
 export const createErrorResponse = (error: AxiosError<ApiErrorResponse>): ErrorResponse => {
@@ -38,6 +39,7 @@ export const createErrorResponse = (error: AxiosError<ApiErrorResponse>): ErrorR
 };
 
 export const handleUnauthorized = (): void => {
+  resetChatNotifications();
   window.location.href = '/login';
 };
 

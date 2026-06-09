@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, UseGuards, ForbiddenException } from '@nestjs/common';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { User } from '../../core/decorators/current-user.decorator';
 import { ChatService } from './chat.service';
@@ -41,7 +41,14 @@ export class ChatController {
 
   @Get('conversations/:id/messages')
   @ApiResponse({ status: 200, description: 'Conversation messages' })
-  async getMessages(@Param('id') id: string) {
+  async getMessages(
+    @User('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    const conversation = await this.chatService.getConversation(id);
+    if (!conversation || (conversation.renterId !== userId && conversation.adminId !== userId)) {
+      throw new ForbiddenException('Access denied');
+    }
     const messages = await this.chatService.getMessages(id);
     return {
       statusCode: 200,
@@ -58,6 +65,10 @@ export class ChatController {
     @Param('id') conversationId: string,
     @Body() body: { content: string },
   ) {
+    const conversation = await this.chatService.getConversation(conversationId);
+    if (!conversation || (conversation.renterId !== userId && conversation.adminId !== userId)) {
+      throw new ForbiddenException('Access denied');
+    }
     const message = await this.chatService.sendMessage({
       conversationId,
       senderId: userId,

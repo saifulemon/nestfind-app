@@ -7,6 +7,8 @@ import { TourService } from './tour.service';
 import { RoleEnum } from '../../common/enums/role.enum';
 import { Public } from '../../core/decorators/public.decorator';
 import { ApiResponse } from '@nestjs/swagger';
+import { BookTourDto } from './dto/book-tour.dto';
+import { CreateTourSlotDto } from './dto/create-tour-slot.dto';
 
 @Controller('tours')
 export class TourController {
@@ -29,7 +31,7 @@ export class TourController {
   @ApiResponse({ status: 201, description: 'Tour booked successfully' })
   async bookTour(
     @User('id') userId: string,
-    @Body() body: { slotId: string; notes?: string },
+    @Body() body: BookTourDto,
   ) {
     const booking = await this.tourService.bookSlot(userId, body.slotId, body.notes);
     return {
@@ -71,7 +73,7 @@ export class TourController {
   @ApiResponse({ status: 201, description: 'Tour slot created' })
   async createSlot(
     @User('id') adminId: string,
-    @Body() body: { propertyId: string; startTime: string; endTime: string; tourType?: string },
+    @Body() body: CreateTourSlotDto,
   ) {
     const slot = await this.tourService.createSlot(adminId, {
       propertyId: body.propertyId,
@@ -90,8 +92,11 @@ export class TourController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @SetRoles(RoleEnum.ADMIN)
   @ApiResponse({ status: 200, description: 'Tour slot deleted' })
-  async deleteSlot(@Param('id') id: string) {
-    await this.tourService.deleteSlot(id);
+  async deleteSlot(
+    @User('id') adminId: string,
+    @Param('id') id: string,
+  ) {
+    await this.tourService.deleteSlot(adminId, id);
     return {
       statusCode: 200,
       message: 'Slot deleted',

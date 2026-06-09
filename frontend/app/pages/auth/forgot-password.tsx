@@ -14,8 +14,8 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-73px)] p-[24px]">
-      <div className="w-full max-w-[420px] bg-[rgba(255,255,255,0.04)] backdrop-blur-[12px] border border-[rgba(255,255,255,0.08)] rounded-[16px] p-[40px] text-center">
+    <div className="flex-1 flex items-center justify-center p-[24px] text-[#F1F5F9]">
+      <div className="w-full max-w-[420px] bg-[rgba(255,255,255,0.04)] backdrop-blur-[12px] border border-[rgba(255,255,255,0.08)] rounded-[16px] p-[24px] sm:p-[40px] text-center">
         <div className="flex items-center justify-center w-[56px] h-[56px] rounded-[14px] bg-[rgba(74,144,217,0.1)] mx-auto mb-[24px] text-[#4A90D9]">
           <LockKeyhole size={28} />
         </div>

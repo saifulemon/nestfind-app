@@ -72,6 +72,9 @@ export class Property extends BaseEntity {
   @Column({ name: 'available_from', type: 'date', nullable: true })
   availableFrom: string | null;
 
+  @Column({ name: 'owner_id', type: 'uuid', nullable: true })
+  ownerId: string | null;
+
   @OneToMany(() => PropertyPhoto, (photo) => photo.property)
   photos: PropertyPhoto[];
 

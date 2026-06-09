@@ -30,4 +30,12 @@ export class SavedSearchService extends BaseService<SavedSearch> {
     }
     return this.savedSearchRepository.update(id, { alertEnabled: enabled });
   }
+
+  async removeByUser(userId: string, id: string): Promise<void> {
+    const savedSearch = await this.savedSearchRepository.findById(id);
+    if (!savedSearch || savedSearch.userId !== userId) {
+      return;
+    }
+    await this.savedSearchRepository.softDelete(id);
+  }
 }

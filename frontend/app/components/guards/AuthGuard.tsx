@@ -1,9 +1,10 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '~/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
 export function AuthGuard({ children }: { children?: React.ReactNode }) {
   const { isAuthenticated, authChecked } = useAuth();
+  const location = useLocation();
 
   if (!authChecked) {
     return (
@@ -14,7 +15,8 @@ export function AuthGuard({ children }: { children?: React.ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    const returnUrl = location.pathname + location.search + location.hash;
+    return <Navigate to={`/login?returnUrl=${encodeURIComponent(returnUrl)}`} replace />;
   }
 
   return children ? <>{children}</> : <Outlet />;

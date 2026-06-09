@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { httpService } from '~/services/httpService';
+import { resetChatNotifications } from '~/hooks/useChatNotifications';
 import type { AuthState, AuthUser, LoginCredentials, RegisterCredentials } from '~/types/auth';
 
 const initialState: AuthState = {
@@ -33,19 +34,6 @@ function saveSession(user: any) {
 function clearSession() {
   try {
     localStorage.removeItem('nestfind_auth');
-    localStorage.removeItem('nestfind_refresh');
-  } catch {}
-}
-
-export function getRefreshToken(): string | null {
-  try {
-    return localStorage.getItem('nestfind_refresh');
-  } catch { return null; }
-}
-
-export function saveRefreshToken(token: string): void {
-  try {
-    localStorage.setItem('nestfind_refresh', token);
   } catch {}
 }
 
@@ -54,6 +42,7 @@ export const loginUser = createAsyncThunk(
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
       const response = await httpService.post<{ user: AuthUser }>('/auth/login', credentials);
+      saveSession(response.user);
       return response.user;
     } catch (error: unknown) { const message = error instanceof Error ? error.message : "Unknown error";
       return rejectWithValue(error.message);
@@ -66,6 +55,7 @@ export const registerUser = createAsyncThunk(
   async (credentials: RegisterCredentials, { rejectWithValue }) => {
     try {
       const response = await httpService.post<{ user: AuthUser }>('/auth/register', credentials);
+      saveSession(response.user);
       return response.user;
     } catch (error: unknown) { const message = error instanceof Error ? error.message : "Unknown error";
       return rejectWithValue(error.message);
@@ -78,6 +68,7 @@ export const fetchCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await httpService.get<{ user: AuthUser }>('/auth/me');
+      saveSession(response.user);
       return response.user;
     } catch (error: unknown) { const message = error instanceof Error ? error.message : "Unknown error";
       return rejectWithValue(error.message);
@@ -90,7 +81,11 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await httpService.post('/auth/logout');
+      clearSession();
+      resetChatNotifications();
     } catch (error: unknown) { const message = error instanceof Error ? error.message : "Unknown error";
+      clearSession();
+      resetChatNotifications();
       return rejectWithValue(error.message);
     }
   }
@@ -111,7 +106,6 @@ const authSlice = createSlice({
       state.isAuthenticated = !!action.payload;
       state.authChecked = true;
       state.error = null;
-      if (action.payload) saveSession(action.payload);
     },
     restoreSession(state) {
       const saved = loadSession();
@@ -134,7 +128,6 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.authChecked = true;
         state.user = action.payload;
-        saveSession(action.payload);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -150,7 +143,6 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.authChecked = true;
         state.user = action.payload;
-        saveSession(action.payload);
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -166,26 +158,22 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.authChecked = true;
         state.user = action.payload;
-        saveSession(action.payload);
       })
       .addCase(fetchCurrentUser.rejected, (state) => {
         state.isLoading = false;
         state.isAuthenticated = false;
         state.authChecked = true;
         state.user = null;
-        clearSession();
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.isAuthenticated = false;
         state.authChecked = true;
         state.user = null;
-        clearSession();
       })
       .addCase(logoutUser.rejected, (state) => {
         state.isAuthenticated = false;
         state.authChecked = true;
         state.user = null;
-        clearSession();
       });
   },
 });

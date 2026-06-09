@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '~/hooks/useAuth';
 import { notificationService } from '~/services/api/notificationService';
 import type { Notification } from '~/services/api/notificationService';
 
 export function useNotifications() {
+  const { isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,10 +25,17 @@ export function useNotifications() {
   }, []);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setNotifications([]);
+      setUnreadCount(0);
+      setIsLoading(false);
+      return;
+    }
+
     refetch();
     const interval = setInterval(refetch, 30000); // Poll every 30s
     return () => clearInterval(interval);
-  }, [refetch]);
+  }, [refetch, isAuthenticated]);
 
   const markAsRead = useCallback(async (id: string) => {
     await notificationService.markAsRead(id);

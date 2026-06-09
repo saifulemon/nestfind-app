@@ -8,13 +8,14 @@ import {
   IsUUID,
   Min,
   Max,
-  Matches,
   MinLength,
   MaxLength,
   ValidateNested,
   IsPositive,
+  ArrayMaxSize,
+  IsDateString,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform, plainToInstance } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PropertyTypeEnum } from '../../../common/enums/property-type.enum';
 
@@ -72,22 +73,26 @@ export class CreatePropertyDto {
   description: string;
 
   @ApiProperty({ example: 2500, description: 'Monthly rent price in USD' })
+  @Transform(({ value }) => (typeof value === 'string' ? parseFloat(value) : value))
   @IsNumber()
   @IsPositive()
   price: number;
 
   @ApiProperty({ example: 2, description: 'Number of bedrooms' })
+  @Transform(({ value }) => (typeof value === 'string' ? parseInt(value, 10) : value))
   @IsInt()
   @Min(0)
   bedrooms: number;
 
   @ApiProperty({ example: 2, description: 'Number of bathrooms' })
+  @Transform(({ value }) => (typeof value === 'string' ? parseInt(value, 10) : value))
   @IsInt()
   @Min(0)
   bathrooms: number;
 
   @ApiPropertyOptional({ example: 950, description: 'Square footage' })
   @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? parseInt(value, 10) : value))
   @IsInt()
   @Min(1)
   squareFeet?: number;
@@ -97,19 +102,24 @@ export class CreatePropertyDto {
   propertyType: PropertyTypeEnum;
 
   @ApiProperty({ description: 'Nested address object' })
+  @Transform(({ value }) => {
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    return plainToInstance(AddressDto, parsed);
+  })
   @ValidateNested()
   @Type(() => AddressDto)
   address: AddressDto;
 
   @ApiPropertyOptional({ example: '2026-06-01', description: 'Date when the property becomes available (YYYY-MM-DD)' })
   @IsOptional()
-  @IsString()
-  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  @IsDateString()
   availableFrom?: string;
 
   @ApiPropertyOptional({ description: 'Array of amenity UUIDs to associate with the property', type: [String] })
   @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value))
   @IsArray()
+  @ArrayMaxSize(50)
   @IsUUID('4', { each: true })
   amenityIds?: string[];
 }

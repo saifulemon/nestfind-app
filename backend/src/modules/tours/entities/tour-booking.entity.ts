@@ -6,6 +6,8 @@ import { User } from '../../users/entities/user.entity';
 @Entity('tour_bookings')
 @Index(['userId'])
 @Index(['propertyId'])
+@Index(['status'])
+@Index(['slotId'])
 export class TourBooking extends BaseEntity {
   @Column({ name: 'slot_id', type: 'uuid' })
   slotId: string;

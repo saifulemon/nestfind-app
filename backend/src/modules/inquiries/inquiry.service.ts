@@ -4,6 +4,7 @@ import { Inquiry } from './entities/inquiry.entity';
 import { InquiryRepository } from './inquiry.repository';
 import { PropertyRepository } from '../properties/property.repository';
 import { UserRepository } from '../users/user.repository';
+import { NotificationService } from '../notifications/notification.service';
 import { InquiryStatusEnum } from '../../common/enums/inquiry-status.enum';
 import { SubmitInquiryDto } from './dto/submit-inquiry.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -15,6 +16,7 @@ export class InquiryService extends BaseService<Inquiry> {
     private readonly inquiryRepository: InquiryRepository,
     private readonly propertyRepository: PropertyRepository,
     private readonly userRepository: UserRepository,
+    private readonly notificationService: NotificationService,
     @InjectDataSource() private readonly dataSource: DataSource,
   ) {
     super(inquiryRepository, 'Inquiry');
@@ -42,6 +44,14 @@ export class InquiryService extends BaseService<Inquiry> {
       email: dto.email ?? user.email,
       phone: dto.phone ?? user.phone ?? null,
       message: dto.message,
+    });
+
+    await this.notificationService.createNotification({
+      userId,
+      type: 'inquiry',
+      title: 'New inquiry sent',
+      message: `Your inquiry for "${property.title}" has been submitted successfully.`,
+      data: { propertyId, inquiryId: created.id },
     });
 
     const result = await this.inquiryRepository.findById(created.id, {
@@ -148,6 +158,9 @@ export class InquiryService extends BaseService<Inquiry> {
     response: string,
   ): Promise<Record<string, unknown>> {
     const inquiry = await this.findByIdOrFail(id);
+    if (inquiry.status === InquiryStatusEnum.RESPONDED) {
+      throw new BadRequestException('Inquiry has already been responded to');
+    }
     const existingResponse = inquiry.response || '';
     const formattedResponse = existingResponse
       ? existingResponse + `\n\n[Admin | ${new Date().toLocaleDateString()}]:\n${response.trim()}`
@@ -171,10 +184,17 @@ export class InquiryService extends BaseService<Inquiry> {
   }
 
   async replyToInquiry(
+    userId: string,
     id: string,
     reply: string,
   ): Promise<Record<string, unknown>> {
     const inquiry = await this.findByIdOrFail(id);
+    if (inquiry.userId !== userId) {
+      throw new NotFoundException('Inquiry not found');
+    }
+    if (inquiry.status !== InquiryStatusEnum.RESPONDED && inquiry.status !== InquiryStatusEnum.READ) {
+      throw new BadRequestException('Cannot reply to this inquiry');
+    }
     const existingResponse = inquiry.response || '';
     const formattedReply = `\n\n[Renter | ${new Date().toLocaleDateString()}]:\n${reply.trim()}`;
     const newResponse = existingResponse + formattedReply;

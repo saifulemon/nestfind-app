@@ -67,12 +67,14 @@ export class AddChatSystem0091700000000009 implements MigrationInterface {
           { name: 'is_read', type: 'boolean', default: false, isNullable: false },
           { name: 'created_at', type: 'timestamp', default: 'now()', isNullable: false },
           { name: 'updated_at', type: 'timestamp', default: 'now()', isNullable: false },
+          { name: 'deleted_at', type: 'timestamp', isNullable: true },
         ],
       }),
       true,
     );
 
     await queryRunner.createIndex('chat_messages', new TableIndex({ columnNames: ['conversation_id'] }));
+    await queryRunner.createIndex('chat_messages', new TableIndex({ columnNames: ['sender_id'] }));
 
     await queryRunner.createForeignKey(
       'chat_messages',

@@ -1,7 +1,10 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { BaseService } from '../../core/base/base.service';
 import { TourSlotRepository } from './tour-slot.repository';
 import { TourBookingRepository } from './tour-booking.repository';
+import { NotificationService } from '../notifications/notification.service';
 import { TourSlot } from './entities/tour-slot.entity';
 import { TourBooking } from './entities/tour-booking.entity';
 
@@ -10,6 +13,8 @@ export class TourService {
   constructor(
     private readonly slotRepository: TourSlotRepository,
     private readonly bookingRepository: TourBookingRepository,
+    private readonly notificationService: NotificationService,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   async getAvailableSlots(propertyId: string): Promise<TourSlot[]> {
@@ -22,6 +27,9 @@ export class TourService {
     endTime: Date;
     tourType: string;
   }): Promise<TourSlot> {
+    if (data.endTime <= data.startTime) {
+      throw new BadRequestException('End time must be after start time');
+    }
     return this.slotRepository.create({
       adminId,
       propertyId: data.propertyId,
@@ -33,23 +41,37 @@ export class TourService {
   }
 
   async bookSlot(userId: string, slotId: string, notes?: string): Promise<TourBooking> {
-    const slot = await this.slotRepository.findById(slotId);
-    if (!slot) {
-      throw new NotFoundException('Slot not found');
-    }
-    if (slot.isBooked) {
-      throw new ConflictException('Slot already booked');
-    }
-
-    await this.slotRepository.update(slotId, { isBooked: true });
-
-    return this.bookingRepository.create({
-      slotId,
-      userId,
-      propertyId: slot.propertyId,
-      notes: notes || null,
-      status: 'confirmed',
+    const booking = await this.dataSource.transaction(async (manager) => {
+      const slotRepo = manager.getRepository(TourSlot);
+      const bookingRepo = manager.getRepository(TourBooking);
+      const slot = await slotRepo.findOne({
+        where: { id: slotId },
+      });
+      if (!slot) {
+        throw new NotFoundException('Slot not found');
+      }
+      if (slot.isBooked) {
+        throw new ConflictException('Slot already booked');
+      }
+      await slotRepo.update(slotId, { isBooked: true });
+      return bookingRepo.save(bookingRepo.create({
+        slotId,
+        userId,
+        propertyId: slot.propertyId,
+        notes: notes || null,
+        status: 'confirmed',
+      }));
     });
+
+    await this.notificationService.createNotification({
+      userId,
+      type: 'tour_reminder',
+      title: 'Tour booked successfully',
+      message: `Your tour has been confirmed. Check "My Tours" for details.`,
+      data: { bookingId: booking.id, slotId, propertyId: booking.propertyId },
+    });
+
+    return booking;
   }
 
   async getMyBookings(userId: string): Promise<TourBooking[]> {
@@ -69,7 +91,11 @@ export class TourService {
     return this.bookingRepository.findByProperty(propertyId);
   }
 
-  async deleteSlot(slotId: string): Promise<void> {
+  async deleteSlot(adminId: string, slotId: string): Promise<void> {
+    const slot = await this.slotRepository.findById(slotId);
+    if (!slot || slot.adminId !== adminId) {
+      throw new NotFoundException('Slot not found');
+    }
     await this.slotRepository.delete(slotId);
   }
 }

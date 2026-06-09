@@ -37,6 +37,7 @@ import { ReplyInquiryDto } from './dto/reply-inquiry.dto';
 @ApiBearerAuth()
 @Controller('inquiries')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@SetRoles(RoleEnum.ADMIN)
 export class InquiryController extends BaseController<Inquiry> {
   constructor(private readonly inquiryService: InquiryService) {
     super(inquiryService);
@@ -206,10 +207,11 @@ export class InquiryController extends BaseController<Inquiry> {
   @ApiResponse({ status: 404, description: 'Inquiry not found' })
   @ApiParam({ name: 'id', type: String, description: 'Inquiry UUID' })
   async reply(
+    @User('id') userId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ReplyInquiryDto,
   ) {
-    const inquiry = await this.inquiryService.replyToInquiry(id, dto.reply);
+    const inquiry = await this.inquiryService.replyToInquiry(userId, id, dto.reply);
     return {
       success: true,
       statusCode: HttpStatus.OK,

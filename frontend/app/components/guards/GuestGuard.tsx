@@ -1,9 +1,11 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useSearchParams } from 'react-router-dom';
 import { useAuth } from '~/hooks/useAuth';
+import { getHomeRouteForRole } from '~/utils/getHomeRouteForRole';
 import { Loader2 } from 'lucide-react';
 
 export function GuestGuard() {
-  const { isAuthenticated, authChecked } = useAuth();
+  const { isAuthenticated, authChecked, user } = useAuth();
+  const [searchParams] = useSearchParams();
 
   if (!authChecked) {
     return (
@@ -14,7 +16,11 @@ export function GuestGuard() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/search" replace />;
+    const returnUrl = searchParams.get('returnUrl');
+    if (returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//')) {
+      return <Navigate to={returnUrl} replace />;
+    }
+    return <Navigate to={getHomeRouteForRole(user?.role)} replace />;
   }
 
   return <Outlet />;

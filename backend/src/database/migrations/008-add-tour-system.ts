@@ -25,6 +25,7 @@ export class AddTourSystem0081700000000008 implements MigrationInterface {
 
     await queryRunner.createIndex('tour_slots', new TableIndex({ columnNames: ['property_id'] }));
     await queryRunner.createIndex('tour_slots', new TableIndex({ columnNames: ['start_time'] }));
+    await queryRunner.createIndex('tour_slots', new TableIndex({ columnNames: ['admin_id'] }));
 
     await queryRunner.createForeignKey(
       'tour_slots',
@@ -66,6 +67,8 @@ export class AddTourSystem0081700000000008 implements MigrationInterface {
 
     await queryRunner.createIndex('tour_bookings', new TableIndex({ columnNames: ['user_id'] }));
     await queryRunner.createIndex('tour_bookings', new TableIndex({ columnNames: ['property_id'] }));
+    await queryRunner.createIndex('tour_bookings', new TableIndex({ columnNames: ['slot_id'] }));
+    await queryRunner.createIndex('tour_bookings', new TableIndex({ columnNames: ['status'] }));
 
     await queryRunner.createForeignKey(
       'tour_bookings',

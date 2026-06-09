@@ -21,9 +21,10 @@ export default function RenterLayout() {
 
   useEffect(() => {
     if (authChecked && !isAuthenticated && !isLoading) {
-      navigate('/login', { replace: true });
+      const returnUrl = location.pathname + location.search + location.hash;
+      navigate(`/login?returnUrl=${encodeURIComponent(returnUrl)}`, { replace: true });
     }
-  }, [authChecked, isAuthenticated, isLoading, navigate]);
+  }, [authChecked, isAuthenticated, isLoading, navigate, location]);
 
   if (!authChecked || isLoading) {
     return (

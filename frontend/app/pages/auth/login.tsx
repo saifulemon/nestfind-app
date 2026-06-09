@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { useDocumentTitle } from '~/hooks/useDocumentTitle';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useLogin } from '~/hooks/api/useAuth';
-import { setUser, saveRefreshToken } from '~/redux/features/authSlice';
+import { setUser } from '~/redux/features/authSlice';
 import { loginSchema, type LoginFormData } from '~/utils/validations/auth';
 
 const inputClass =
@@ -18,7 +18,6 @@ const btnPrimaryClass =
 export default function Login() {
   useDocumentTitle('Sign In - NestFind');
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login, loading, error } = useLogin();
@@ -32,17 +31,15 @@ export default function Login() {
   const onSubmit = (data: LoginFormData) => {
     login(data.email, data.password).then((res: any) => {
       if (res?.success) {
-        if (res.refreshToken) saveRefreshToken(res.refreshToken);
         dispatch(setUser(res.result));
-        navigate('/');
+        // GuestGuard will handle redirect after auth state updates
       }
     });
   };
 
   return (
-    <div className="bg-[#0B0F1A] min-h-screen text-[#F1F5F9]">
-      <div className="flex items-center justify-center min-h-[calc(100vh-73px)] p-6">
-        <div className="w-full max-w-[420px] bg-[rgba(255,255,255,0.04)] backdrop-blur-[12px] border border-[rgba(255,255,255,0.08)] rounded-[16px] p-[40px]">
+    <div className="flex-1 flex items-center justify-center p-6 text-[#F1F5F9]">
+      <div className="w-full max-w-[420px] bg-[rgba(255,255,255,0.04)] backdrop-blur-[12px] border border-[rgba(255,255,255,0.08)] rounded-[16px] p-[24px] sm:p-[40px]">
           <h2 className="text-[28px] font-bold mb-2 tracking-[-0.02em]">
             Welcome back
           </h2>
@@ -151,6 +148,5 @@ export default function Login() {
           </p>
         </div>
       </div>
-    </div>
   );
 }

@@ -1,8 +1,50 @@
 import { useState, useEffect } from 'react';
 const API = (import.meta as any).env?.VITE_API_URL || '/api';
 
-export function useInquiries() { const [data,setData]=useState<any>([]); useEffect(()=>{fetch(API+'/inquiries',{credentials:'include'}).then(r=>r.json()).then(d=>setData(d?.data?.items||[]))},[]); return {data, loading:false}; }
-export function useSubmitInquiry(propertyId?: string) { const [isPending,setIsPending]=useState(false); const [isError,setIsError]=useState(false); const [error,setError]=useState<any>(null); const mutate = async (body: any, options?: { onSuccess?: () => void }) => { setIsPending(true); setIsError(false); setError(null); try { const r = await fetch(API+'/properties/'+propertyId+'/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),credentials:'include'}); const data = await r.json(); if (!r.ok) throw new Error(data?.message || 'Failed to submit'); options?.onSuccess?.(); return data; } catch(e) { setError(e); setIsError(true); if (!options?.onSuccess) throw e; } finally { setIsPending(false); } }; return {mutate, isPending, isError, error}; }
+export function useInquiries() {
+  const [data, setData] = useState<any>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    setLoading(true);
+    fetch(API + '/inquiries', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((d) => setData(d?.data?.items || []))
+      .catch(() => setData([]))
+      .finally(() => setLoading(false));
+  }, []);
+  return { data, loading };
+}
+
+export function useSubmitInquiry(propertyId?: string) {
+  const [isPending, setIsPending] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<any>(null);
+  const mutate = async (body: any, options?: { onSuccess?: () => void }) => {
+    setIsPending(true);
+    setIsError(false);
+    setError(null);
+    try {
+      const r = await fetch(API + '/properties/' + propertyId + '/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        credentials: 'include',
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.message || 'Failed to submit');
+      options?.onSuccess?.();
+      return data;
+    } catch (e) {
+      setError(e);
+      setIsError(true);
+      if (!options?.onSuccess) throw e;
+    } finally {
+      setIsPending(false);
+    }
+  };
+  return { mutate, isPending, isError, error };
+}
+
 export function useReplyToInquiry() {
   const [isPending, setIsPending] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -12,7 +54,6 @@ export function useReplyToInquiry() {
     setIsError(false);
     setError(null);
     try {
-      console.log('[Reply] Sending reply to inquiry:', inquiryId, 'text:', reply);
       const r = await fetch(`${API}/inquiries/${inquiryId}/reply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -20,12 +61,10 @@ export function useReplyToInquiry() {
         credentials: 'include',
       });
       const data = await r.json();
-      console.log('[Reply] Response status:', r.status, 'data:', data);
       if (!r.ok) throw new Error(data?.message || 'Failed to send reply');
       options?.onSuccess?.();
       return data;
     } catch (e: any) {
-      console.error('[Reply] Error:', e);
       setError(e);
       setIsError(true);
       throw e;
@@ -44,21 +83,18 @@ export const useInquiryList = (params?: any, endpoint: string = '/inquiries') =>
   const [refreshKey, setRefreshKey] = useState(0);
   const qs = params ? '?' + new URLSearchParams(params).toString() : '';
   useEffect(() => {
-    console.log('[useInquiryList] Fetching:', `${API}${endpoint}${qs}`, 'refreshKey:', refreshKey);
     setIsError(false);
     setError(null);
     setIsLoading(true);
     fetch(`${API}${endpoint}${qs}`, { credentials: 'include', cache: 'no-cache' })
       .then((r) => { if (!r.ok) throw new Error(`Request failed with status ${r.status}`); return r.json(); })
       .then((j) => {
-        console.log('[useInquiryList] Got data:', j);
         setData(j?.data || j);
       })
       .catch((e) => { setIsError(true); setError(e.message); })
       .finally(() => setIsLoading(false));
   }, [qs, endpoint, refreshKey]);
   const refetch = () => {
-    console.log('[useInquiryList] refetch called');
     setRefreshKey((k) => k + 1);
   };
   return { data, isLoading, isError, error, refetch };

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '~/hooks/useAuth';
 
 interface RoleGuardProps {
@@ -9,9 +9,11 @@ interface RoleGuardProps {
 
 export function RoleGuard({ allowedRoles, children }: RoleGuardProps) {
   const { user, isAuthenticated } = useAuth();
+  const location = useLocation();
 
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" replace />;
+    const returnUrl = location.pathname + location.search + location.hash;
+    return <Navigate to={`/login?returnUrl=${encodeURIComponent(returnUrl)}`} replace />;
   }
 
   const allowed = allowedRoles.map(String).includes(String(user.role));

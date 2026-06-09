@@ -4,6 +4,7 @@ import { User } from '../../users/entities/user.entity';
 
 @Entity('chat_messages')
 @Index(['conversationId'])
+@Index(['senderId'])
 export class ChatMessage extends BaseEntity {
   @Column({ name: 'conversation_id', type: 'uuid' })
   conversationId: string;

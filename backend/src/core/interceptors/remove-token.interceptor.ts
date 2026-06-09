@@ -24,6 +24,18 @@ export class RemoveTokenInterceptor implements NestInterceptor {
             {
               httpOnly: true,
               path: "/",
+              sameSite: "strict",
+              secure: process.env.NODE_ENV === "production",
+            },
+          );
+          res.cookie(
+            'refresh_token',
+            "",
+            {
+              httpOnly: true,
+              path: "/",
+              sameSite: "strict",
+              secure: process.env.NODE_ENV === "production",
             },
           );
 

@@ -12,12 +12,19 @@ export class PropertyViewService extends BaseService<PropertyView> {
   }
 
   async trackView(userId: string, propertyId: string): Promise<PropertyView> {
-    const existing = await this.propertyViewRepository.findByUserAndProperty(userId, propertyId);
+    const existing = await this.propertyViewRepository.findOne({
+      where: { userId, propertyId } as any,
+    });
 
     if (existing) {
-      await this.propertyViewRepository.incrementViewCount(userId, propertyId);
-      // Return the updated record
-      return this.propertyViewRepository.findByUserAndProperty(userId, propertyId) as Promise<PropertyView>;
+      const updated = await this.propertyViewRepository.update(existing.id, {
+        viewCount: existing.viewCount + 1,
+        lastViewedAt: new Date(),
+      });
+      if (!updated) {
+        throw new Error('Failed to update property view');
+      }
+      return updated;
     }
 
     return this.propertyViewRepository.create({
@@ -25,7 +32,7 @@ export class PropertyViewService extends BaseService<PropertyView> {
       propertyId,
       viewCount: 1,
       lastViewedAt: new Date(),
-    });
+    } as any);
   }
 
   async getRecentlyViewed(userId: string, limit: number = 20): Promise<PropertyView[]> {

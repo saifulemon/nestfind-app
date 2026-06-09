@@ -6,7 +6,7 @@ export class CsrfMiddleware implements NestMiddleware {
     private readonly allowedOrigins: string[];
 
     constructor() {
-        const origins = process.env.ALLOW_ORIGINS || 'http://localhost:5173,http://localhost:3000';
+        const origins = process.env.ALLOW_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:5173,http://localhost:3000';
         this.allowedOrigins = origins.split(',').map((o) => o.trim()).filter(Boolean);
     }
 
@@ -18,10 +18,6 @@ export class CsrfMiddleware implements NestMiddleware {
 
         const origin = req.headers.origin;
         const referer = req.headers.referer;
-
-        if (!origin && !referer) {
-            return next();
-        }
 
         if (origin && this.isAllowedOrigin(origin)) {
             return next();
@@ -42,11 +38,7 @@ export class CsrfMiddleware implements NestMiddleware {
     private isAllowedOrigin(origin: string): boolean {
         if (this.allowedOrigins.length === 0) return false;
         return this.allowedOrigins.some(
-            (allowed) =>
-                allowed === origin ||
-                allowed === '*' ||
-                (allowed.endsWith('*') &&
-                    origin.startsWith(allowed.replace('*', ''))),
+            (allowed) => allowed === origin,
         );
     }
 }

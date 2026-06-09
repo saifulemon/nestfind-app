@@ -103,7 +103,7 @@ export class AuthController extends BaseController<UserEntity> {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.body?.refreshToken;
+    const refreshToken = req.body?.refreshToken || req.cookies?.refresh_token;
     if (!refreshToken) {
       throw new UnauthorizedException('No refresh token provided!');
     }

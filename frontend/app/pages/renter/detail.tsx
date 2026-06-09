@@ -2,7 +2,7 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useDocumentTitle } from '~/hooks/useDocumentTitle';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, MapPin, Bed, Bath, Ruler, Building2, Wifi, AirVent, WashingMachine, CookingPot, Car, Dumbbell, Waves, PawPrint, Send, MapIcon, Calendar, Clock, Video, UserCheck, Loader2, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Heart, MapPin, Bed, Bath, Ruler, Building2, Wifi, AirVent, WashingMachine, CookingPot, Car, Dumbbell, Waves, PawPrint, Send, MapIcon, Calendar, Clock, Video, UserCheck, Loader2, MessageSquare, FileText } from 'lucide-react';
 import { usePropertyDetail } from '~/hooks/api/useProperties';
 import { useAddFavorite, useRemoveFavorite } from '~/hooks/api/useFavorites';
 import { useSubmitInquiry } from '~/hooks/api/useInquiries';
@@ -83,20 +83,25 @@ export default function DetailPage() {
 
   const handleStartConversation = async () => {
     if (!isAuthenticated) {
-      navigate('/login');
+      const returnUrl = window.location.pathname + window.location.search + window.location.hash;
+      navigate(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
       return;
     }
     if (!property) return;
     resetConversation();
     try {
-      // TODO: adminId should come from property.ownerId or property.adminId once backend supports it
-      const adminId = '00000000-0000-0000-0000-000000000001';
-      await createConversation({
-        adminId,
+      const ownerId = property.ownerId;
+      if (!ownerId) {
+        console.error('Property has no ownerId, cannot start conversation');
+        return;
+      }
+      const conversation = await createConversation({
+        adminId: ownerId,
         propertyId: property.id,
         subject: `Question about ${property.title}`,
       });
-      navigate('/messages');
+      // Auto-open the new conversation so both sides are in the socket room
+      navigate(`/messages?conv=${conversation.id}`);
     } catch {
       // error state is already set in the hook
     }
@@ -298,11 +303,19 @@ export default function DetailPage() {
                 type="button"
                 onClick={handleStartConversation}
                 disabled={creatingConversation}
-                className="w-full h-[48px] rounded-[12px] bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] text-white font-semibold text-[14px] flex items-center justify-center gap-[8px] hover:shadow-[0_0_24px_rgba(74,144,217,0.3)] hover:-translate-y-[1px] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed mb-[24px]"
+                className="w-full h-[48px] rounded-[12px] bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] text-white font-semibold text-[14px] flex items-center justify-center gap-[8px] hover:shadow-[0_0_24px_rgba(74,144,217,0.3)] hover:-translate-y-[1px] transition-all cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed mb-[12px]"
               >
                 <MessageSquare className="w-[18px] h-[18px]" />
                 {creatingConversation ? 'Starting...' : 'Message Landlord'}
               </button>
+
+              <Link
+                to={`/applications/new/${property.id}`}
+                className="w-full h-[48px] rounded-[12px] bg-white/[0.08] border border-white/[0.12] text-[#F1F5F9] font-semibold text-[14px] flex items-center justify-center gap-[8px] hover:bg-white/[0.12] hover:border-white/[0.2] transition-all no-underline mb-[24px]"
+              >
+                <FileText className="w-[18px] h-[18px]" />
+                Apply Now
+              </Link>
 
               {conversationError && (
                 <div className="mb-[16px] p-[12px] bg-[rgba(248,113,113,0.1)] border border-[rgba(248,113,113,0.3)] rounded-[8px] text-[#F87171] text-[13px]">

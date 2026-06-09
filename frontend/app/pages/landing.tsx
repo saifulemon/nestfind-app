@@ -1,8 +1,9 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { EyeOff, Zap, Heart, MapPin, Menu } from 'lucide-react';
+import { EyeOff, Zap, Heart, MapPin, Menu, Calendar, MessageSquare, ClipboardList, Star, Bell, Bookmark, Search, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '~/hooks/useAuth';
+import NotificationBell from '~/components/shared/NotificationBell';
 import RecentlyViewedStrip from '~/components/shared/RecentlyViewedStrip';
 import RecommendationSection from '~/components/shared/RecommendationSection';
 import { RoleEnum } from '~/enums/role.enum';
@@ -12,9 +13,10 @@ import { Sheet } from '~/components/ui/sheet';
 const API_BASE = (import.meta as any).env?.VITE_API_URL || '/api';
 
 const HOW_IT_WORKS_STEPS = [
-  { num: '1', title: 'Search & Filter', desc: 'Enter your preferred location and refine by price, beds, and property type. Results update instantly.' },
-  { num: '2', title: 'Explore & Save', desc: 'Browse photos, check amenities, and view locations on the map. Save favorites with one click.' },
-  { num: '3', title: 'Inquire & Move', desc: 'Send an inquiry directly to the property manager. Simple form, no lengthy applications.' },
+  { num: '1', title: 'Search & Filter', desc: 'Enter your preferred location and refine by price, beds, and property type. Results update instantly.', Icon: Search },
+  { num: '2', title: 'Explore & Save', desc: 'Browse photos, check amenities, view locations on the map, and save favorites with one click.', Icon: Heart },
+  { num: '3', title: 'Connect & Tour', desc: 'Message landlords directly, schedule in-person or virtual tours, and read verified renter reviews.', Icon: Calendar },
+  { num: '4', title: 'Apply & Move', desc: 'Submit your rental application, track its status, and get notified when it is approved.', Icon: ClipboardCheck },
 ];
 
 const CHIP_LABELS = ['Apartments', 'Houses', 'Condos', 'Pet-Friendly', 'Under $2,000'] as const;
@@ -34,10 +36,22 @@ const PROPERTY_TYPE_LABELS: Record<string, string> = {
 
 const FOOTER_COLUMNS = [
   {
-    title: 'Renters',
+    title: 'Discover',
     links: [
       { label: 'Browse Properties', to: '/search' },
+      { label: 'Map Search', to: '/map-search' },
       { label: 'How It Works', href: '#how-it-works' },
+    ],
+  },
+  {
+    title: 'For Renters',
+    links: [
+      { label: 'Favorites', to: '/favorites' },
+      { label: 'Saved Searches', to: '/saved-searches' },
+      { label: 'Inquiries', to: '/inquiries' },
+      { label: 'Book a Tour', to: '/tours' },
+      { label: 'Messages', to: '/messages' },
+      { label: 'Applications', to: '/applications' },
     ],
   },
   {
@@ -97,8 +111,12 @@ export default function LandingPage() {
     });
   };
 
-  // Seed favoritedIds from user's favorites on mount
+  // Seed favoritedIds from user's favorites on mount (only if authenticated)
   useEffect(() => {
+    if (!isAuthenticated) {
+      setFavoritedIds(new Set());
+      return;
+    }
     fetch(`${API_BASE}/favorites`, { credentials: 'include' })
       .then((r) => r.ok ? r.json() : Promise.reject())
       .then((json) => {
@@ -106,8 +124,8 @@ export default function LandingPage() {
         const ids = new Set(items.map((f: any) => f.propertyId || f.property?.id).filter(Boolean));
         setFavoritedIds(ids);
       })
-      .catch(() => {});
-  }, []);
+      .catch(() => setFavoritedIds(new Set()));
+  }, [isAuthenticated]);
 
   useEffect(() => {
     fetch(`${API_BASE}/properties?sortBy=createdAt&sortOrder=DESC&limit=6`, { credentials: 'include' })
@@ -139,13 +157,10 @@ export default function LandingPage() {
             NestFind
           </div>
           {/* Desktop links */}
-          <div className="hidden sm:flex gap-[32px] items-center">
+          <div className="hidden lg:flex gap-[32px] items-center">
             <Link to="/search" className={`no-underline text-[14px] font-medium transition-colors ${scrolled ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-white/80 hover:text-white'}`}>
               Browse
             </Link>
-            <a href="#how-it-works" className={`no-underline text-[14px] font-medium transition-colors ${scrolled ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-white/80 hover:text-white'}`}>
-              How It Works
-            </a>
             {isAuthenticated ? (
               <>
                 <Link to="/favorites" className={`no-underline text-[14px] font-medium transition-colors ${scrolled ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-white/80 hover:text-white'}`}>
@@ -172,6 +187,7 @@ export default function LandingPage() {
                 <Link to="/applications" className={`no-underline text-[14px] font-medium transition-colors ${scrolled ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-white/80 hover:text-white'}`}>
                   Applications
                 </Link>
+                <NotificationBell />
                 <Link to="/profile" className="flex items-center gap-2 no-underline group">
                   <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 bg-gradient-to-br from-[#4A90D9] to-[#7C3AED] flex items-center justify-center transition-all group-hover:shadow-[0_0_12px_rgba(74,144,217,0.3)]">
                     {user?.avatarUrl ? (
@@ -197,7 +213,7 @@ export default function LandingPage() {
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
-            className={`sm:hidden w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${scrolled ? 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/5' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
+            className={`lg:hidden w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${scrolled ? 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/5' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
             aria-label="Open navigation menu"
           >
             <Menu className="w-5 h-5" />
@@ -226,9 +242,6 @@ export default function LandingPage() {
           <Link to="/search" className="text-[16px] text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors py-3 px-4 rounded-lg hover:bg-white/5 block" onClick={() => setMenuOpen(false)}>
             Browse
           </Link>
-          <a href="#how-it-works" className="text-[16px] text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors py-3 px-4 rounded-lg hover:bg-white/5 block" onClick={() => setMenuOpen(false)}>
-            How It Works
-          </a>
           {isAuthenticated ? (
             <>
               <Link to="/favorites" className="text-[16px] text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors py-3 px-4 rounded-lg hover:bg-white/5 block" onClick={() => setMenuOpen(false)}>
@@ -255,6 +268,9 @@ export default function LandingPage() {
               <Link to="/applications" className="text-[16px] text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors py-3 px-4 rounded-lg hover:bg-white/5 block" onClick={() => setMenuOpen(false)}>
                 Applications
               </Link>
+              <div className="px-4 py-3" onClick={() => setMenuOpen(false)}>
+                <NotificationBell />
+              </div>
               <Link to="/profile" className="text-[16px] text-[#94A3B8] no-underline font-medium hover:text-[#F1F5F9] transition-colors py-3 px-4 rounded-lg hover:bg-white/5 block" onClick={() => setMenuOpen(false)}>
                 Profile
               </Link>
@@ -318,9 +334,10 @@ export default function LandingPage() {
             <button
               type="button"
               onClick={handleSearch}
-              className="inline-flex items-center justify-center font-semibold cursor-pointer border-none no-underline bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] text-white h-[56px] px-[32px] rounded-r-[12px] text-[16px] hover:-translate-y-[1px]"
+              className="inline-flex items-center justify-center font-semibold cursor-pointer border-none no-underline bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] text-white h-[56px] px-[20px] sm:px-[32px] rounded-r-[12px] text-[14px] sm:text-[16px] hover:-translate-y-[1px] shrink-0"
             >
-              Search Properties
+              <span className="hidden sm:inline">Search Properties</span>
+              <span className="sm:hidden">Search</span>
             </button>
           </div>
 
@@ -342,7 +359,7 @@ export default function LandingPage() {
         </div>
 
         {/* Slider dots — bottom right */}
-        <div className="absolute bottom-[32px] right-[48px] z-10 flex gap-[10px]">
+        <div className="absolute bottom-[32px] right-[24px] sm:right-[48px] z-10 flex gap-[10px]">
           {HERO_SLIDES.map((_, i) => (
             <button
               key={i}
@@ -357,33 +374,72 @@ export default function LandingPage() {
 
       {/* Content sections — back in container */}
       <div className="max-w-[1440px] mx-auto">
-        <section id="how-it-works" className="px-[48px] py-[64px]">
-          <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#4A90D9] mb-[8px]">
-            How It Works
+        <section id="how-it-works" className="px-[24px] sm:px-[48px] py-[80px]">
+          {/* Section header */}
+          <div className="text-center max-w-[640px] mx-auto mb-[64px]">
+            <div className="inline-flex items-center gap-[8px] px-[14px] py-[6px] rounded-full bg-[rgba(74,144,217,0.1)] border border-[rgba(74,144,217,0.2)] text-[#4A90D9] text-[12px] font-semibold uppercase tracking-[0.08em] mb-[16px]">
+              <Zap className="w-[14px] h-[14px]" />
+              How It Works
+            </div>
+            <h2 className="text-[32px] sm:text-[40px] font-bold mb-[16px] tracking-[-0.02em] leading-[1.15]">
+              Your next home in{' '}
+              <span className="bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] bg-clip-text text-transparent">
+                4 simple steps
+              </span>
+            </h2>
+            <p className="text-[#94A3B8] text-[16px] sm:text-[18px] leading-relaxed">
+              From search to signed lease — NestFind streamlines every part of your rental journey.
+            </p>
           </div>
-          <h2 className="text-[36px] font-bold mb-[16px] tracking-[-0.02em]">
-            Three steps to your next home
-          </h2>
-          <p className="text-[#94A3B8] text-[16px] max-w-[560px] mb-[48px]">
-            NestFind makes rental hunting simple. No ads, no clutter, just homes you&rsquo;ll love.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px]">
-            {HOW_IT_WORKS_STEPS.map((step) => (
-              <div
-                key={step.title}
-                className="bg-white/5 backdrop-blur-[12px] border border-white/10 rounded-[12px] px-[24px] py-[32px] text-center transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,144,217,0.15)] hover:bg-white/[0.06]"
-              >
-                <div className="w-[48px] h-[48px] rounded-[12px] bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] flex items-center justify-center text-[20px] font-bold mx-auto mb-[16px]">
-                  {step.num}
+
+          {/* Steps */}
+          <div className="relative max-w-[1100px] mx-auto">
+            {/* Desktop connecting line */}
+            <div className="hidden lg:block absolute top-[40px] left-[12.5%] right-[12.5%] h-[2px] bg-gradient-to-r from-[#4A90D9]/30 via-[#7C3AED]/30 to-[#4A90D9]/30" />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[32px] lg:gap-[24px]">
+              {HOW_IT_WORKS_STEPS.map((step, i) => (
+                <div
+                  key={step.title}
+                  className="relative group"
+                >
+                  <div className="bg-white/[0.04] backdrop-blur-[12px] border border-white/[0.08] rounded-[16px] p-[28px] text-center transition-all duration-300 hover:border-[rgba(74,144,217,0.3)] hover:shadow-[0_0_30px_rgba(74,144,217,0.1)] hover:-translate-y-[4px] hover:bg-white/[0.06]">
+                    {/* Step number badge */}
+                    <div className="relative inline-flex items-center justify-center w-[56px] h-[56px] rounded-[16px] bg-gradient-to-br from-[#4A90D9] to-[#7C3AED] mb-[20px] shadow-[0_8px_24px_rgba(74,144,217,0.25)] group-hover:shadow-[0_12px32px_rgba(74,144,217,0.35)] group-hover:scale-105 transition-all duration-300">
+                      <step.Icon className="w-[24px] h-[24px] text-white" strokeWidth={2} />
+                      <span className="absolute -top-[8px] -right-[8px] w-[24px] h-[24px] rounded-full bg-[#0B0F1A] border border-white/10 flex items-center justify-center text-[11px] font-bold text-[#4A90D9]">
+                        {step.num}
+                      </span>
+                    </div>
+
+                    <h4 className="text-[18px] font-semibold mb-[10px] tracking-[-0.01em]">{step.title}</h4>
+                    <p className="text-[#94A3B8] text-[14px] leading-[1.6]">{step.desc}</p>
+                  </div>
+
+                  {/* Arrow connector on mobile/tablet between cards */}
+                  {i < HOW_IT_WORKS_STEPS.length - 1 && (
+                    <div className="flex lg:hidden items-center justify-center py-[12px]">
+                      <div className="w-[2px] h-[24px] bg-gradient-to-b from-[#4A90D9]/40 to-[#7C3AED]/40 rounded-full" />
+                    </div>
+                  )}
                 </div>
-                <h4 className="text-[18px] font-semibold mb-[8px]">{step.title}</h4>
-                <p className="text-[#94A3B8] text-[14px]">{step.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center mt-[48px]">
+            <Link
+              to="/search"
+              className="inline-flex items-center justify-center gap-[8px] font-semibold cursor-pointer border-none no-underline bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] text-white h-[52px] px-[32px] rounded-[12px] text-[15px] hover:shadow-[0_0_24px_rgba(74,144,217,0.3)] hover:-translate-y-[1px] transition-all"
+            >
+              <Search className="w-[18px] h-[18px]" />
+              Start Your Search
+            </Link>
           </div>
         </section>
 
-        <section className="px-[48px] py-[64px]">
+        <section className="px-[24px] sm:px-[48px] py-[64px]">
           <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#4A90D9] mb-[8px]">
             Featured Properties
           </div>
@@ -469,7 +525,7 @@ export default function LandingPage() {
         {isAuthenticated && <RecentlyViewedStrip />}
         {isAuthenticated && <RecommendationSection />}
 
-        <section className="px-[48px] py-[64px]">
+        <section className="px-[24px] sm:px-[48px] py-[64px]">
           <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#4A90D9] mb-[8px]">
             Why NestFind
           </div>
@@ -485,6 +541,10 @@ export default function LandingPage() {
               { title: 'Instant Filters', desc: 'Real-time filtering by price, beds, and type. No page reloads.', Icon: Zap },
               { title: 'Quick Favorites', desc: 'Save properties with one click. Access your favorites from anywhere.', Icon: Heart },
               { title: 'Map View', desc: 'See exactly where each property is. Integrated Google Maps on every listing.', Icon: MapPin },
+              { title: 'Direct Messaging', desc: 'Chat with landlords in real time. No phone calls or emails needed.', Icon: MessageSquare },
+              { title: 'Tour Scheduling', desc: 'Book in-person or virtual tours with available time slots.', Icon: Calendar },
+              { title: 'Verified Reviews', desc: 'Read honest reviews from verified renters who have lived there.', Icon: Star },
+              { title: 'Smart Notifications', desc: 'Get alerts for new listings, replies, and application updates.', Icon: Bell },
             ].map((feat) => (
               <div key={feat.title} className="text-center p-[24px]">
                 <div className="w-[48px] h-[48px] rounded-[12px] bg-[rgba(74,144,217,0.1)] flex items-center justify-center mx-auto mb-[12px] text-[#4A90D9]">
@@ -498,10 +558,10 @@ export default function LandingPage() {
         </section>
 
         <footer className="border-t border-white/10 bg-[#080C14]">
-          <div className="max-w-[1440px] mx-auto px-[48px] py-[48px]">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-[32px]">
+          <div className="max-w-[1440px] mx-auto px-[24px] sm:px-[48px] py-[48px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-[32px]">
               {/* Brand */}
-              <div className="md:col-span-2">
+              <div className="md:col-span-2 lg:col-span-2">
                 <Link to="/" className="text-[20px] font-bold bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] bg-clip-text text-transparent no-underline">
                   NestFind
                 </Link>

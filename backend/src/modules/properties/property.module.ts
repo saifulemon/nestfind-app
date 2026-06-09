@@ -13,6 +13,7 @@ import { FavoriteRepository } from '../favorites/favorite.repository';
 import { PropertyService } from './property.service';
 import { PropertyController } from './property.controller';
 import { MapSearchController } from './map-search.controller';
+import { NotificationModule } from '../notifications/notification.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MapSearchController } from './map-search.controller';
       PropertyAmenity,
       Favorite,
     ]),
+    NotificationModule,
   ],
   controllers: [MapSearchController, PropertyController],
   providers: [

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '~/hooks/useDocumentTitle';
 import { Search, Heart, BedDouble, Bath, Ruler, X, SlidersHorizontal, Loader2, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
+import { useAuth } from '~/hooks/useAuth';
 import { useAddFavorite, useRemoveFavorite } from '~/hooks/api/useFavorites';
 import SaveSearchModal from '~/components/modals/SaveSearchModal';
 
@@ -79,6 +80,7 @@ export default function SearchPage() {
   const [meta, setMeta] = useState({ total: 0, totalPages: 1 });
   const [showSaveSearchModal, setShowSaveSearchModal] = useState(false);
   const LIMIT = 10;
+  const { isAuthenticated } = useAuth();
   const addFav = useAddFavorite();
   const removeFav = useRemoveFavorite();
 
@@ -104,8 +106,12 @@ export default function SearchPage() {
     setPage(1);
   }, [searchParams]);
 
-  // Seed favoritedIds from user's favorites on mount
+  // Seed favoritedIds from user's favorites on mount (only if authenticated)
   useEffect(() => {
+    if (!isAuthenticated) {
+      setFavoritedIds(new Set());
+      return;
+    }
     fetch(`${API}/favorites`, { credentials: 'include' })
       .then((r) => r.ok ? r.json() : Promise.reject())
       .then((json) => {
@@ -113,8 +119,8 @@ export default function SearchPage() {
         const ids = new Set(items.map((f: any) => f.propertyId || f.property?.id).filter(Boolean));
         setFavoritedIds(ids);
       })
-      .catch(() => {});
-  }, []);
+      .catch(() => setFavoritedIds(new Set()));
+  }, [isAuthenticated]);
 
   const buildParams = useCallback((pageNum: number = page): Record<string, string> => {
     const params: Record<string, string> = {};
@@ -419,38 +425,58 @@ export default function SearchPage() {
 
             {/* Pagination */}
             {meta.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-[8px] mt-[40px]">
+              <div className="flex items-center justify-center gap-[6px] sm:gap-[8px] mt-[40px] flex-wrap">
                 <button
                   type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
-                  className="inline-flex items-center justify-center w-[40px] h-[40px] rounded-[10px] border border-white/10 bg-white/5 text-[#F1F5F9] transition-all hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center w-[36px] sm:w-[40px] h-[36px] sm:h-[40px] rounded-[10px] border border-white/10 bg-white/5 text-[#F1F5F9] transition-all hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <ChevronLeft className="w-[18px] h-[18px]" />
+                  <ChevronLeft className="w-[16px] sm:w-[18px] h-[16px] sm:h-[18px]" />
                 </button>
 
-                {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setPage(p)}
-                    className={`inline-flex items-center justify-center min-w-[40px] h-[40px] rounded-[10px] text-[14px] font-medium transition-all ${
-                      p === page
-                        ? 'bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] text-white shadow-[0_0_12px_rgba(74,144,217,0.25)]'
-                        : 'border border-white/10 bg-white/5 text-[#94A3B8] hover:bg-white/10 hover:text-[#F1F5F9]'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
+                {(() => {
+                  const total = meta.totalPages;
+                  const current = page;
+                  const pages: (number | string)[] = [];
+                  const showFirst = current > 3;
+                  const showLast = current < total - 2;
+                  const start = Math.max(2, current - 1);
+                  const end = Math.min(total - 1, current + 1);
+
+                  pages.push(1);
+                  if (showFirst && start > 2) pages.push('…');
+                  for (let i = start; i <= end; i++) pages.push(i);
+                  if (showLast && end < total - 1) pages.push('…');
+                  if (total > 1) pages.push(total);
+
+                  return pages.map((p, idx) =>
+                    p === '…' ? (
+                      <span key={`ellipsis-${idx}`} className="inline-flex items-center justify-center w-[36px] sm:w-[40px] h-[36px] sm:h-[40px] text-[#64748B] text-[13px]">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPage(p as number)}
+                        className={`inline-flex items-center justify-center min-w-[36px] sm:min-w-[40px] h-[36px] sm:h-[40px] rounded-[10px] text-[13px] sm:text-[14px] font-medium transition-all ${
+                          p === page
+                            ? 'bg-gradient-to-r from-[#4A90D9] to-[#7C3AED] text-white shadow-[0_0_12px_rgba(74,144,217,0.25)]'
+                            : 'border border-white/10 bg-white/5 text-[#94A3B8] hover:bg-white/10 hover:text-[#F1F5F9]'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  );
+                })()}
 
                 <button
                   type="button"
                   onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
                   disabled={page >= meta.totalPages}
-                  className="inline-flex items-center justify-center w-[40px] h-[40px] rounded-[10px] border border-white/10 bg-white/5 text-[#F1F5F9] transition-all hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center w-[36px] sm:w-[40px] h-[36px] sm:h-[40px] rounded-[10px] border border-white/10 bg-white/5 text-[#F1F5F9] transition-all hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <ChevronRight className="w-[18px] h-[18px]" />
+                  <ChevronRight className="w-[16px] sm:w-[18px] h-[16px] sm:h-[18px]" />
                 </button>
               </div>
             )}

@@ -44,7 +44,7 @@ export class Inquiry extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   response: string | null;
 
-  @Column({ name: 'responded_at', type: 'datetime', nullable: true })
+  @Column({ name: 'responded_at', type: 'timestamp', nullable: true })
   respondedAt: Date | null;
 
   @ManyToOne(() => Property, (property) => property.inquiries, { onDelete: 'SET NULL' })

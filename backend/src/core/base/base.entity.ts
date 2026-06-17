@@ -9,12 +9,12 @@ export abstract class BaseEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+    @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
 
-    @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
+    @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date;
 
-    @DeleteDateColumn({ name: 'deleted_at', type: 'datetime', nullable: true })
+    @DeleteDateColumn({ name: 'deleted_at', nullable: true })
     deletedAt: Date | null;
 }

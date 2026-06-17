@@ -32,7 +32,7 @@ export class SavedSearch extends BaseEntity {
   @Column({ name: 'alert_enabled', type: 'boolean', default: true })
   alertEnabled: boolean;
 
-  @Column({ name: 'last_alerted_at', type: 'datetime', nullable: true })
+  @Column({ name: 'last_alerted_at', type: 'timestamp', nullable: true })
   lastAlertedAt: Date | null;
 
   @ManyToOne(() => User, (user) => user.savedSearches, { onDelete: 'CASCADE' })

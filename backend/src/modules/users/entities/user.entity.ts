@@ -56,7 +56,7 @@ export class User extends BaseEntity {
   @Column({ name: 'avatar_url', type: 'varchar', length: 500, nullable: true })
   avatarUrl: string | null;
 
-  @Column({ name: 'email_verified_at', type: 'datetime', nullable: true })
+  @Column({ name: 'email_verified_at', type: 'timestamp', nullable: true })
   emailVerifiedAt: Date | null;
 
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)

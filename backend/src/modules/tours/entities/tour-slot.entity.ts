@@ -14,10 +14,10 @@ export class TourSlot extends BaseEntity {
   @Column({ name: 'admin_id', type: 'uuid' })
   adminId: string;
 
-  @Column({ name: 'start_time', type: 'datetime' })
+  @Column({ name: 'start_time', type: 'timestamp' })
   startTime: Date;
 
-  @Column({ name: 'end_time', type: 'datetime' })
+  @Column({ name: 'end_time', type: 'timestamp' })
   endTime: Date;
 
   @Column({ name: 'tour_type', type: 'varchar', length: 50, default: 'in_person' })

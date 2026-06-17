@@ -2,10 +2,10 @@ import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as path from 'path';
 
-const ADMIN_EMAIL = 'admin@test.com';
-const ADMIN_PASS = 'AdminPassword123!';
-const RENTER_EMAIL = 'testuser@test.com';
-const RENTER_PASS = 'TestPassword123!';
+const ADMIN_EMAIL = 'admin@nestfind.com';
+const ADMIN_PASS = 'AdminPass123!';
+const RENTER_EMAIL = 'jane@example.com';
+const RENTER_PASS = 'Password123!';
 
 const ADMIN_ID = '00000000-0000-0000-0000-000000000001';
 const RENTER_ID = '00000000-0000-0000-0000-000000000002';
@@ -17,7 +17,7 @@ async function seed() {
     type: 'sqlite',
     database: 'nestfind.sqlite',
     entities: [entitiesPath],
-    synchronize: false,
+    synchronize: true,
   });
 
   await dataSource.initialize();
@@ -46,7 +46,7 @@ async function seed() {
     await dataSource.query(
       `INSERT INTO users (id, name, email, password, phone, role, status, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-      [RENTER_ID, 'Test Renter', RENTER_EMAIL, hashed, '(555) 123-4567', 'renter', 'active']
+      [RENTER_ID, 'Jane Doe', RENTER_EMAIL, hashed, '(555) 123-4567', 'renter', 'active']
     );
     console.log('Created renter user:', RENTER_EMAIL);
   } else {
@@ -90,6 +90,43 @@ async function seed() {
     console.log(`Ensured ${propertyIds.length} properties exist`);
   } else {
     console.log(`${propertyIds.length} properties already exist`);
+  }
+
+  // ─── PROPERTY PHOTOS ───────────────────────────────────────────────
+  const photoCount = await dataSource.query(`SELECT COUNT(*) as count FROM property_photos`);
+  if (photoCount[0].count === 0) {
+    const photos: [string, string, string, boolean, number][] = [
+      ['photo-01', propertyIds[0], 'https://mysanmar.com/cms/wp-content/uploads/2026/01/thumbnail-night-100.jpg', true, 0],
+      ['photo-02', propertyIds[0], 'https://mysanmar.com/cms/wp-content/uploads/2026/01/banner-100.jpg', false, 1],
+      ['photo-03', propertyIds[1], 'https://mysanmar.com/cms/wp-content/uploads/2025/09/thumbnail-night-copy.jpg', true, 0],
+      ['photo-04', propertyIds[1], 'https://mysanmar.com/cms/wp-content/uploads/2025/09/banner-copy.jpg', false, 1],
+      ['photo-05', propertyIds[1], 'https://mysanmar.com/cms/wp-content/uploads/2025/08/thumbnail-night-2.png', false, 2],
+      ['photo-06', propertyIds[2], 'https://mysanmar.com/cms/wp-content/uploads/2025/08/thumbnail-day-2-commercial.png', true, 0],
+      ['photo-07', propertyIds[2], 'https://mysanmar.com/cms/wp-content/uploads/2025/08/banner-commercial.png', false, 1],
+      ['photo-08', propertyIds[3], 'https://mysanmar.com/cms/wp-content/uploads/2025/08/thumbnail-night-2.png', true, 0],
+      ['photo-09', propertyIds[3], 'https://mysanmar.com/cms/wp-content/uploads/2025/08/banner-residential.png', false, 1],
+      ['photo-10', propertyIds[4], 'https://mysanmar.com/cms/wp-content/uploads/2023/10/Grande_Thumbnail-min.jpg', true, 0],
+      ['photo-11', propertyIds[4], 'https://mysanmar.com/cms/wp-content/uploads/2023/10/19-Oct-New-Grande_Header-min.jpg', false, 1],
+      ['photo-12', propertyIds[5], 'https://mysanmar.com/cms/wp-content/uploads/2025/08/thumbnail-night.png', true, 0],
+      ['photo-13', propertyIds[5], 'https://mysanmar.com/cms/wp-content/uploads/2025/08/banner-2-min.png', false, 1],
+      ['photo-14', propertyIds[6], 'https://mysanmar.com/cms/wp-content/uploads/2024/12/thumbnail-night.png', true, 0],
+      ['photo-15', propertyIds[6], 'https://mysanmar.com/cms/wp-content/uploads/2024/12/Header.png', false, 1],
+      ['photo-16', propertyIds[7], 'https://mysanmar.com/cms/wp-content/uploads/2023/05/One-Gulshan_Gallery-16.jpg', true, 0],
+      ['photo-17', propertyIds[7], 'https://mysanmar.com/cms/wp-content/uploads/2023/05/One-Gulshan_Header.jpg', false, 1],
+      ['photo-18', propertyIds[8], 'https://mysanmar.com/cms/wp-content/uploads/2023/10/orchard-garden-min.jpg', true, 0],
+      ['photo-19', propertyIds[8], 'https://mysanmar.com/cms/wp-content/uploads/2023/10/Orchard-Garden_Header.jpg', false, 1],
+      ['photo-20', propertyIds[9], 'https://mysanmar.com/cms/wp-content/uploads/2023/10/Rahim-Tower_Thumbnail-min.jpg', true, 0],
+      ['photo-21', propertyIds[9], 'https://mysanmar.com/cms/wp-content/uploads/2023/10/Rahim-Tower_Header-1.jpg', false, 1],
+      ['photo-22', propertyIds[9], 'https://mysanmar.com/cms/wp-content/uploads/2023/10/Rahim-Center_Header-min.jpg', false, 2],
+    ];
+    for (const ph of photos) {
+      await dataSource.query(
+        `INSERT INTO property_photos (id, property_id, url, is_primary, sort_order, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+        ph
+      );
+    }
+    console.log(`Created ${photos.length} property photos`);
   }
 
   if (propertyIds.length === 0) {

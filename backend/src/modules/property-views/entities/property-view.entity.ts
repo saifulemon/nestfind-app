@@ -17,7 +17,7 @@ export class PropertyView extends BaseEntity {
   @Column({ name: 'view_count', type: 'integer', default: 1 })
   viewCount: number;
 
-  @Column({ name: 'last_viewed_at', type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ name: 'last_viewed_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   lastViewedAt: Date;
 
   @ManyToOne(() => User, (user) => user.propertyViews, { onDelete: 'CASCADE' })

@@ -24,6 +24,7 @@ import { TokenModule } from './infrastructure/token/token.module';
 import { MailModule } from './infrastructure/mail/mail.module';
 import { LoggingModule } from './infrastructure/logging/logging.module';
 import jwtConfig from './config/jwt.config';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import jwtConfig from './config/jwt.config';
             entities: [__dirname + '/modules/**/entities/*.entity{.ts,.js}'],
             synchronize: false,
             migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
+            migrationsRun: true,
           };
         }
         return {
@@ -53,6 +55,7 @@ import jwtConfig from './config/jwt.config';
     AuthModule, UserModule, PropertyModule,
     FavoriteModule, InquiryModule, AdminModule, AmenityModule, ProfileModule, PropertyViewModule, RecommendationModule, SavedSearchModule, ReviewModule, NotificationModule, TourModule, ChatModule, ApplicationModule,
   ],
+  controllers: [AppController],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],

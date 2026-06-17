@@ -85,13 +85,16 @@ class EnvConfigService {
   // Example: getMailConfig(), getAwsConfig(), etc.
 }
 
-const envConfigService = new EnvConfigService(process.env).ensureValues([
-  // TODO: CUSTOMIZE — List required env vars for your project
-  "POSTGRES_HOST",
-  "POSTGRES_PORT",
-  "POSTGRES_USER",
-  "POSTGRES_PASSWORD",
-  "POSTGRES_DATABASE",
-]);
+const requiredKeys = process.env.DATABASE_URL
+  ? []
+  : [
+      "POSTGRES_HOST",
+      "POSTGRES_PORT",
+      "POSTGRES_USER",
+      "POSTGRES_PASSWORD",
+      "POSTGRES_DATABASE",
+    ];
+
+const envConfigService = new EnvConfigService(process.env).ensureValues(requiredKeys);
 
 export { envConfigService };

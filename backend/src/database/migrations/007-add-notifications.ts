@@ -13,7 +13,7 @@ export class AddNotifications0071700000000007 implements MigrationInterface {
           { name: 'type', type: 'varchar', length: '50', isNullable: false },
           { name: 'title', type: 'varchar', length: '200', isNullable: false },
           { name: 'message', type: 'text', isNullable: false },
-          { name: 'data', type: 'simple-json', isNullable: true },
+          { name: 'data', type: 'text', isNullable: true },
           { name: 'is_read', type: 'boolean', default: false, isNullable: false },
           { name: 'created_at', type: 'timestamp', default: 'now()', isNullable: false },
           { name: 'updated_at', type: 'timestamp', default: 'now()', isNullable: false },

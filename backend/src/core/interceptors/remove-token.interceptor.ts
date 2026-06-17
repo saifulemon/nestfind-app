@@ -18,13 +18,15 @@ export class RemoveTokenInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((value) => {
         if (value?.success) {
+          const sameSite = this.configService.get<string>('cookieSameSite') || 'strict';
+
           res.cookie(
             this.configService.get<string>("authTokenCookieName") || 'access_token',
             "",
             {
               httpOnly: true,
               path: "/",
-              sameSite: "strict",
+              sameSite: sameSite as 'strict' | 'lax' | 'none',
               secure: process.env.NODE_ENV === "production",
             },
           );
@@ -34,7 +36,7 @@ export class RemoveTokenInterceptor implements NestInterceptor {
             {
               httpOnly: true,
               path: "/",
-              sameSite: "strict",
+              sameSite: sameSite as 'strict' | 'lax' | 'none',
               secure: process.env.NODE_ENV === "production",
             },
           );

@@ -10,5 +10,6 @@ export default () => {
         authTokenExpiredTime: 48 * 60 * 60,
         authRefreshTokenExpiredTime: 168 * 60 * 60,
         cookieDomain: process.env.COOKIE_DOMAIN || '',
+        cookieSameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     };
 };

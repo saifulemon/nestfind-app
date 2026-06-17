@@ -34,10 +34,12 @@ export class SetTokenInterceptor implements NestInterceptor {
                         'cookieDomain',
                     ) || '';
 
+                    const sameSite = this.configService.get<string>('cookieSameSite') || 'strict';
+
                     res.cookie(cookieName, tokenValue, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
-                        sameSite: 'strict',
+                        sameSite: sameSite as 'strict' | 'lax' | 'none',
                         domain: cookieDomain || undefined,
                         path: '/',
                     });
@@ -46,7 +48,7 @@ export class SetTokenInterceptor implements NestInterceptor {
                         res.cookie('refresh_token', value.refreshToken, {
                             httpOnly: true,
                             secure: process.env.NODE_ENV === 'production',
-                            sameSite: 'strict',
+                            sameSite: sameSite as 'strict' | 'lax' | 'none',
                             domain: cookieDomain || undefined,
                             path: '/',
                         });

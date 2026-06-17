@@ -20,7 +20,7 @@ import { PASSPORT_AUTH_TOKEN } from '../../config/static-data.config';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.getOrThrow<string>('authJwtSecret'),
+        secret: config.getOrThrow<string>('AUTH_JWT_SECRET'),
         signOptions: { expiresIn: '1h' },
       }),
     }),

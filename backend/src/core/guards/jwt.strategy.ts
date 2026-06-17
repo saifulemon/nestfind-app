@@ -9,9 +9,9 @@ import type { IJwtPayload } from "../../shared/interfaces";
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, PASSPORT_AUTH_TOKEN) {
   constructor(private configService: ConfigService) {
-    const secret = configService.get<string>('authJwtSecret');
+    const secret = configService.get<string>('AUTH_JWT_SECRET');
     if (!secret) {
-      throw new Error('authJwtSecret (JWT_SECRET env) is required');
+      throw new Error('AUTH_JWT_SECRET environment variable is required');
     }
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, PASSPORT_AUTH_TOKEN)
           let token = null;
           if (req && req.cookies) {
             token = req.cookies[
-              configService.get<string>('authTokenCookieName') ||
+              configService.get<string>('AUTH_TOKEN_COOKIE_NAME') ||
               'access_token'
             ];
           }

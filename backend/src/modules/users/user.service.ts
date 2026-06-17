@@ -1,7 +1,6 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { BaseService } from '../../core/base/base.service';
 import { UserRepository } from './user.repository';
 import { User } from './entities/user.entity';
@@ -32,9 +31,7 @@ export class UserService extends BaseService<User> {
       if (existing) {
         throw new ConflictException('Email already exists!');
       }
-      if (data.password) {
-        data.password = await bcrypt.hash(data.password, 10);
-      }
+
       const user = await queryRunner.manager.save(queryRunner.manager.create(User, data));
       await queryRunner.commitTransaction();
       return user;

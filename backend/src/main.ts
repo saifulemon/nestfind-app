@@ -7,6 +7,7 @@ import { AppModule } from './app.module';
 import { CsrfMiddleware } from './core/middleware/csrf.middleware';
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './core/filters/http-exception.filter';
+import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -31,7 +32,7 @@ async function bootstrap(): Promise<void> {
   app.use(new CsrfMiddleware().use.bind(new CsrfMiddleware()));
 
   app.useGlobalInterceptors(new TransformInterceptor());
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({

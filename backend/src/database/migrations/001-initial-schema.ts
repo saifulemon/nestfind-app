@@ -17,6 +17,7 @@ export class InitialSchema0011700000000000 implements MigrationInterface {
           { name: 'phone', type: 'varchar', length: '20', isNullable: true },
           { name: 'role', type: 'enum', enum: ['renter', 'admin'], default: `'renter'`, isNullable: false },
           { name: 'status', type: 'enum', enum: ['active', 'suspended'], default: `'active'`, isNullable: false },
+          { name: 'avatar_url', type: 'varchar', length: '500', isNullable: true },
           { name: 'email_verified_at', type: 'timestamp', isNullable: true },
           { name: 'created_at', type: 'timestamp', default: 'now()', isNullable: false },
           { name: 'updated_at', type: 'timestamp', default: 'now()', isNullable: false },

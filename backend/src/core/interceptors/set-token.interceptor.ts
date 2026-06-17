@@ -65,7 +65,7 @@ export class SetTokenInterceptor implements NestInterceptor {
                 if (err instanceof HttpException) {
                     return throwError(() => err);
                 }
-                return throwError(() => new InternalServerErrorException('An unexpected error occurred'));
+                return throwError(() => new InternalServerErrorException(err.message || 'An unexpected error occurred'));
             }),
         );
     }
